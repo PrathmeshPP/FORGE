@@ -13,38 +13,60 @@ F.O.R.G.E is a spatial intelligence and 3D scene reconstruction platform built a
 
 ## Architecture & System Overview
 
-The platform consists of two primary subsystems:
-1. **F.O.R.G.E Core Reconstruction Pipeline (`src/`, `scripts/`)**: Feed-forward foundation model inference, pinhole depth backprojection, multi-view consistency filtering, Poisson/BPA surface meshing, photographic KD-tree color transfer, and Umeyama–RANSAC 7-DoF geospatial alignment.
-2. **F.O.R.G.E Explorer Interactive Viewer (`viewer/`, `scripts/serve_viewer.py`)**: React 19, TypeScript, Vite, and Three.js web application for real-time 3D inspection, camera framing presets, multi-representation rendering (textured, photographic, untextured, point cloud), and split-view comparative analysis.
+The platform consists of three integrated subsystems:
+1. **F.O.R.G.E AWS Video Preflight Service (`aws/preflight/`, `scripts/run_aws_preflight.py`)**: Serverless AWS Lambda quality and feasibility inspection worker using `opencv-python-headless==5.0.0.93` and private Amazon S3 storage (`forge-drone3d-prathmesh-2026-8xq472`). Automatically triggered on video upload to evaluate container integrity, compute Laplacian sharpness and ORB feature distributions, assemble a visual contact sheet, and enforce a 3D reconstruction feasibility gate (`APPROVED_FOR_3D_RECONSTRUCTION`, `NEEDS_REVIEW`, `REJECTED`) before downstream GPU foundation model inference.
+2. **F.O.R.G.E Core Reconstruction Pipeline (`src/`, `scripts/`)**: OpenCV 5 quality/diversity frame curation (`src/video/opencv5_frame_analyzer.py`), feed-forward foundation model inference (VGGT-Ω 1B), pinhole depth backprojection, multi-view consistency filtering, Poisson/BPA surface meshing, photographic KD-tree color transfer, and Umeyama–RANSAC 7-DoF geospatial alignment.
+3. **F.O.R.G.E Explorer Interactive Viewer (`viewer/`, `scripts/serve_viewer.py`)**: React 19, TypeScript, Vite, and Three.js web application for real-time 3D inspection, camera framing presets, multi-representation rendering (textured, photographic, untextured, point cloud), and split-view comparative analysis.
 
 ```
-                      [ Monocular Source Video ]
-                                  │
-                                  ▼
-                     [ Frame Sampling & Telemetry ]
-                                  │
-                                  ▼
-                [ VGGT-Ω 1B Feed-Forward Foundation Model ]
-                                  │
-                ┌─────────────────┴─────────────────┐
-                ▼                                   ▼
-      [ Metric Depth & Confidence ]      [ Camera Poses (R, T, K) ]
-                │                                   │
-                └─────────────────┬─────────────────┘
-                                  ▼
-                   [ Dense Point Cloud Fusion ]
-                                  │
-                                  ▼
-                     [ Surface Mesh Generation ]
-                    (Poisson / Ball-Pivoting)
-                                  │
-                                  ▼
-                  [ Photographic Texture Mapping ]
-                                  │
-          ┌───────────────────────┴───────────────────────┐
-          ▼                                               ▼
-[ F.O.R.G.E Explorer Viewer ]              [ Standalone Inspection Exports ]
-  (Three.js Web Application)                 (OBJ, PLY, GLB, MTL, 4K Atlases)
+                  [ Raw Drone Video Upload ]
+                              │
+                              ▼
+            [ Amazon S3: FORGE/inputs/videos/*.mp4 ]
+                              │
+                    (S3 ObjectCreated Event)
+                              ▼
+       [ AWS Lambda Worker: OpenCV 5 Video Preflight ]
+         ├── Container Probe (FPS, Dimensions, Frames)
+         ├── Bounded Corridor Sampling
+         ├── OpenCV 5 Laplacian & Tenengrad Sharpness
+         ├── ORB Invariant Feature Distribution
+         └── Feasibility Gate & Contact Sheet Generation
+                              │
+                 (JSON Report & Contact Sheet)
+                              ▼
+        [ Amazon S3: FORGE/outputs/aws_preflight/ ]
+                              │
+                   [ Gate: Approved Video ]
+                              │
+                              ▼
+            [ Local / Field Edge GPU Workstation ]
+                              │
+                              ▼
+            [ OpenCV 5 Dynamic Viewpoint Curation ]
+                              │
+                              ▼
+          [ VGGT-Ω 1B Feed-Forward Foundation Model ]
+                              │
+             ┌────────────────┴────────────────┐
+             ▼                                 ▼
+   [ Metric Depth & Confidence ]      [ Camera Poses (R, T, K) ]
+             │                                 │
+             └────────────────┬────────────────┘
+                              ▼
+                 [ Dense Point Cloud Fusion ]
+                              │
+                              ▼
+                   [ Surface Mesh Generation ]
+                  (Poisson / Ball-Pivoting)
+                              │
+                              ▼
+                [ Photographic Texture Mapping ]
+                              │
+        ┌─────────────────────┴─────────────────────┐
+        ▼                                           ▼
+[ F.O.R.G.E Explorer Viewer ]           [ Standalone Inspection Exports ]
+ (Three.js Web Application)              (OBJ, PLY, GLB, MTL, 4K Atlases)
 ```
 
 ---
@@ -128,6 +150,7 @@ The four source videos used across the five scenes have distinct redistribution 
 
 | Document | Purpose & Contents |
 | :--- | :--- |
+| [`docs/AWS_DEPLOYMENT.md`](docs/AWS_DEPLOYMENT.md) | **AWS Cloud Preflight Architecture & Deployment:** Serverless OpenCV 5 Lambda worker, S3 trigger, IAM least-privilege policy, SAM template, and verification guide. |
 | [`docs/SPRINT11_RELEASE_MANIFEST.md`](docs/SPRINT11_RELEASE_MANIFEST.md) | **Sprint 11 Canonical Release Manifest:** Selected models, SHA-256 hashes, LFS accounting, and reproduction scripts. |
 | [`docs/THIRD_PARTY_ASSET_PROVENANCE.md`](docs/THIRD_PARTY_ASSET_PROVENANCE.md) | Exhaustive legal provenance, upstream URLs, Meta FAIR terms, and project licensing options. |
 | [`docs/REPOSITORY_ASSET_POLICY.md`](docs/REPOSITORY_ASSET_POLICY.md) | Durable three-tier artifact policy (Git vs Git LFS vs External untracked foundation weights). |
@@ -210,7 +233,23 @@ Where OpenCV 5 is actively used:
 - **`src/video/extract_frames.py` & `src/video/frame_sampler.py`**: Stream reading, FPS/dimension probing, and color space transformations via `cv2.VideoCapture` and `cv2.cvtColor`.
 - Complete migration details are recorded in [`OPENCV5_MIGRATION_REPORT.md`](OPENCV5_MIGRATION_REPORT.md).
 
-### 6. Launching F.O.R.G.E Explorer
+### 6. AWS Cloud Video Preflight Service (Lambda + S3)
+F.O.R.G.E integrates an event-driven AWS serverless preflight worker ([`aws/preflight/lambda_function.py`](aws/preflight/lambda_function.py)) designed to evaluate uploaded drone footage in Amazon S3 (`forge-drone3d-prathmesh-2026-8xq472` in `ap-southeast-2`) before allocating compute for GPU reconstruction.
+
+The preflight stage enforces strict quality gates (Laplacian blur threshold >= 80, ORB feature density >= 100):
+```bash
+# Run the preflight inspector (auto-detects AWS credentials or runs local evaluation engine)
+python scripts/run_aws_preflight.py --video "data/source_videos/desert_road.mp4"
+
+# Run against Campus 0049 drone footage
+python scripts/run_aws_preflight.py --video "data/source_videos/dji_fly_20260727_172754_0049_1785175051818_video.mp4"
+
+# Run tests for AWS Lambda preflight component (OpenCV 5 runtime, mock S3, metrics)
+python -m unittest tests.test_aws_preflight
+```
+Deployment templates (AWS SAM [`aws/preflight/template.yaml`](aws/preflight/template.yaml)), IAM least-privilege policies, and step-by-step cloud deployment commands are documented in [`docs/AWS_DEPLOYMENT.md`](docs/AWS_DEPLOYMENT.md).
+
+### 7. Launching F.O.R.G.E Explorer
 
 #### One-Click Launch (Windows)
 Double-click `start_forge_explorer.bat` or execute in command prompt:
@@ -224,7 +263,7 @@ python scripts/serve_viewer.py --port 5173
 ```
 Open [http://localhost:5173](http://localhost:5173) in Chrome, Edge, or Firefox.
 
-### 7. Running YOLO Dynamic-Object Masking
+### 8. Running YOLO Dynamic-Object Masking
 ```bash
 # Run YOLO dynamic masking on GPU across all benchmark scenes
 python scripts/run_dynamic_masking.py --scene all --device cuda
@@ -243,6 +282,12 @@ python scripts/run_desert_road_masked_reconstruction.py
 F.O.R.G.E includes comprehensive unit and integration tests verifying manifest accuracy, geometry extents, coordinate finiteness, texture bindings, and HTTP asset serving:
 
 ```bash
+# Run AWS Lambda preflight unit and integration test suite
+python -m unittest tests.test_aws_preflight
+
+# Run OpenCV 5 compliance suite
+python -m unittest tests.test_opencv5_compliance
+
 # Run comprehensive release test suites
 pytest tests/test_sprint9_video_to_viewer.py tests/test_sprint10_demo_hardening.py tests/test_sprint10_1_viewer_refinement.py tests/test_sprint10_2_standalone_review.py tests/test_sprint11_dynamic_masking.py -v
 ```

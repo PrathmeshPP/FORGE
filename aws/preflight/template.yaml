@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  F.O.R.G.E — AWS Lambda OpenCV 5 Video Preflight Quality Service.
+  Performs event-driven quality inspection and feasibility gating on drone video sequences.
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: forge-drone3d-prathmesh-2026-8xq472
+    Description: S3 bucket name where drone videos are ingested.
+  InputPrefix:
+    Type: String
+    Default: FORGE/inputs/videos/
+    Description: S3 prefix for input drone video footage.
+  OutputPrefix:
+    Type: String
+    Default: FORGE/outputs/aws_preflight/
+    Description: S3 prefix where preflight quality reports and contact sheets are stored.
+  SampleFrames:
+    Type: Number
+    Default: 8
+    Description: Number of frames to uniformly sample across the video corridor.
+
+Globals:
+  Function:
+    Timeout: 180
+    MemorySize: 2048
+    Runtime: python3.12
+    Architectures:
+      - x86_64
+    EphemeralStorage:
+      Size: 1024
+
+Resources:
+  # Least-Privilege Execution Role
+  FORGEPreflightExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: FORGE-Video-Preflight-ExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FORGECloudWatchLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+        - PolicyName: FORGES3ScopedAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub arn:aws:s3:::${BucketName}/${InputPrefix}*
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${BucketName}/${OutputPrefix}*
+
+  # OpenCV 5 Video Preflight Worker Function
+  FORGEVideoPreflightFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: forge-video-preflight-worker
+      CodeUri: .
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt FORGEPreflightExecutionRole.Arn
+      Description: >
+        Substantive OpenCV 5 video preflight worker analyzing frame sharpness,
+        radiometric clipping, and ORB feature distribution.
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+          INPUT_PREFIX: !Ref InputPrefix
+          OUTPUT_PREFIX: !Ref OutputPrefix
+          SAMPLE_FRAMES: !Ref SampleFrames
+          MIN_LAPLACIAN_SHARPNESS: "15.0"
+          MIN_ORB_KEYPOINTS: "100"
+          MIN_WIDTH: "1280"
+          MIN_HEIGHT: "720"
+          MIN_FRAMES: "30"
+
+Outputs:
+  FunctionArn:
+    Description: FORGE Video Preflight Lambda Function ARN
+    Value: !GetAtt FORGEVideoPreflightFunction.Arn
+  ExecutionRoleArn:
+    Description: IAM Execution Role ARN
+    Value: !GetAtt FORGEPreflightExecutionRole.Arn
+  ReportS3Location:
+    Description: Destination S3 Prefix for Preflight Reports
+    Value: !Sub s3://${BucketName}/${OutputPrefix}

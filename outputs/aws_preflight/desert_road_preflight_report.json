@@ -1,0 +1,149 @@
+{
+  "service": "F.O.R.G.E. AWS Video Preflight Worker",
+  "version": "1.0.0",
+  "opencv_runtime_version": "5.0.0",
+  "python_version": "3.12.7",
+  "timestamp_utc": "2026-10-26T17:26:12Z",
+  "analysis_time_sec": 0.634,
+  "video_metadata": {
+    "source_s3_bucket": "forge-drone3d-prathmesh-2026-8xq472",
+    "source_s3_key": "FORGE/inputs/videos/dji_fly_20260727_172754_0049_1785175051818_video.mp4",
+    "video_filename": "dji_fly_20260727_172754_0049_1785175051818_video.mp4",
+    "file_size_bytes": 6539814,
+    "file_size_mb": 6.24,
+    "width": 1280,
+    "height": 720,
+    "fps": 23.976,
+    "total_frames": 477,
+    "duration_sec": 19.89
+  },
+  "sampling": {
+    "requested_samples": 8,
+    "evaluated_samples": 8,
+    "sample_frame_indices": [
+      0,
+      68,
+      136,
+      204,
+      272,
+      340,
+      408,
+      476
+    ]
+  },
+  "summary_metrics": {
+    "mean_laplacian_sharpness": 278.75,
+    "mean_tenengrad_sharpness": 1810.31,
+    "mean_orb_keypoint_count": 500.0,
+    "mean_dynamic_range": 120.0,
+    "mean_intensity": 138.95
+  },
+  "preflight_decision": {
+    "status": "APPROVED_FOR_3D_RECONSTRUCTION",
+    "label": "Pass: Video meets all geospatial 3D reconstruction quality gates",
+    "reasons": [
+      "Resolution 1280x720 meets criteria",
+      "Mean Laplacian sharpness 278.7 indicates adequate focus",
+      "Mean ORB keypoints 500.0 confirms textural richness"
+    ],
+    "approved_for_curation": true
+  },
+  "per_frame_metrics": [
+    {
+      "frame_index": 0,
+      "timestamp_sec": 0.0,
+      "laplacian_sharpness": 555.41,
+      "tenengrad_sharpness": 2546.74,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 141.97,
+      "rms_contrast": 45.44,
+      "dynamic_range": 134.0,
+      "clipped_highlights_ratio": 0.0003,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 68,
+      "timestamp_sec": 2.836,
+      "laplacian_sharpness": 360.62,
+      "tenengrad_sharpness": 2065.15,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 142.35,
+      "rms_contrast": 44.56,
+      "dynamic_range": 133.0,
+      "clipped_highlights_ratio": 0.0002,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 136,
+      "timestamp_sec": 5.672,
+      "laplacian_sharpness": 268.33,
+      "tenengrad_sharpness": 2022.45,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 141.68,
+      "rms_contrast": 43.05,
+      "dynamic_range": 130.0,
+      "clipped_highlights_ratio": 0.0003,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 204,
+      "timestamp_sec": 8.508,
+      "laplacian_sharpness": 303.62,
+      "tenengrad_sharpness": 1994.5,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 139.28,
+      "rms_contrast": 41.37,
+      "dynamic_range": 129.0,
+      "clipped_highlights_ratio": 0.0004,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 272,
+      "timestamp_sec": 11.345,
+      "laplacian_sharpness": 185.2,
+      "tenengrad_sharpness": 1628.64,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 137.61,
+      "rms_contrast": 38.11,
+      "dynamic_range": 125.0,
+      "clipped_highlights_ratio": 0.0001,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 340,
+      "timestamp_sec": 14.181,
+      "laplacian_sharpness": 229.76,
+      "tenengrad_sharpness": 1651.35,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 135.82,
+      "rms_contrast": 33.34,
+      "dynamic_range": 119.0,
+      "clipped_highlights_ratio": 0.0,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 408,
+      "timestamp_sec": 17.017,
+      "laplacian_sharpness": 174.81,
+      "tenengrad_sharpness": 1387.58,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 136.09,
+      "rms_contrast": 29.8,
+      "dynamic_range": 105.0,
+      "clipped_highlights_ratio": 0.0,
+      "clipped_shadows_ratio": 0.0
+    },
+    {
+      "frame_index": 476,
+      "timestamp_sec": 19.853,
+      "laplacian_sharpness": 152.22,
+      "tenengrad_sharpness": 1186.08,
+      "orb_keypoint_count": 500,
+      "mean_intensity": 136.8,
+      "rms_contrast": 27.97,
+      "dynamic_range": 85.0,
+      "clipped_highlights_ratio": 0.0,
+      "clipped_shadows_ratio": 0.0
+    }
+  ]
+}

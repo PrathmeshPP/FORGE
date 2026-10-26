@@ -1,0 +1,7 @@
+# F.O.R.G.E — AWS Lambda Video Preflight Dependencies
+# Pinned for Python 3.12 / Linux x86_64 Lambda Runtime
+
+opencv-python-headless==5.0.0.93
+numpy==1.26.4
+boto3>=1.34.0
+Pillow>=10.0.0
