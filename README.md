@@ -1,6 +1,7 @@
 # F.O.R.G.E — Fast Optical Reconstruction & Geospatial Estimation
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![OpenCV 5.0.0.93](https://img.shields.io/badge/OpenCV-5.0.0.93-red.svg)](https://pypi.org/project/opencv-python/5.0.0.93/)
 [![Three.js](https://img.shields.io/badge/Three.js-r186-black.svg)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF.svg)](https://vitejs.dev/)
 [![Git LFS](https://img.shields.io/badge/Git%20LFS-3.5%20GB-orange.svg)](https://git-lfs.github.com/)
@@ -112,7 +113,14 @@ The four source videos used across the five scenes have distinct redistribution 
 | **Forest Road** | `data/source_videos/forest_road.mp4` | 10.2 MB | Meta AI & Univ. of Oxford (`VGGT-Omega`) | [Meta FAIR Noncommercial License](docs/licenses/META_FAIR_NONCOMMERCIAL_LICENSE.txt) | **RESTRICTED** (Noncommercial Research only; AUP restrictions apply) |
 
 > [!NOTE]
-> Detailed legal analysis, upstream acceptable use policy constraints (including military/warfare prohibitions), and project licensing options for the repository owner are fully documented in [`docs/THIRD_PARTY_ASSET_PROVENANCE.md`](docs/THIRD_PARTY_ASSET_PROVENANCE.md). A complete copy of the upstream Meta FAIR Noncommercial Research License is provided at [`docs/licenses/META_FAIR_NONCOMMERCIAL_LICENSE.txt`](docs/licenses/META_FAIR_NONCOMMERCIAL_LICENSE.txt).
+> **Source Video Distribution & Local Input Guidance:**
+> - **Benchmark Sequences (`desert_road.mp4`, `forest_road.mp4`):** Cleared for noncommercial research and educational distribution under the [Meta FAIR Noncommercial Research License](docs/licenses/META_FAIR_NONCOMMERCIAL_LICENSE.txt).
+> - **Proprietary Drone Flights (`Campus 0049`, `River/Bridge`):** Attributed to first-party team flight captures. Private master 4K recordings are backed up securely in the team's private S3 bucket.
+> - **Supplying Your Own Video:** F.O.R.G.E is fully input-agnostic. To run 3D reconstruction on your own drone footage, simply point the pipeline to your local MP4 file:
+>   ```bash
+>   python run_pipeline.py --video "path/to/your_drone_video.mp4" --output-dir "outputs/my_reconstruction"
+>   ```
+> - **Historical Git LFS Note:** Historical commits in Git retain LFS object pointers. In accordance with zero-destructive-history policies, Git history has been preserved without force-pushes or history rewrites. Detailed legal analysis is documented in [`docs/THIRD_PARTY_ASSET_PROVENANCE.md`](docs/THIRD_PARTY_ASSET_PROVENANCE.md).
 
 ---
 
@@ -155,18 +163,54 @@ git lfs pull
 
 *Selective checkout options (to pull only specific scenes or viewer meshes) are documented in [`docs/GIT_LFS_AND_STORAGE.md`](docs/GIT_LFS_AND_STORAGE.md).*
 
-### 3. Python Environment Setup
+### 3. Python Environment Setup & OpenCV 5 Configuration
+F.O.R.G.E is fully upgraded and pinned to **OpenCV 5** (`opencv-python==5.0.0.93`):
 ```bash
 # Create and activate virtual environment
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install dependencies
+# Install dependencies (ensures single clean opencv-python distribution)
 pip install -r requirements.txt
 pip install -r requirements-viewer.txt
+
+# Verify active OpenCV runtime is 5.x
+python -c "import cv2; print('OpenCV version:', cv2.__version__)"
+# Expected: OpenCV version: 5.0.0
+```
+> [!IMPORTANT]
+> **Single OpenCV Wheel Rule:** Do not install multiple OpenCV distributions concurrently (`opencv-python` and `opencv-python-headless`). Only `opencv-python==5.0.0.93` should be installed.
+
+### 4. OpenCV 5 Smoke Test & Verification
+Execute the reproducible OpenCV 5 compliance suite to verify video decoding, multi-metric sharpness, ORB feature distribution, and epipolar RANSAC verification on real drone video:
+```bash
+# Run standalone smoke test (auto-locates local drone footage or accepts --video)
+python tests/test_opencv5_compliance.py
+
+# Or run via unittest module
+python -m unittest tests.test_opencv5_compliance
 ```
 
-### 4. Launching F.O.R.G.E Explorer
+### 5. Running the Pipeline with OpenCV 5 Preprocessing
+The primary pipeline automatically uses OpenCV 5 for deterministic quality and viewpoint curation (`--frame-selector opencv5` is the default):
+```bash
+# Run real video ingestion with OpenCV 5 multi-metric curation and VGGT-Omega inference
+python run_pipeline.py --video "data/source_videos/desert_road.mp4" --output-dir "outputs/pipeline_run"
+
+# Optional explicit arguments
+python run_pipeline.py --video "path/to/drone_video.mp4" --frame-selector opencv5 --max-frames 6
+```
+Where OpenCV 5 is actively used:
+- **`src/video/opencv5_frame_analyzer.py`**:
+  - Multi-metric sharpness: Dual evaluation with Laplacian variance `cv2.Laplacian` and Tenengrad `cv2.Sobel`.
+  - Radiometric fidelity: Mean intensity, RMS contrast, and dynamic range calculation.
+  - Spatial feature entropy: ORB keypoints (`cv2.ORB_create`) across a 4×4 spatial grid with Shannon distribution entropy.
+  - Pairwise visual disparity: Grayscale histogram correlation (`cv2.calcHist`, `cv2.compareHist`) and Bhattacharyya distance.
+  - Epipolar covisibility: Feature correspondence (`cv2.BFMatcher`) and Fundamental matrix RANSAC estimation (`cv2.findFundamentalMat`).
+- **`src/video/extract_frames.py` & `src/video/frame_sampler.py`**: Stream reading, FPS/dimension probing, and color space transformations via `cv2.VideoCapture` and `cv2.cvtColor`.
+- Complete migration details are recorded in [`OPENCV5_MIGRATION_REPORT.md`](OPENCV5_MIGRATION_REPORT.md).
+
+### 6. Launching F.O.R.G.E Explorer
 
 #### One-Click Launch (Windows)
 Double-click `start_forge_explorer.bat` or execute in command prompt:
@@ -180,7 +224,7 @@ python scripts/serve_viewer.py --port 5173
 ```
 Open [http://localhost:5173](http://localhost:5173) in Chrome, Edge, or Firefox.
 
-### 5. Running YOLO Dynamic-Object Masking
+### 7. Running YOLO Dynamic-Object Masking
 ```bash
 # Run YOLO dynamic masking on GPU across all benchmark scenes
 python scripts/run_dynamic_masking.py --scene all --device cuda

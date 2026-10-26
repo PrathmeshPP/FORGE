@@ -22,6 +22,21 @@ from src.geo.quality_gates import (
     evaluate_reconstruction_quality_gate
 )
 
+from src.geo.dsm_exporter import (
+    CoordinateReferenceMetadata,
+    DSMConfig,
+    DSMExportResult,
+    DSMExporter,
+    UnreferencedGeometryError,
+    GeographicCRSError,
+    IncompatibleUnitsError,
+    UnvalidatedAlignmentError,
+    InvalidRasterConfigurationError,
+    derive_utm_crs_from_latlon,
+    reproject_geographic_to_utm,
+    rasterize_point_cloud_dsm
+)
+
 __all__ = [
     "GPSTelemetryRecord",
     "extract_dji_telemetry",
@@ -37,4 +52,16 @@ __all__ = [
     "QualityCheck",
     "QualityGateReport",
     "evaluate_reconstruction_quality_gate",
+    "CoordinateReferenceMetadata",
+    "DSMConfig",
+    "DSMExportResult",
+    "DSMExporter",
+    "UnreferencedGeometryError",
+    "GeographicCRSError",
+    "IncompatibleUnitsError",
+    "UnvalidatedAlignmentError",
+    "InvalidRasterConfigurationError",
+    "derive_utm_crs_from_latlon",
+    "reproject_geographic_to_utm",
+    "rasterize_point_cloud_dsm",
 ]

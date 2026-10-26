@@ -75,7 +75,7 @@ class TestSprint8ViewerPlatform(unittest.TestCase):
 
         manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["app_title"], "F.O.R.G.E Explorer")
-        self.assertIn(manifest["sprint"], ["Sprint 8", "Sprint 9"])
+        self.assertIn(manifest["sprint"], ["Sprint 8", "Sprint 9", "Sprint 10.1"])
 
         scenes = manifest["scenes"]
         self.assertEqual(len(scenes), 5, "Manifest must contain exactly 5 primary benchmark scenes")

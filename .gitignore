@@ -86,3 +86,22 @@ outputs/dji_fly_validation/
 outputs/diagnostics/
 outputs/diagnostics.zip
 outputs/dynamic_object_masking/
+outputs/new_video_reconstruction/
+outputs/new_video_reconstructions/
+outputs/opencv5_experiments/
+outputs/diagnostics_rooftop_fixtures/
+outputs/dji_sample_frame0.png
+outputs/experiments_multiview_consistency/
+outputs/test_4k_dense_building_window/
+outputs/test_multiview_export/
+outputs/accuracy_experiment/sprint9_video_to_viewer_release/whatsapp_recovery_v3/
+
+# Local developer scratch and snapshot folders
+scratch/
+snapshots/
+
+# Ephemeral web downloads, shortcuts, and browser saves
+*.html
+*.url
+*_files/
+
