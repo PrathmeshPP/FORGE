@@ -23,8 +23,8 @@ JOBS_DIR = FORGE_DATA_DIR / "jobs"
 DB_PATH = FORGE_DATA_DIR / "forge_jobs.db"
 
 # Upload and Preflight Limits
-FORGE_MAX_UPLOAD_BYTES = int(os.environ.get("FORGE_MAX_UPLOAD_BYTES", 2 * 1024 * 1024 * 1024)) # 2 GiB
-FORGE_MAX_VIDEO_SECONDS = float(os.environ.get("FORGE_MAX_VIDEO_SECONDS", 900.0)) # 15 minutes
+FORGE_MAX_UPLOAD_BYTES = int(os.environ.get("FORGE_MAX_UPLOAD_BYTES", 2 * 1024 * 1024 * 1024))  # 2 GiB
+FORGE_MAX_VIDEO_SECONDS = float(os.environ.get("FORGE_MAX_VIDEO_SECONDS", 900.0))  # 15 minutes
 FORGE_ACCEPTED_EXTENSIONS: List[str] = [".mp4", ".mov"]
 FORGE_MIN_FREE_DISK_PERCENT = float(os.environ.get("FORGE_MIN_FREE_DISK_PERCENT", 10.0))
 FORGE_RAW_RETENTION_HOURS = int(os.environ.get("FORGE_RAW_RETENTION_HOURS", 24))
@@ -34,9 +34,14 @@ FORGE_PIPELINE_ROOT = Path(
     os.environ.get("FORGE_PIPELINE_ROOT", r"C:\Users\25beevdt025\Desktop\FORGE")
 ).resolve()
 
-# Worker Mode ('mock' for Phase 2/3, 'real' only after handoff approval)
+# Worker Concurrency & Mock Timing
 FORGE_WORKER_MODE = os.environ.get("FORGE_WORKER_MODE", "mock").lower()
+FORGE_MAX_ACTIVE_JOBS = 1
+FORGE_MAX_QUEUE_SIZE = int(os.environ.get("FORGE_MAX_QUEUE_SIZE", "3"))
+FORGE_MOCK_STEP_DELAY_SECONDS = float(os.environ.get("FORGE_MOCK_STEP_DELAY_SECONDS", "0.6"))
+
+# Sample Assets Directory (verified watermarked sample 3D indoor fixtures)
+SAMPLE_ASSETS_DIR = (BASE_DIR / "viewer" / "public" / "sample").resolve()
 
 # Frontend distribution directory for unified single-origin serving
 FRONTEND_DIST_DIR = (BASE_DIR / "viewer" / "dist").resolve()
-

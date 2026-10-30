@@ -1,6 +1,6 @@
 """
 F.O.R.G.E. Website Backend — API Router
-Implements the endpoints specified in API_CONTRACT.md.
+Implements the endpoints specified in API_CONTRACT.md and TRD.md.
 """
 
 import uuid
@@ -36,6 +36,7 @@ from web_backend.services.job_service import (
     JobServiceError,
 )
 from web_backend.database import get_job_by_id, list_jobs
+from web_backend.worker.mock_worker import mock_worker
 
 router = APIRouter(prefix="/api/v1")
 
@@ -64,11 +65,16 @@ def get_health():
     except Exception:
         pass
 
+    worker_status = "busy" if mock_worker.is_busy() else "idle"
+    accepting = not mock_worker.is_queue_full()
+    active_id = mock_worker.get_active_job_id()
+
     return HealthResponse(
         status="ok",
-        worker="idle",
-        accepting_jobs=True,
+        worker=worker_status,
+        accepting_jobs=accepting,
         worker_mode=FORGE_WORKER_MODE,
+        active_job_id=active_id,
         limits=HealthLimits(
             max_upload_bytes=FORGE_MAX_UPLOAD_BYTES,
             max_video_duration_seconds=FORGE_MAX_VIDEO_SECONDS,
@@ -105,11 +111,11 @@ async def create_job(
 
 
 @router.post("/jobs/{job_id}/start", response_model=JobResponse)
-def start_reconstruction_job(job_id: str):
+async def start_reconstruction_job(job_id: str):
     """Transitions a validated preflight job into the active queue."""
     clean_id = validate_uuid_string(job_id)
     try:
-        job = start_job(clean_id)
+        job = await start_job(clean_id)
         return job
     except JobServiceError as e:
         raise HTTPException(
@@ -138,11 +144,11 @@ def get_job(job_id: str):
 
 
 @router.post("/jobs/{job_id}/cancel", response_model=JobResponse)
-def cancel_reconstruction_job(job_id: str):
+async def cancel_reconstruction_job(job_id: str):
     """Cancels a queued or running job."""
     clean_id = validate_uuid_string(job_id)
     try:
-        return cancel_job(clean_id)
+        return await cancel_job(clean_id)
     except JobServiceError as e:
         raise HTTPException(
             status_code=e.status_code,
@@ -151,11 +157,11 @@ def cancel_reconstruction_job(job_id: str):
 
 
 @router.delete("/jobs/{job_id}", status_code=204)
-def delete_reconstruction_job(job_id: str):
+async def delete_reconstruction_job(job_id: str):
     """Deletes a job and permanently removes its associated local files."""
     clean_id = validate_uuid_string(job_id)
     try:
-        delete_job(clean_id)
+        await delete_job(clean_id)
         return Response(status_code=204)
     except JobServiceError as e:
         raise HTTPException(
@@ -188,9 +194,9 @@ def get_job_artifacts(job_id: str):
     artifacts: List[ArtifactItem] = []
     allowlisted_files = {
         "primary_model": ("textured_mesh.obj", "OBJ"),
-        "texture_atlas": ("texture_atlas.png", "PNG"),
         "material_def": ("textured_mesh.mtl", "MTL"),
         "point_cloud": ("surface_mesh_photographic.ply", "PLY"),
+        "manifest": ("artifact_manifest.json", "JSON"),
     }
 
     for key, (filename, fmt) in allowlisted_files.items():
@@ -213,7 +219,7 @@ def get_job_artifacts(job_id: str):
 def download_job_artifact(job_id: str, artifact_key: str):
     """
     Serves a validated artifact file.
-    Enforces logical key allowlist and strict path containment.
+    Enforces logical key and filename allowlist and strict path containment.
     """
     clean_id = validate_uuid_string(job_id)
     job = get_job_by_id(clean_id)
@@ -223,11 +229,23 @@ def download_job_artifact(job_id: str, artifact_key: str):
             detail={"code": "JOB_NOT_FOUND", "message": f"Job '{clean_id}' was not found."}
         )
 
+    if job.get("status") != "ready":
+        raise HTTPException(
+            status_code=403,
+            detail={"code": "JOB_NOT_READY", "message": f"Job '{clean_id}' is not in ready state."}
+        )
+
     allowlist_map = {
         "primary_model": ("textured_mesh.obj", "text/plain"),
-        "texture_atlas": ("texture_atlas.png", "image/png"),
+        "textured_mesh.obj": ("textured_mesh.obj", "text/plain"),
         "material_def": ("textured_mesh.mtl", "text/plain"),
+        "textured_mesh.mtl": ("textured_mesh.mtl", "text/plain"),
         "point_cloud": ("surface_mesh_photographic.ply", "application/octet-stream"),
+        "surface_mesh_photographic.ply": ("surface_mesh_photographic.ply", "application/octet-stream"),
+        "texture_atlas": ("texture_atlas.png", "image/png"),
+        "texture_atlas.png": ("texture_atlas.png", "image/png"),
+        "manifest": ("artifact_manifest.json", "application/json"),
+        "artifact_manifest.json": ("artifact_manifest.json", "application/json"),
     }
 
     if artifact_key not in allowlist_map:
@@ -250,6 +268,5 @@ def download_job_artifact(job_id: str, artifact_key: str):
         path=str(file_path),
         filename=filename,
         media_type=media_type,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        headers={"Content-Disposition": f'inline; filename="{filename}"'}
     )
-

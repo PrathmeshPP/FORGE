@@ -1,13 +1,13 @@
 """
 F.O.R.G.E. Website Backend — Job Management Service
-Handles streaming uploads, path security containment, directory isolation, and SQLite state persistence.
+Handles streaming uploads, path security containment, directory isolation, SQLite state persistence,
+and mock worker job scheduling.
 """
 
 import os
 import shutil
 import uuid
 import datetime
-import shutil
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -29,6 +29,7 @@ from web_backend.database import (
 )
 from web_backend.models import JobStatus, PipelineStage
 from web_backend.services.video_validator import validate_and_probe_video, VideoValidationError
+from web_backend.worker.mock_worker import mock_worker, WorkerQueueFullError
 
 
 class JobServiceError(Exception):
@@ -95,7 +96,7 @@ async def handle_streaming_upload(
 
     # 3. Stream Upload with Chunk-by-Chunk Byte Limit Enforcement
     total_bytes = 0
-    chunk_size = 64 * 1024 # 64 KiB chunks
+    chunk_size = 64 * 1024  # 64 KiB chunks
 
     try:
         with open(safe_target_path, "wb") as f_out:
@@ -177,15 +178,44 @@ async def handle_streaming_upload(
     return get_job_by_id(job_id) or job_record
 
 
-def start_job(job_id: str) -> Dict[str, Any]:
-    """Marks a preflighted job as queued to start."""
+async def start_job(job_id: str) -> Dict[str, Any]:
+    """
+    Transitions a preflighted job into the workstation worker queue and enqueues it.
+    Prevents duplicate runs and validates queue capacity.
+    """
     job = get_job_by_id(job_id)
     if not job:
         raise JobServiceError("JOB_NOT_FOUND", f"Job '{job_id}' does not exist.", status_code=404)
 
-    if job["status"] not in [JobStatus.PREFLIGHT.value, JobStatus.QUEUED.value]:
-        # Return existing state if already running or completed
+    # Idempotent: If already running, validating, or ready, return existing state
+    if job["status"] in [
+        JobStatus.RUNNING.value,
+        JobStatus.VALIDATING_OUTPUT.value,
+        JobStatus.READY.value,
+    ]:
         return job
+
+    # If job already queued, ensure worker queue has it and return
+    if job["status"] == JobStatus.QUEUED.value:
+        try:
+            await mock_worker.enqueue_job(job_id)
+        except WorkerQueueFullError:
+            pass
+        return job
+
+    # Only preflight jobs (or retried failed jobs) can be queued
+    if job["status"] not in [JobStatus.PREFLIGHT.value, JobStatus.FAILED.value]:
+        raise JobServiceError(
+            "INVALID_JOB_STATE",
+            f"Cannot start job in state '{job['status']}'. Job must be in 'preflight' state.",
+            status_code=400,
+        )
+
+    # Enqueue in mock worker
+    try:
+        await mock_worker.enqueue_job(job_id)
+    except WorkerQueueFullError as qe:
+        raise JobServiceError("QUEUE_FULL", str(qe), status_code=429)
 
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
     job["status"] = JobStatus.QUEUED.value
@@ -193,18 +223,22 @@ def start_job(job_id: str) -> Dict[str, Any]:
     job["progress_stage"] = PipelineStage.INGESTION.value
     job["progress_stage_label"] = "Queued in local workstation task queue"
     job["attempt_count"] = job.get("attempt_count", 0) + 1
+    job["last_error_code"] = None
+    job["last_error_message"] = None
     job["logs"].append({
         "timestamp": datetime.datetime.now().strftime("%H:%M:%S"),
         "stage": "ingestion",
-        "message": "Job queued for local workstation processing.",
+        "message": "Job enqueued for deterministic local workstation processing.",
     })
 
     save_job(job)
     return job
 
 
-def cancel_job(job_id: str) -> Dict[str, Any]:
-    """Transitions a queued or running job to cancelled."""
+async def cancel_job(job_id: str) -> Dict[str, Any]:
+    """
+    Transitions an active or queued job to cancelled, terminating worker simulation.
+    """
     job = get_job_by_id(job_id)
     if not job:
         raise JobServiceError("JOB_NOT_FOUND", f"Job '{job_id}' does not exist.", status_code=404)
@@ -212,27 +246,21 @@ def cancel_job(job_id: str) -> Dict[str, Any]:
     if job["status"] in [JobStatus.READY.value, JobStatus.CANCELLED.value, JobStatus.FAILED.value]:
         return job
 
-    job["status"] = JobStatus.CANCELLED.value
-    job["progress_stage"] = PipelineStage.IDLE.value
-    job["progress_stage_label"] = "Job cancelled by user"
-    job["logs"].append({
-        "timestamp": datetime.datetime.now().strftime("%H:%M:%S"),
-        "stage": "idle",
-        "message": "Cancellation confirmed. Host worker stopped.",
-    })
-
-    save_job(job)
-    return job
+    await mock_worker.cancel_job(job_id)
+    return get_job_by_id(job_id) or job
 
 
-def delete_job(job_id: str) -> bool:
+async def delete_job(job_id: str) -> bool:
     """
-    Deletes a job and its associated data directory.
+    Cancels any running tasks, deletes job files on disk, and removes SQLite record.
     Guarantees strict path containment within JOBS_DIR.
     """
     internal_record = get_job_internal(job_id)
     if not internal_record:
         raise JobServiceError("JOB_NOT_FOUND", f"Job '{job_id}' does not exist.", status_code=404)
+
+    # Cancel if active or queued
+    await mock_worker.cancel_job(job_id)
 
     # Delete files on disk
     job_dir = JOBS_DIR / job_id
@@ -241,4 +269,3 @@ def delete_job(job_id: str) -> bool:
 
     # Remove from DB
     return delete_job_record(job_id)
-

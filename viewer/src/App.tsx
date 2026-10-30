@@ -238,7 +238,13 @@ export const App: React.FC = () => {
           <JobStatusView
             job={activeJob || allJobs[0]}
             onCancelJob={handleCancelJob}
-            onOpenViewer={() => setActiveTab('viewer')}
+            onOpenViewer={() => {
+              const j = activeJob || allJobs[0];
+              if (j?.scene) {
+                setCurrentScene(j.scene);
+              }
+              setActiveTab('viewer');
+            }}
             onStartNewUpload={() => setActiveTab('upload')}
           />
         )}

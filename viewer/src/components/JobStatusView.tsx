@@ -104,6 +104,28 @@ export const JobStatusView: React.FC<JobStatusViewProps> = ({
               execute until <code>PIPELINE_INTEGRATION_HANDOFF.md</code> is approved.
             </span>
           </div>
+
+          {/* Error Banner if job failed */}
+          {job.status === 'failed' && (
+            <div className="status-error-banner">
+              <XCircle size={16} className="text-rose" />
+              <div>
+                <strong>Reconstruction Error ({job.last_error_code || 'PIPELINE_ERROR'}):</strong>
+                <p>{job.last_error_message || 'Reconstruction process failed. Review log entries below.'}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Cancellation Banner if job cancelled */}
+          {job.status === 'cancelled' && (
+            <div className="status-cancelled-banner">
+              <StopCircle size={16} />
+              <div>
+                <strong>Reconstruction Cancelled:</strong>
+                <p>Execution halted upon user cancellation request. Subprocess stopped.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Live Metrics Row */}
@@ -177,7 +199,7 @@ export const JobStatusView: React.FC<JobStatusViewProps> = ({
 
         {/* Action Controls */}
         <div className="status-actions">
-          {job.status === 'running' || job.status === 'queued' ? (
+          {['running', 'queued', 'validating_output'].includes(job.status) ? (
             <button className="btn-danger" onClick={() => onCancelJob(job.id)}>
               <StopCircle size={15} />
               <span>Cancel Job Execution</span>

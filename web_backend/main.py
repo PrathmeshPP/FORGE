@@ -1,6 +1,7 @@
 """
 F.O.R.G.E. Website Backend — Main Application Entry Point
-FastAPI application with unified single-origin static file serving and strict security headers.
+FastAPI application with unified single-origin static file serving, strict security headers,
+startup crash recovery, and deterministic background mock worker lifecycle.
 """
 
 import os
@@ -15,6 +16,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from web_backend.config import HOST, PORT, FRONTEND_DIST_DIR, FORGE_DATA_DIR
 from web_backend.database import init_db
 from web_backend.api.routes import router
+from web_backend.worker.mock_worker import mock_worker, recover_interrupted_jobs
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -39,22 +41,35 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle."""
-    # Ensure database schema is initialized on startup
+    # 1. Initialize data directory and database schema
     FORGE_DATA_DIR.mkdir(parents=True, exist_ok=True)
     init_db()
+
+    # 2. Crash Recovery: Detect & safely mark any jobs interrupted by host restart
+    recovered = recover_interrupted_jobs()
+    if recovered > 0:
+        print(f"[*] Recovered {recovered} interrupted job(s) from previous session.")
+
+    # 3. Start background mock worker event loop
+    mock_worker.start_background_loop()
+
     yield
+
+    # 4. Graceful shutdown
+    mock_worker.stop_background_loop()
 
 
 app = FastAPI(
     title="F.O.R.G.E. Indoor 3D Reconstruction Platform",
     version="1.0.0",
-    docs_url=None, # Disabled per SECURITY_BASELINE to prevent operational leakage
+    docs_url=None,  # Disabled per SECURITY_BASELINE to prevent operational leakage
     redoc_url=None,
     lifespan=lifespan
 )
 
 # Apply Security Headers
 app.add_middleware(SecurityHeadersMiddleware)
+
 
 # Custom Exception Handler to enforce safe JSON errors (no raw tracebacks)
 @app.exception_handler(HTTPException)
@@ -100,12 +115,4 @@ if FRONTEND_DIST_DIR.exists() and (FRONTEND_DIST_DIR / "index.html").exists():
         if target_file.is_file() and full_path != "":
             return FileResponse(str(target_file))
 
-        # Default to SPA index.html
         return FileResponse(str(FRONTEND_DIST_DIR / "index.html"))
-
-
-if __name__ == "__main__":
-    import uvicorn
-    # Bind exclusively to 127.0.0.1
-    uvicorn.run("web_backend.main:app", host=HOST, port=PORT, reload=False)
-

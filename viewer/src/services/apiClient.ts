@@ -8,7 +8,7 @@ import { SAMPLE_INDOOR_SCENE } from '../data/sampleScene';
 
 const API_BASE = '/api/v1';
 
-// In-memory mock storage for client simulation when backend is in development
+// In-memory mock storage for client simulation when backend is offline
 let mockJobs: JobRecord[] = [
   {
     id: 'sample-job-0001',
@@ -102,6 +102,24 @@ export const apiClient = {
     preflight: PreflightMetadata,
     keepRawInput: boolean
   ): Promise<JobRecord> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('keep_raw_input', String(keepRawInput));
+
+      const res = await fetch(`${API_BASE}/jobs`, {
+        method: 'POST',
+        body: formData,
+        signal: AbortSignal.timeout(30000), // Allow time for large video upload
+      });
+      if (res.ok) {
+        const backendJob = await res.json();
+        return backendJob;
+      }
+    } catch {
+      // Fallback to mock job if backend is offline
+    }
+
     const jobId = `job-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
     const newJob: JobRecord = {
       id: jobId,
@@ -125,24 +143,6 @@ export const apiClient = {
       ],
     };
 
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('keep_raw_input', String(keepRawInput));
-
-      const res = await fetch(`${API_BASE}/jobs`, {
-        method: 'POST',
-        body: formData,
-        signal: AbortSignal.timeout(3000),
-      });
-      if (res.ok) {
-        const backendJob = await res.json();
-        return backendJob;
-      }
-    } catch {
-      // Fallback to mock job
-    }
-
     mockJobs.unshift(newJob);
     return newJob;
   },
@@ -151,18 +151,44 @@ export const apiClient = {
     jobId: string,
     onProgress?: (updated: JobRecord) => void
   ): Promise<JobRecord> {
+    // 1. Attempt Real Backend Worker Start & Live Polling
     try {
       const res = await fetch(`${API_BASE}/jobs/${jobId}/start`, {
         method: 'POST',
-        signal: AbortSignal.timeout(2000),
+        signal: AbortSignal.timeout(3000),
       });
+
       if (res.ok) {
-        return await res.json();
+        const startedJob: JobRecord = await res.json();
+        if (onProgress) onProgress(startedJob);
+
+        // Start live polling loop against backend
+        const pollBackend = async () => {
+          try {
+            const pollRes = await fetch(`${API_BASE}/jobs/${jobId}`);
+            if (pollRes.ok) {
+              const currentJob: JobRecord = await pollRes.json();
+              if (onProgress) onProgress(currentJob);
+
+              if (['ready', 'failed', 'cancelled'].includes(currentJob.status)) {
+                activeSimulationTimer = null;
+                return; // Stop polling on terminal states
+              }
+            }
+          } catch {
+            // Transient fetch error, retry
+          }
+          activeSimulationTimer = setTimeout(pollBackend, 800);
+        };
+
+        activeSimulationTimer = setTimeout(pollBackend, 400);
+        return startedJob;
       }
     } catch {
-      // Run deterministic mock pipeline simulation
+      // Backend not running; fallback to deterministic in-memory client simulation
     }
 
+    // 2. Offline Simulation Fallback
     const job = mockJobs.find((j) => j.id === jobId);
     if (!job) throw new Error('Job not found');
 
@@ -173,7 +199,6 @@ export const apiClient = {
     job.attempt_count = 1;
     if (onProgress) onProgress({ ...job });
 
-    // Deterministic stage simulation
     const stages: Array<{
       status: JobRecord['status'];
       stage: PipelineStage;
@@ -181,42 +206,42 @@ export const apiClient = {
       delayMs: number;
       log: string;
     }> = [
-      {
-        status: 'running',
-        stage: 'ingestion',
-        label: 'Step 1/5: Streaming Video Ingestion & Container Integrity Check',
-        delayMs: 1200,
-        log: 'Container parsed without errors. Audio track discarded; video stream validated.',
-      },
-      {
-        status: 'running',
-        stage: 'keyframe_extraction',
-        label: 'Step 2/5: Viewpoint Diversity & Laplacian Sharpness Curation',
-        delayMs: 2500,
-        log: 'Extracted keyframes. Mean Laplacian sharpness: 34.2 (threshold: 15.0). Viewpoint baselines confirmed.',
-      },
-      {
-        status: 'running',
-        stage: 'spatial_inference',
-        label: 'Step 3/5: Foundation Spatial Inference (Simulated Model Pass)',
-        delayMs: 3500,
-        log: '[MOCK ADAPTER] Simulated VGGT-Omega spatial inference pass. Estimated VRAM ceiling: 6.2 GB.',
-      },
-      {
-        status: 'running',
-        stage: 'dense_meshing',
-        label: 'Step 4/5: Point Cloud Densification & Surface Reconstruction',
-        delayMs: 3000,
-        log: 'Dense point cloud generated. Screened Poisson surface reconstruction converged (Depth: 9).',
-      },
-      {
-        status: 'validating_output',
-        stage: 'qa_verification',
-        label: 'Step 5/5: Running Gates A-E Quality & Coordinate Verification',
-        delayMs: 2000,
-        log: 'Gate A-E diagnostics executed. Bounding box extents valid. Zero non-finite coordinates.',
-      },
-    ];
+        {
+          status: 'running',
+          stage: 'ingestion',
+          label: 'Step 1/5: Streaming Video Ingestion & Container Integrity Check',
+          delayMs: 1000,
+          log: 'Container parsed without errors. Audio track discarded; video stream validated.',
+        },
+        {
+          status: 'running',
+          stage: 'keyframe_extraction',
+          label: 'Step 2/5: Viewpoint Diversity & Laplacian Sharpness Curation',
+          delayMs: 1500,
+          log: 'Extracted keyframes. Mean Laplacian sharpness: 34.2 (threshold: 15.0). Viewpoint baselines confirmed.',
+        },
+        {
+          status: 'running',
+          stage: 'spatial_inference',
+          label: 'Step 3/5: Foundation Spatial Inference (Simulated Model Pass)',
+          delayMs: 2000,
+          log: '[MOCK ADAPTER] Simulated VGGT-Omega spatial inference pass. Estimated VRAM ceiling: 6.2 GB.',
+        },
+        {
+          status: 'running',
+          stage: 'dense_meshing',
+          label: 'Step 4/5: Point Cloud Densification & Surface Reconstruction',
+          delayMs: 1800,
+          log: 'Dense point cloud generated. Screened Poisson surface reconstruction converged (Depth: 9).',
+        },
+        {
+          status: 'validating_output',
+          stage: 'qa_verification',
+          label: 'Step 5/5: Running Gates A-E Quality & Coordinate Verification',
+          delayMs: 1200,
+          log: 'Gate A-E diagnostics executed. Bounding box extents valid. Zero non-finite coordinates.',
+        },
+      ];
 
     let currentStep = 0;
     const runNextStep = () => {
@@ -234,7 +259,6 @@ export const apiClient = {
         currentStep++;
         activeSimulationTimer = setTimeout(runNextStep, step.delayMs);
       } else {
-        // Complete job
         job.status = 'ready';
         job.progress_stage = 'idle';
         job.progress_stage_label = 'Reconstruction Complete';
@@ -262,7 +286,7 @@ export const apiClient = {
       }
     };
 
-    activeSimulationTimer = setTimeout(runNextStep, 500);
+    activeSimulationTimer = setTimeout(runNextStep, 400);
     return job;
   },
 
@@ -273,9 +297,12 @@ export const apiClient = {
     }
 
     try {
-      await fetch(`${API_BASE}/jobs/${jobId}/cancel`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/jobs/${jobId}/cancel`, { method: 'POST' });
+      if (res.ok) {
+        return true;
+      }
     } catch {
-      // Mock cancellation
+      // Mock cancellation fallback
     }
 
     const job = mockJobs.find((j) => j.id === jobId);
@@ -295,7 +322,10 @@ export const apiClient = {
 
   async deleteJob(jobId: string): Promise<boolean> {
     try {
-      await fetch(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' });
+      if (res.ok) {
+        return true;
+      }
     } catch {
       // Mock delete
     }
@@ -305,4 +335,3 @@ export const apiClient = {
     return mockJobs.length < initialLen;
   },
 };
-

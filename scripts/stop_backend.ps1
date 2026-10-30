@@ -17,10 +17,12 @@ if ($connection) {
         Write-Host "[*] Stopping verified F.O.R.G.E. backend process on port $port (PID: $pidToKill, Name: $($proc.ProcessName))..."
         Stop-Process -Id $pidToKill -Force -ErrorAction SilentlyContinue
         Write-Host "[+] F.O.R.G.E. backend stopped successfully."
-    } else {
+    }
+    else {
         Write-Warning "[!] Process on port $port (PID: $pidToKill, Name: $($proc.ProcessName)) does not match F.O.R.G.E. backend signature. Aborting termination to protect unrelated services."
         Write-Host "    CommandLine: $cmdLine"
     }
-} else {
+}
+else {
     Write-Host "[*] No backend service was listening on port $port."
 }

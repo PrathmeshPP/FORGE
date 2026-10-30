@@ -14,11 +14,16 @@ Verifies:
 """
 
 import os
+import sys
 import io
 import hashlib
 import tempfile
 import uuid
 from pathlib import Path
+
+# Ensure workspace root is in sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import pytest
 import cv2
 import numpy as np
