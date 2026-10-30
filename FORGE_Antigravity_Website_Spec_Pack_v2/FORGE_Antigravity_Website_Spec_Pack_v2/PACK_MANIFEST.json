@@ -1,0 +1,33 @@
+{
+  "project": "F.O.R.G.E. Private Indoor Video-to-3D Website",
+  "version": "2.0",
+  "updated_date": "2026-10-30",
+  "format": "Markdown specification pack",
+  "workspace": "C:\\Users\\25beevdt025\\Desktop\\FORGE_website",
+  "website_repository": "https://github.com/PrathmeshPP/FORGE_website",
+  "pipeline_repository_read_only": "https://github.com/PrathmeshPP/FORGE",
+  "host_profile": "Windows workstation; NVIDIA GPU with 8 GB VRAM; exact GPU/driver/runtime must be detected",
+  "files": [
+    "AGENTS.md",
+    "API_CONTRACT.md",
+    "ARCHITECTURE_DECISIONS.md",
+    "CHANGELOG_V2.md",
+    "DEPLOYMENT_RUNBOOK.md",
+    "MASTER_ANTIGRAVITY_PROMPT.md",
+    "MODEL_QA_AND_RETRY_POLICY.md",
+    "PHASE_PROMPTS.md",
+    "PIPELINE_INTEGRATION_HANDOFF.md",
+    "PRD.md",
+    "PROMPT_QUICK_START.md",
+    "README_FIRST.md",
+    "RESEARCH_REFERENCES.md",
+    "SECURITY_BASELINE.md",
+    "TEST_PLAN.md",
+    "THREAT_MODEL.md",
+    "TRD.md",
+    "UI_UX_GUIDELINES.md",
+    "WORKSPACE_PROFILE.md",
+    "PACK_MANIFEST.json"
+  ],
+  "important_note": "Specification only. No website code was implemented, no host hardware was probed, no security audit was performed, and no reconstruction was run. Use a mock worker until the separate indoor model workstream supplies an owner-approved integration handoff."
+}
