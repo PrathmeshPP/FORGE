@@ -1353,6 +1353,82 @@
           -2.2
         ]
       }
+    },
+    {
+      "id": "indoor_candidate_f_poisson_continuous",
+      "scene_name": "indoor_candidate_f_poisson_continuous",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE F (CONTINUOUS POISSON HQ)",
+      "subtitle": "True Room Isolation (3.20m x 2.27m x 3.75m) + Connected Sheet Filtering + 4K Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "RECOMMENDED PRODUCTION DIGITAL TWIN",
+      "description": "True indoor room reconstruction isolating the enclosed room interior (Windows 2..19). Chained via exact analytical camera overlaps, eliminating doorway corridor shear. Surface topology filtered to eliminate disconnected floating fragments. 1,375,183 faces textured with 16 native 1024x1024 keyframe tiles.",
+      "vertex_count": 815210,
+      "triangle_count": 1375183,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate F GLB (Continuous Poisson HQ)",
+          "glb_url": "/outputs/indoor/critical_reconstruction_recovery_video1/candidate_f_poisson_continuous.glb",
+          "file_size_bytes": 50331648,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Candidate F Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/critical_reconstruction_recovery_video1/candidate_f_poisson_continuous.obj",
+          "mtl_url": "/outputs/indoor/critical_reconstruction_recovery_video1/candidate_f_poisson_continuous.mtl",
+          "file_size_bytes": 214955219,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          -0.6,
+          0.6,
+          -1.2
+        ],
+        "target": [
+          0.5,
+          -0.2,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "indoor_candidate_g_tsdf_volumetric",
+      "scene_name": "indoor_candidate_g_tsdf_volumetric",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE G (SCALABLE TSDF VOLUMETRIC)",
+      "subtitle": "Scalable TSDF (1.5cm Voxel) + Enclosed Room Geometry + 4K Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EVALUATION",
+      "acceptance_label": "VOLUMETRIC DIGITAL TWIN",
+      "description": "Scalable TSDF volumetric reconstruction at 1.5cm voxel resolution isolating the enclosed room. 242,105 triangles, 15.07 MB GLB, exact physical geometry without Poisson ballooning.",
+      "vertex_count": 161011,
+      "triangle_count": 242105,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate G GLB (Scalable TSDF)",
+          "glb_url": "/outputs/indoor/critical_reconstruction_recovery_video1/candidate_g_tsdf_volumetric.glb",
+          "file_size_bytes": 15802368,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          -0.6,
+          0.6,
+          -1.2
+        ],
+        "target": [
+          0.5,
+          -0.2,
+          0.8
+        ]
+      }
     }
   ],
   "comparison_pairs": [
