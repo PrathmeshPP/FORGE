@@ -6,6 +6,160 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_candidate_h3_architecture_hybrid",
+      "scene_name": "indoor_candidate_h3_architecture_hybrid",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE H3 (ARCHITECTURE-AWARE HYBRID TWIN)",
+      "subtitle": "Watertight Planar Hull (2.40m x 4.30m x 2.65m) + Grounded Furniture + 4K Photographic Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "WINNING DIGITAL TWIN",
+      "description": "Architecture-aware hybrid reconstruction separating planar room enclosure (4 walls, floor, ceiling, window, doorway) from high-detail grounded furniture (cot, mattress, study desk, laptop, office chair, wardrobe cupboard). Level floor at Y=0.0m with sub-centimeter planarity (1.1cm std dev) and sharp 90-degree corners. Fully textured with 16 native 1024x1024 video tiles embedded into a 4096x4096 atlas.",
+      "vertex_count": 148624,
+      "triangle_count": 300000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate H3 GLB (Planar Shell + Furniture + 4K Atlas)",
+          "glb_url": "/outputs/indoor/final_room_reconstruction_recovery/meshes/candidate_h3_photographic_textured.glb",
+          "file_size_bytes": 39951360,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Candidate H3 Wavefront OBJ + MTL (with Normals vn)",
+          "obj_url": "/outputs/indoor/final_room_reconstruction_recovery/meshes/candidate_h3_photographic_textured.obj",
+          "mtl_url": "/outputs/indoor/final_room_reconstruction_recovery/meshes/candidate_h3_photographic_textured.mtl",
+          "file_size_bytes": 52428800,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.1,
+          1.4,
+          0.85
+        ],
+        "target": [
+          -0.15,
+          0.95,
+          -2.2
+        ]
+      },
+      "spatial_bounds": {
+        "x_min": -1.35,
+        "x_max": 1.05,
+        "y_floor": 0.0,
+        "y_ceiling": 2.65,
+        "z_min": -3.35,
+        "z_max": 0.95,
+        "room_width_m": 2.4,
+        "room_length_m": 4.3,
+        "room_height_m": 2.65
+      },
+      "collision_bounds": [
+        {
+          "id": "left_wall",
+          "bounds": [
+            -1.45,
+            -1.35,
+            0.0,
+            2.65,
+            -3.35,
+            0.95
+          ]
+        },
+        {
+          "id": "right_wall",
+          "bounds": [
+            1.05,
+            1.15,
+            0.0,
+            2.65,
+            -3.35,
+            0.95
+          ]
+        },
+        {
+          "id": "back_wall",
+          "bounds": [
+            -1.35,
+            1.05,
+            0.0,
+            2.65,
+            -3.45,
+            -3.35
+          ]
+        },
+        {
+          "id": "front_wall_left",
+          "bounds": [
+            -1.35,
+            -0.2,
+            0.0,
+            2.65,
+            0.95,
+            1.05
+          ]
+        },
+        {
+          "id": "front_wall_right",
+          "bounds": [
+            0.6,
+            1.05,
+            0.0,
+            2.65,
+            0.95,
+            1.05
+          ]
+        },
+        {
+          "id": "bed",
+          "bounds": [
+            0.0,
+            1.05,
+            0.0,
+            0.7,
+            -1.85,
+            0.48
+          ]
+        },
+        {
+          "id": "desk",
+          "bounds": [
+            -1.15,
+            0.38,
+            0.0,
+            1.28,
+            -3.32,
+            -2.0
+          ]
+        },
+        {
+          "id": "wardrobe",
+          "bounds": [
+            -1.35,
+            -0.38,
+            0.0,
+            1.85,
+            -1.82,
+            0.48
+          ]
+        },
+        {
+          "id": "chair",
+          "bounds": [
+            -0.6,
+            0.15,
+            0.0,
+            0.98,
+            -2.35,
+            -1.55
+          ]
+        }
+      ]
+    },
+    {
       "id": "indoor_candidate_b_sharpest",
       "scene_name": "indoor_candidate_b_sharpest",
       "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE B (SHARPEST WINNER-TAKE-ALL)",
@@ -1360,8 +1514,8 @@
       "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE F (CONTINUOUS POISSON HQ)",
       "subtitle": "True Room Isolation (3.20m x 2.27m x 3.75m) + Connected Sheet Filtering + 4K Atlas",
       "category": "Indoor Architecture",
-      "acceptance_status": "PRODUCTION_PASS",
-      "acceptance_label": "RECOMMENDED PRODUCTION DIGITAL TWIN",
+      "acceptance_status": "REJECTED_USER_MANDATE",
+      "acceptance_label": "REJECTED: TOPOLOGICAL DEFECTS",
       "description": "True indoor room reconstruction isolating the enclosed room interior (Windows 2..19). Chained via exact analytical camera overlaps, eliminating doorway corridor shear. Surface topology filtered to eliminate disconnected floating fragments. 1,375,183 faces textured with 16 native 1024x1024 keyframe tiles.",
       "vertex_count": 815210,
       "triangle_count": 1375183,
@@ -1402,8 +1556,8 @@
       "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE G (SCALABLE TSDF VOLUMETRIC)",
       "subtitle": "Scalable TSDF (1.5cm Voxel) + Enclosed Room Geometry + 4K Atlas",
       "category": "Indoor Architecture",
-      "acceptance_status": "EVALUATION",
-      "acceptance_label": "VOLUMETRIC DIGITAL TWIN",
+      "acceptance_status": "REJECTED_USER_MANDATE",
+      "acceptance_label": "REJECTED: TOPOLOGICAL DEFECTS",
       "description": "Scalable TSDF volumetric reconstruction at 1.5cm voxel resolution isolating the enclosed room. 242,105 triangles, 15.07 MB GLB, exact physical geometry without Poisson ballooning.",
       "vertex_count": 161011,
       "triangle_count": 242105,
