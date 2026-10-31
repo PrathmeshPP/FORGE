@@ -105,3 +105,24 @@ snapshots/
 *.url
 *_files/
 
+# Source and uploaded videos (large binary assets)
+data/source_videos/
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Runtime indoor experiment outputs (heavy models, PLYs, OBJs, GLBs, NPZ caches, textures)
+outputs/indoor/
+master_architectural_comparison_panel.png
+viewer_vggt_tsdf_room_*.png
+viewer/screenshots/
+viewer/public/outputs/
+viewer/public/data/
+
+# Cache directories
+.cache/
+*.npz
+*.npy
+
+
