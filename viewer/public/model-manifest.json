@@ -6,6 +6,861 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_candidate_b_sharpest",
+      "scene_name": "indoor_candidate_b_sharpest",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE B (SHARPEST WINNER-TAKE-ALL)",
+      "subtitle": "16 Native 1024x1024 Keyframe Tiles + glTF 2.0 UVs + Vertex Normals (Zero Downsampling Loss)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "SHARPEST PHOTOGRAPHIC MODEL",
+      "description": "Rebuilt photographic texturing model for WhatsApp Video 2026-10-30 at 17.02.34.mp4. Solves baseline smoothing by packing 16 dominant keyframe views into 1024x1024 tiles (exceeding native 478x850 optical sensor resolution), correcting glTF 2.0 vertical UV coordinate inversion, and baking vertex normals into OBJ (vn) and GLB (NORMAL). 100% sharp, unblurred source photographs visible across desk, computer screen, bed fabrics, posters, and floor tiles.",
+      "vertex_count": 119103,
+      "triangle_count": 250000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate B GLB (Embedded 1024px Tile Atlas)",
+          "glb_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/candidate_b_sharpest_winner_take_all.glb",
+          "file_size_bytes": 35143972,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Candidate B Wavefront OBJ + MTL (with Normals vn)",
+          "obj_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/candidate_b_sharpest_winner_take_all.obj",
+          "mtl_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/candidate_b_sharpest_winner_take_all.mtl",
+          "file_size_bytes": 39108830,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.35,
+          0.2,
+          0.7
+        ],
+        "target": [
+          -0.2,
+          -0.1,
+          -0.4
+        ]
+      }
+    },
+    {
+      "id": "indoor_candidate_c_blended",
+      "scene_name": "indoor_candidate_c_blended",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE C (SEAM-AWARE BLENDED)",
+      "subtitle": "16 Native 1024x1024 Keyframe Tiles + Multi-View Exposure Harmonization + Vertex Normals",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "SEAM-AWARE HARMONIZED MODEL",
+      "description": "Rebuilt photographic model with multi-view exposure and luminance harmonization across chart boundaries. Preserves native optical sensor sharpness (1024x1024 tiles) while eliminating hard luminance steps along adjacent camera charts. Verified in Three.js WebGL.",
+      "vertex_count": 119103,
+      "triangle_count": 250000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate C GLB (Embedded Harmonized Atlas)",
+          "glb_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/candidate_c_seam_aware_blended.glb",
+          "file_size_bytes": 35598292,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Candidate C Wavefront OBJ + MTL (with Normals vn)",
+          "obj_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/candidate_c_seam_aware_blended.obj",
+          "mtl_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/candidate_c_seam_aware_blended.mtl",
+          "file_size_bytes": 39108818,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.35,
+          0.2,
+          0.7
+        ],
+        "target": [
+          -0.2,
+          -0.1,
+          -0.4
+        ]
+      }
+    },
+    {
+      "id": "indoor_coverage_heatmap",
+      "scene_name": "indoor_coverage_heatmap",
+      "display_name": "HOSTEL ROOM B 314 \u2014 4-CATEGORY COVERAGE HEATMAP",
+      "subtitle": "Green: Direct (41.3%) | Blue: Blended (22.6%) | Yellow: Occluded (2.1%) | Red: Unobserved (34.0%)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "DIAGNOSTIC_REFERENCE",
+      "acceptance_label": "COVERAGE HEATMAP",
+      "description": "4-category surface classification: Green (Directly Photographed: 41.33%), Blue (Blended Transition Region: 22.57%), Yellow (Occluded by Neural Depth: 2.10%), Red (Never Observed / Exterior: 34.00%). Total Photographic Coverage: 63.90%.",
+      "vertex_count": 119103,
+      "triangle_count": 250000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Coverage Heatmap GLB",
+          "glb_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/coverage_heatmap.glb",
+          "file_size_bytes": 4906624,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Coverage Heatmap Vertex PLY",
+          "ply_url": "/outputs/indoor/photographic_texture_quality_recovery_video1/coverage_heatmap.ply",
+          "file_size_bytes": 9324579,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.35,
+          0.2,
+          0.7
+        ],
+        "target": [
+          -0.2,
+          -0.1,
+          -0.4
+        ]
+      }
+    },
+    {
+      "id": "texture_experiment_video1_reproduced",
+      "scene_name": "texture_experiment_video1_reproduced",
+      "display_name": "HOSTEL ROOM B 314 \u2014 REPRODUCED texture_experiment_video1",
+      "subtitle": "Exact Reference Pipeline Reproduction \u2014 63 Frames + Screened Poisson (Dec 250k) + 4K Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "EXACT PIPELINE REPRODUCTION",
+      "description": "Exact reproduction of the successful texture_experiment_video1 pipeline on WhatsApp Video 2026-10-30 at 17.02.34.mp4. Reuses exact curation algorithm (63 frames, 1.57 FPS), VGGT-Omega overlapping window engine (20 windows, size 6, overlap 3), Screened Poisson meshing (depth 9, decimated to 250k triangles), horizontal floor leveling, and IndoorPhotographicTextureEngine 4096x4096 packed texture atlas. 119,103 vertices, 250,000 triangles, 100% verified in Three.js.",
+      "vertex_count": 119103,
+      "triangle_count": 250000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Reproduced Textured GLB (Embedded 4K Atlas)",
+          "glb_url": "/outputs/indoor/texture_experiment_video1_reproduced_video_170234/room_photographic_model.glb",
+          "file_size_bytes": 29416352,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Canonical Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/texture_experiment_video1_reproduced_video_170234/room_photographic_model_canonical.obj",
+          "mtl_url": "/outputs/indoor/texture_experiment_video1_reproduced_video_170234/room_photographic_model_canonical.mtl",
+          "file_size_bytes": 30691574,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex Coloured PLY",
+          "ply_url": "/outputs/indoor/texture_experiment_video1_reproduced_video_170234/room_photographic_model.ply",
+          "file_size_bytes": 9324579,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.5,
+          2.2
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "outdoor_pipeline_applied_video1",
+      "scene_name": "outdoor_pipeline_applied_video1",
+      "display_name": "HOSTEL ROOM B 314 \u2014 REUSED OUTDOOR ARCHITECTURE (POISSON HQ + 4K ATLAS)",
+      "subtitle": "Approved Production Twin \u2014 Screened Poisson HQ (Depth 9) + 4K Packed Texture Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "CANONICAL OUTDOOR PIPELINE REUSED",
+      "description": "Production indoor digital twin reconstructed by strictly invoking the proven outdoor pipeline architecture (campus_0049_candidate_a). Eliminates TSDF voxel shredding and sliding-window drift. Features 26 adaptively curated keyframes, WindowedInferenceManager, calibrated depth-edge jump filter (jump_rtol=0.12), per-view outward normal orientation, Screened Poisson HQ (Depth 9), surface connectivity repair, and native 4K photographic texture atlas baked via MultiViewTextureEngine. Watertight, continuous geometry with zero ghost walls or fragmented surfaces.",
+      "vertex_count": 954081,
+      "triangle_count": 1874408,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Production Textured GLB (Embedded 4K Atlas)",
+          "glb_url": "/outputs/indoor/outdoor_pipeline_applied_video1/indoor_reconstruction.glb",
+          "file_size_bytes": 143645880,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Canonical Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/outdoor_pipeline_applied_video1/textured/indoor_reconstruction.obj",
+          "mtl_url": "/outputs/indoor/outdoor_pipeline_applied_video1/textured/indoor_reconstruction.mtl",
+          "file_size_bytes": 242516613,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex Coloured PLY",
+          "ply_url": "/outputs/indoor/outdoor_pipeline_applied_video1/textured/indoor_reconstruction.ply",
+          "file_size_bytes": 73025762,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.8,
+          1.8
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "clean_slate_video1_textured",
+      "scene_name": "clean_slate_video1_textured",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CLEAN-SLATE TWIN (15mm TSDF)",
+      "subtitle": "Fresh Clean-Slate Digital Twin \u2014 54 Adaptive Keyframes + 15mm Scalable TSDF + Native 4K Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EXPERIMENTAL_PASS",
+      "acceptance_label": "CLEAN-SLATE TEXTURED DIGITAL TWIN",
+      "description": "Clean-slate production digital twin reconstructed from original source video (54 curated frames, 17 windows). Eliminates door-transition residual spike via targeted adaptive curation (residual reduced from 47.5cm to 18.9cm). Features Candidate A Bounded Sim(3) alignment with mandatory translation recomputation, 15mm Scalable TSDF fusion, and native-resolution 4K photographic texture atlas. 77k vertices, 138k triangles, 0.91 cm median surface agreement, zero ghost walls.",
+      "vertex_count": 77781,
+      "triangle_count": 138213,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Clean-Slate Textured Twin GLB (Embedded 4K Atlas)",
+          "glb_url": "/outputs/indoor/clean_reconstruction_video1_20261030/textured_tsdf_model/model_clean_textured.glb",
+          "file_size_bytes": 20478648,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Canonical Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/clean_reconstruction_video1_20261030/textured_tsdf_model/model_clean_textured_canonical.obj",
+          "mtl_url": "/outputs/indoor/clean_reconstruction_video1_20261030/textured_tsdf_model/model_clean_textured_canonical.mtl",
+          "file_size_bytes": 33454710,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex Coloured PLY",
+          "ply_url": "/outputs/indoor/clean_reconstruction_video1_20261030/textured_tsdf_model/model_clean_textured.ply",
+          "file_size_bytes": 3830690,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.8,
+          1.8
+        ],
+        "target": [
+          -0.05,
+          0.17,
+          -0.44
+        ]
+      }
+    },
+    {
+      "id": "video1_vggt_tsdf_candidate_a_textured",
+      "scene_name": "video1_vggt_tsdf_candidate_a_textured",
+      "display_name": "HOSTEL ROOM B 314 \u2014 COMPLETE TEXTURED TWIN (40s)",
+      "subtitle": "Complete Digital Twin \u2014 15mm TSDF Mesh + Native 4K Photographic Texture Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EXPERIMENTAL_PASS",
+      "acceptance_label": "VIDEO 1 TEXTURED DIGITAL TWIN",
+      "description": "Complete production digital twin across the 40-second indoor video (63 frames, 20 windows). Features Candidate A Bounded Sim(3) alignment with mandatory translation recomputation, 15mm Scalable TSDF fusion, and native-resolution 4K photographic texture atlas. 86k vertices, 154k triangles, 0.94 cm median surface agreement, zero ghost walls.",
+      "vertex_count": 86048,
+      "triangle_count": 154763,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured Digital Twin GLB (Embedded 4K Atlas)",
+          "glb_url": "/outputs/indoor/vggt_tsdf_video_20261030_170234/textured_tsdf_model/model_video1_textured.glb",
+          "file_size_bytes": 22072524,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Canonical Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/vggt_tsdf_video_20261030_170234/textured_tsdf_model/model_video1_textured_canonical.obj",
+          "mtl_url": "/outputs/indoor/vggt_tsdf_video_20261030_170234/textured_tsdf_model/model_video1_textured_canonical.mtl",
+          "file_size_bytes": 37444710,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex Coloured PLY",
+          "ply_url": "/outputs/indoor/vggt_tsdf_video_20261030_170234/textured_tsdf_model/model_video1_textured.ply",
+          "file_size_bytes": 4330690,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.8,
+          1.8
+        ],
+        "target": [
+          -0.07,
+          0.06,
+          -0.61
+        ]
+      }
+    },
+    {
+      "id": "gate_d_candidate_a_textured",
+      "scene_name": "gate_d_candidate_a_textured",
+      "display_name": "GATE D \u2014 COMPLETE TEXTURED DIGITAL TWIN (136s)",
+      "subtitle": "Complete Full-Duration Digital Twin \u2014 15mm TSDF Mesh + 4K Photographic Texture Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EXPERIMENTAL_PASS",
+      "acceptance_label": "GATE D TEXTURED DIGITAL TWIN",
+      "description": "Complete production digital twin across the entire 136-second indoor video (179 frames, 59 windows). Features Candidate A Bounded Sim(3) alignment with mandatory translation recomputation, 15mm Scalable TSDF fusion, and native-resolution 4K photographic texture atlas. 100k vertices, 200k triangles, 0.93 cm median surface fit, zero ghost walls.",
+      "vertex_count": 86195,
+      "triangle_count": 152234,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured Digital Twin GLB (Embedded 4K Atlas)",
+          "glb_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/textured_tsdf_model/model_gate_d_textured.glb",
+          "file_size_bytes": 22993892,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Canonical Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/textured_tsdf_model/model_gate_d_textured_canonical.obj",
+          "mtl_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/textured_tsdf_model/model_gate_d_textured_canonical.mtl",
+          "file_size_bytes": 36866645,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex Coloured PLY",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/textured_tsdf_model/model_gate_d_textured.ply",
+          "file_size_bytes": 4306646,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.8,
+          1.8
+        ],
+        "target": [
+          0.0,
+          -0.1,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "gate_d_tsdf_15mm_mesh",
+      "scene_name": "gate_d_tsdf_15mm_mesh",
+      "display_name": "GATE D \u2014 15mm TSDF SURFACE MESH (UNTEXTURED)",
+      "subtitle": "Complete 15mm TSDF Full-Sequence Surface Mesh with Crease-Aware Normals",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EXPERIMENTAL_PASS",
+      "acceptance_label": "15mm TSDF SURFACE MESH",
+      "description": "Full 136-second TSDF surface mesh extracted at 15mm voxel resolution. Contains 121k vertices, 237k triangles, and exhibits sharp vertical room perimeters without ghost wall doubling.",
+      "vertex_count": 86195,
+      "triangle_count": 152234,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "15mm TSDF Mesh GLB",
+          "glb_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/tsdf_benchmark/tsdf_mesh_voxel_15mm.glb",
+          "file_size_bytes": 3206920,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "15mm TSDF Zero-Crossing Point Cloud",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/tsdf_benchmark/tsdf_pcd_voxel_15mm.ply",
+          "file_size_bytes": 4137436,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.8,
+          1.8
+        ],
+        "target": [
+          0.0,
+          -0.1,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "gate_d_full_pre_tsdf",
+      "scene_name": "gate_d_full_pre_tsdf",
+      "display_name": "GATE D \u2014 FULL PRE-TSDF POINT CLOUD (136s, 59 WINS)",
+      "subtitle": "Complete Full-Duration Room Pre-TSDF Validation \u2014 Candidate A Alignment (179 Frames)",
+      "category": "Indoor Diagnostic & Pilot",
+      "acceptance_status": "EXPERIMENTAL_PASS",
+      "acceptance_label": "GATE D PRE-TSDF (CHECKPOINT)",
+      "description": "Complete full-duration merged RGB point cloud across all 59 windows (179 frames, 136 seconds). Aligned using Candidate A (Bounded Sim(3) + mandatory translation recomputation + camera constraints + p20 confidence filtering). Contains 266,923 clean points spanning [2.67m x 1.56m x 3.19m] with 1.76 cm mean 3D held-out residual.",
+      "vertex_count": 266923,
+      "triangle_count": 0,
+      "default_representation": "photographic_ply",
+      "representations": {
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Full Pre-TSDF Clean Point Cloud (266k Pts, 6.87 MB)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/full_pre_tsdf_point_cloud_12mm.ply",
+          "file_size_bytes": 7206921,
+          "available": true
+        },
+        "untextured_ply": {
+          "type": "ply",
+          "label": "Spatial Density Heatmap (256k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_d_full_duration/full_pre_tsdf_density_heatmap.ply",
+          "file_size_bytes": 6934383,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          1.2,
+          3.2
+        ],
+        "target": [
+          0.0,
+          -0.2,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "gate_c_candidate_a",
+      "scene_name": "gate_c_candidate_a",
+      "display_name": "CANDIDATE A \u2014 CORRECTED SIM(3)",
+      "subtitle": "Gate C Extended (36 Frames, 11 Windows) \u2014 Bounded Sim(3) + Mandatory Recomputation",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EXPERIMENTAL_PASS",
+      "acceptance_label": "CANDIDATE A (OPTIMAL)",
+      "description": "Gate C Extended Pilot Model (frames 0..35, 11 windows). Evaluates Bounded Sim(3) with camera constraints (w_cam=10.0), p20 confidence threshold (2.5205), and mandatory translation recomputation (t_new = mu_Y - s*R*mu_X). Achieves 2.27 cm mean held-out error, 0.93 cm median TSDF surface distance, and zero parallel ghost wall artifacts.",
+      "vertex_count": 23727,
+      "triangle_count": 41582,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "TSDF Mesh GLB (0.84 MB)",
+          "glb_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/tsdf_mesh_candidate_A_bounded_sim3.glb",
+          "file_size_bytes": 880628,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "TSDF Point Cloud (22.9k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/tsdf_pcd_candidate_A_bounded_sim3.ply",
+          "file_size_bytes": 1173980,
+          "available": true
+        },
+        "untextured_ply": {
+          "type": "ply",
+          "label": "Pre-TSDF RGB Point Cloud (72.8k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/pre_tsdf_pcd_candidate_A_bounded_sim3.ply",
+          "file_size_bytes": 1967220,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.7,
+          1.6
+        ],
+        "target": [
+          0.0,
+          -0.1,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "gate_c_baseline_defective",
+      "scene_name": "gate_c_baseline_defective",
+      "display_name": "BASELINE \u2014 DEFECTIVE",
+      "subtitle": "Gate C Extended \u2014 Original Scale Clamping without Translation Recomputation",
+      "category": "Indoor Architecture",
+      "acceptance_status": "QA FAILED",
+      "acceptance_label": "BASELINE (DEFECTIVE)",
+      "description": "Gate C baseline with uncorrected translation shift upon scale clamping. Exhibits 5.06 cm mean held-out error, 7.76 cm 95th-percentile surface tail, and visible parallel ghost wall doubling due to centroid displacement.",
+      "vertex_count": 26067,
+      "triangle_count": 46316,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "TSDF Mesh GLB (0.93 MB)",
+          "glb_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/tsdf_mesh_baseline_defective.glb",
+          "file_size_bytes": 975876,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "TSDF Point Cloud (25.1k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/tsdf_pcd_baseline_defective.ply",
+          "file_size_bytes": 1284000,
+          "available": true
+        },
+        "untextured_ply": {
+          "type": "ply",
+          "label": "Pre-TSDF RGB Point Cloud (73.6k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/pre_tsdf_pcd_baseline_defective.ply",
+          "file_size_bytes": 1987740,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.7,
+          1.6
+        ],
+        "target": [
+          0.0,
+          -0.1,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "gate_c_candidate_b",
+      "scene_name": "gate_c_candidate_b",
+      "display_name": "CANDIDATE B \u2014 RIGID SE(3)",
+      "subtitle": "Gate C Extended \u2014 Rigid SE(3) s=1.000 with Mandatory Recomputation",
+      "category": "Indoor Architecture",
+      "acceptance_status": "DIAGNOSTIC",
+      "acceptance_label": "CANDIDATE B (RIGID SE3)",
+      "description": "Gate C Candidate B with forced s=1.000 rigid SE(3). Violates natural local scale variations, leading to 12.05 cm error spike in Window 6 and 4.31 cm mean held-out error.",
+      "vertex_count": 26724,
+      "triangle_count": 45448,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "TSDF Mesh GLB (0.93 MB)",
+          "glb_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/tsdf_mesh_candidate_B_rigid_se3.glb",
+          "file_size_bytes": 975876,
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "TSDF Point Cloud (25.3k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/tsdf_pcd_candidate_B_rigid_se3.ply",
+          "file_size_bytes": 1295280,
+          "available": true
+        },
+        "untextured_ply": {
+          "type": "ply",
+          "label": "Pre-TSDF RGB Point Cloud (75.8k Pts)",
+          "ply_url": "/outputs/indoor/distortion_investigation_20261031/gate_c_extended/pre_tsdf_pcd_candidate_B_rigid_se3.ply",
+          "file_size_bytes": 2046870,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.7,
+          1.6
+        ],
+        "target": [
+          0.0,
+          -0.1,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "indoor_vggt_tsdf_room_20261031",
+      "scene_name": "indoor_vggt_tsdf_room_20261031",
+      "display_name": "Indoor Room (VGGT + TSDF Fusion)",
+      "subtitle": "Oct 31 Recording \u2014 15mm TSDF Fusion & Photographic Texture Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "QA FAILED",
+      "acceptance_label": "Distortion Investigation In Progress (QA FAILED)",
+      "description": "RECONSTRUCTION FAILED QUALITY GATES: Geometry exhibits displaced wall surfaces, duplicated planar structures, and fragmented furniture due to Sim(3) scale-regularization translation shift (2.54m cumulative drift). Undergoing root-cause investigation.",
+      "vertex_count": 111310,
+      "triangle_count": 194731,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "TSDF Textured Model (26.2 MB)",
+          "glb_url": "/outputs/indoor/vggt_tsdf_video_20261031_142303/textured_tsdf_model/model_tsdf_textured.glb",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Canonical OBJ + MTL",
+          "obj_url": "/outputs/indoor/vggt_tsdf_video_20261031_142303/textured_tsdf_model/model_tsdf_textured_canonical.obj",
+          "mtl_url": "/outputs/indoor/vggt_tsdf_video_20261031_142303/textured_tsdf_model/model_tsdf_textured_canonical.mtl",
+          "available": true
+        },
+        "point_cloud_ply": {
+          "type": "ply",
+          "label": "Confidence-Filtered Point Cloud",
+          "ply_url": "/outputs/indoor/vggt_tsdf_video_20261031_142303/point_clouds/filtered_point_cloud_leveled.ply",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.4,
+          2.2
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "indoor_stage2_room_b314",
+      "scene_name": "indoor_stage2_room_b314",
+      "display_name": "Hostel Room B 314 (Stage 2 Diagnostic)",
+      "subtitle": "Student Hostel Room B 314 Forensic Model",
+      "category": "Indoor Architecture",
+      "acceptance_status": "DIAGNOSTIC",
+      "acceptance_label": "Stage 2 Visual Quality Investigation",
+      "description": "Student Room B 314 model evaluated with MRF chart optimization, crease-aware normals, and native aspect-ratio 4K texture atlas.",
+      "vertex_count": 749997,
+      "triangle_count": 249999,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Stage 2 GLB Model",
+          "glb_url": "/outputs/indoor/stage2_texture_video1/final_stage2_model.glb",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Stage 2 Canonical OBJ",
+          "obj_url": "/outputs/indoor/stage2_texture_video1/final_stage2_model_canonical.obj",
+          "mtl_url": "/outputs/indoor/stage2_texture_video1/final_stage2_model_canonical.mtl",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.4,
+          2.2
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "indoor_stage2_corridor",
+      "scene_name": "indoor_stage2_corridor",
+      "display_name": "Hostel Corridor (Stage 2 Diagnostic)",
+      "subtitle": "Hostel Corridor Walkthrough Forensic Model",
+      "category": "Indoor Architecture",
+      "acceptance_status": "DIAGNOSTIC",
+      "acceptance_label": "Stage 2 Visual Quality Investigation",
+      "description": "Corridor walkthrough model evaluated with MRF chart optimization, crease-aware normals, and native aspect-ratio 4K texture atlas.",
+      "vertex_count": 749997,
+      "triangle_count": 249999,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Stage 2 GLB Model",
+          "glb_url": "/outputs/indoor/stage2_texture_video2/final_stage2_model.glb",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Stage 2 Canonical OBJ",
+          "obj_url": "/outputs/indoor/stage2_texture_video2/final_stage2_model_canonical.obj",
+          "mtl_url": "/outputs/indoor/stage2_texture_video2/final_stage2_model_canonical.mtl",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.3,
+          2.4
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "indoor_room_attempt_4_new_video",
+      "scene_name": "indoor_room_attempt_4_new_video",
+      "display_name": "Computer Lab (New Video Source)",
+      "subtitle": "Academic Computer Laboratory Digital Twin \u2014 Attempt 4",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PASS",
+      "acceptance_label": "High-Density Continuous Reconstruction (Attempt 4 New Video)",
+      "description": "Continuous high-density 3D digital twin of a computer laboratory reconstructed from new WhatsApp video (2026-10-30 at 16.43.49). Captured at 1.82 FPS sampling density across 20.38s (37 curated frames). Features multi-view overlapping window inference, Sim(3) coordinate alignment (1.6cm residual), RANSAC floor leveling, and Screened Poisson surface reconstruction.",
+      "known_limitations": "Under-desk knee cavity has partial unobserved shadow; ceiling unobserved due to horizontal pan angle; monitor screens show slight specular reflectance.",
+      "coordinate_status": "Canonical coordinate frame aligned with horizontal floor plane normal. Metric scale preserved via closed-form Sim(3).",
+      "vertex_count": 1115665,
+      "triangle_count": 2234187,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "textured_obj": {
+          "type": "obj",
+          "label": "Textured Canonical OBJ",
+          "obj_url": "/models/indoor_room_attempt_4_new_video/room_model_canonical.obj",
+          "mtl_url": "/models/indoor_room_attempt_4_new_video/room_model_canonical.mtl",
+          "texture_urls": [],
+          "file_size_bytes": 203383025,
+          "sha256": "8c03cf2b528a98edd731be92e5229776fc5a5974ed975366b8e06d31a8a25cfa",
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex PLY",
+          "ply_url": "/models/indoor_room_attempt_4_new_video/room_model.ply",
+          "file_size_bytes": 85943674,
+          "sha256": "15c9414d8d4a0564ccdd741e332cefe6839d373c22d57ed67d51602e73d67d16",
+          "available": true
+        },
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Interactive GLB Model",
+          "glb_url": "/models/indoor_room_attempt_4_new_video/room_model.glb",
+          "file_size_bytes": 44661868,
+          "sha256": "34fe8d7ad03e0398e01a8716791cf7655f7c01532533054cc8fb99418c2d0b67",
+          "available": true
+        }
+      },
+      "thumbnail_url": "/models/indoor_room_attempt_4_new_video/render_view_oblique.png",
+      "previews": {
+        "oblique": "/models/indoor_room_attempt_4_new_video/render_view_oblique.png",
+        "top": "/models/indoor_room_attempt_4_new_video/render_view_top.png",
+        "eye_level": "/models/indoor_room_attempt_4_new_video/render_view_eye_level.png"
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          1.8,
+          2.8
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "reconstruction_run_id": "indoor_room_attempt_4_new_video",
+      "source_video_provenance": {
+        "path": "WhatsApp Video 2026-10-30 at 16.43.49.mp4",
+        "resolution": "480x854",
+        "fps": 29.889,
+        "duration_sec": 20.38,
+        "scene": "computer_laboratory",
+        "status": "PROCESSED_AND_VERIFIED"
+      }
+    },
+    {
+      "id": "indoor_room_001",
+      "scene_name": "indoor_room_001",
+      "display_name": "Indoor Room 001",
+      "subtitle": "Student Hostel Single-Room Walkthrough",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PASS",
+      "acceptance_label": "High-Density Continuous Reconstruction (Attempt 4)",
+      "description": "Continuous high-density 3D digital twin of a student room reconstructed at >=1 FPS temporal sampling (73 frames across 72.59s walkthrough). Integrates multi-view overlapping window inference, Sim(3) coordinate alignment, RANSAC floor leveling, and Screened Poisson reconstruction.",
+      "known_limitations": "Ceiling geometry unobserved due to downward handheld walk angle; high specular reflections on tile floors cause minor depth variance; thin drying rack wires simplified during voxel decimation.",
+      "coordinate_status": "Canonical coordinate frame aligned with horizontal floor plane normal. Metric scale uncalibrated.",
+      "vertex_count": 193449,
+      "triangle_count": 387214,
+      "default_representation": "textured_obj",
+      "representations": {
+        "textured_obj": {
+          "type": "obj",
+          "label": "Textured Canonical OBJ",
+          "obj_url": "/models/indoor_room_001/room_model_canonical.obj",
+          "mtl_url": "/models/indoor_room_001/room_model_canonical.mtl",
+          "texture_urls": [],
+          "file_size_bytes": 34060691,
+          "sha256": "c7ab3fa5a2ecde7bcbdcbadfbf913d1a0f09e026cc1308a60cbf0c3ef339e0a7",
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex PLY",
+          "ply_url": "/models/indoor_room_001/room_model.ply",
+          "file_size_bytes": 14900007,
+          "sha256": "cbaaddecfca81571f0493fa10540faac2081211e36d31000e3c72d66a622dd85",
+          "available": true
+        }
+      },
+      "thumbnail_url": "/models/indoor_room_001/render_view_oblique.png",
+      "previews": {
+        "oblique": "/models/indoor_room_001/render_view_oblique.png",
+        "top": "/models/indoor_room_001/render_view_top.png",
+        "eye_level": "/models/indoor_room_001/render_view_eye_level.png"
+      },
+      "metadata_url": "/models/indoor_room_001/candidate_metadata.json",
+      "initial_camera": {
+        "position": [
+          0.0,
+          1.8,
+          2.8
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "reconstruction_run_id": "indoor_room_001_attempt_4",
+      "source_video_provenance": {
+        "path": "data/source_videos/indoor_room.mp4",
+        "resolution": "478x850",
+        "fps": 59.24,
+        "duration_sec": 72.585,
+        "scene": "indoor_room_001",
+        "status": "PROCESSED_AND_VERIFIED"
+      }
+    },
+    {
       "id": "campus_0049",
       "scene_name": "campus_0049",
       "display_name": "Campus 0049",
@@ -413,6 +1268,90 @@
         "scene": "river_bridge",
         "verified": true,
         "status": "AVAILABLE_AND_VERIFIED"
+      }
+    },
+    {
+      "id": "indoor_candidate_d_rigid_poisson_hq",
+      "scene_name": "indoor_candidate_d_rigid_poisson_hq",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE D (RIGID SE(3) POISSON HQ)",
+      "subtitle": "Scale Lock s=1.0 + Observation-Ray Normal Consensus + 3.5x Local Median Poisson HQ",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EVALUATION",
+      "acceptance_label": "GEOMETRY QUALITY IMPROVEMENT",
+      "description": "Rigid SE(3) alignment with locked scale s=1.0 eliminates cumulative scale drift (previously s=0.51 to 2.17). Per-point observation-ray normal orientation replaces single-centroid averaging. Feature-preserving radius outlier filtering (r=3cm, min=4) retains thin chair legs and desk edges. Screened Poisson HQ reconstruction with 3.5x local median spacing support trimming preserves ceiling geometry.",
+      "vertex_count": 318872,
+      "triangle_count": 620455,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate D GLB (Rigid SE3 Poisson HQ + 4K Atlas)",
+          "glb_url": "/outputs/indoor/geometry_quality_improvement_video1/candidate_d_rigid_poisson_hq.glb",
+          "file_size_bytes": 74368820,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Candidate D Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/geometry_quality_improvement_video1/candidate_d_rigid_poisson_hq.obj",
+          "mtl_url": "/outputs/indoor/geometry_quality_improvement_video1/candidate_d_rigid_poisson_hq.mtl",
+          "file_size_bytes": 101709041,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.55,
+          0.8,
+          -0.3
+        ],
+        "target": [
+          0.1,
+          0.3,
+          -2.2
+        ]
+      }
+    },
+    {
+      "id": "indoor_candidate_e_rigid_tsdf",
+      "scene_name": "indoor_candidate_e_rigid_tsdf",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE E (RIGID SE(3) TSDF 1.5cm)",
+      "subtitle": "Scale Lock s=1.0 + Scalable TSDF Volumetric Marching Cubes (1.5cm Voxel, 4.0cm Truncation)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "EVALUATION",
+      "acceptance_label": "VOLUMETRIC RECONSTRUCTION",
+      "description": "Scalable TSDF volumetric reconstruction at 1.5cm voxel resolution with 4.0cm truncation band. Uses identical rigid SE(3) aligned camera poses and depth predictions as Candidate D. Marching Cubes surface extraction produces inherently watertight mesh surfaces without Poisson smoothing artifacts.",
+      "vertex_count": 195680,
+      "triangle_count": 330958,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Candidate E GLB (Rigid SE3 TSDF 1.5cm + 4K Atlas)",
+          "glb_url": "/outputs/indoor/geometry_quality_improvement_video1/candidate_e_rigid_tsdf_mesh.glb",
+          "file_size_bytes": 43098500,
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Candidate E Wavefront OBJ + MTL",
+          "obj_url": "/outputs/indoor/geometry_quality_improvement_video1/candidate_e_rigid_tsdf_mesh.obj",
+          "mtl_url": "/outputs/indoor/geometry_quality_improvement_video1/candidate_e_rigid_tsdf_mesh.mtl",
+          "file_size_bytes": 54930554,
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.55,
+          0.8,
+          -0.3
+        ],
+        "target": [
+          0.1,
+          0.3,
+          -2.2
+        ]
       }
     }
   ],
