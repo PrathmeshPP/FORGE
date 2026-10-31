@@ -31,7 +31,12 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [exportProgress, setExportProgress] = useState<string>('');
 
-  const rep = scene.representations[currentRepresentation] || scene.representations.textured_obj;
+  const rep =
+    scene.representations[currentRepresentation] ||
+    scene.representations.gltf_glb ||
+    scene.representations.textured_obj ||
+    scene.representations.photographic_ply ||
+    Object.values(scene.representations)[0];
 
   const handleCopyHash = () => {
     if (rep?.sha256) {
@@ -51,17 +56,19 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
 
   // Derive stats if not yet dispatched by viewport
   const currentFileName =
-    rep.type === 'obj'
+    rep?.type === 'obj'
       ? rep.obj_url?.split('/').pop() || 'textured_mesh.obj'
-      : rep.ply_url?.split('/').pop() || 'surface_mesh.ply';
+      : rep?.type === 'glb'
+        ? rep.glb_url?.split('/').pop() || 'model.glb'
+        : rep?.ply_url?.split('/').pop() || 'surface_mesh.ply';
 
   const effectiveStats: ActiveGeometryStats = activeStats || {
     uniqueVertices: scene.vertex_count,
     renderedPositions:
-      rep.type === 'obj' ? scene.triangle_count * 3 : scene.vertex_count,
+      rep?.type === 'obj' ? scene.triangle_count * 3 : scene.vertex_count,
     triangles: scene.triangle_count,
     sourceFileName: currentFileName,
-    format: rep.type === 'obj' ? 'OBJ' : 'PLY',
+    format: rep?.type === 'obj' ? 'OBJ' : rep?.type === 'glb' ? 'GLB' : 'PLY',
   };
 
   // Export & Download asset bundle
@@ -172,9 +179,8 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
           <div className="card-heading">
             <span>Model Identity</span>
             <span
-              className={`badge ${
-                scene.acceptance_status === 'PASS' ? 'pass' : 'partial'
-              }`}
+              className={`badge ${scene.acceptance_status === 'PASS' ? 'pass' : 'partial'
+                }`}
             >
               {scene.acceptance_status}
             </span>
@@ -191,12 +197,12 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
             <div className="stat-item">
               <span className="stat-label">Active Format</span>
               <span className="stat-val" style={{ color: 'var(--accent-cyan)' }}>
-                {rep.type.toUpperCase()} ({currentRepresentation.replace('_', ' ')})
+                {rep?.type ? rep.type.toUpperCase() : 'GLB'} ({currentRepresentation.replace('_', ' ')})
               </span>
             </div>
             <div className="stat-item">
               <span className="stat-label">File Size</span>
-              <span className="stat-val">{formatFileSize(rep.file_size_bytes)}</span>
+              <span className="stat-val">{formatFileSize(rep?.file_size_bytes || 0)}</span>
             </div>
           </div>
         </div>
@@ -299,9 +305,11 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
           </div>
 
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            {rep.type === 'obj'
+            {rep?.type === 'obj'
               ? 'Download complete textured package (OBJ + MTL + PNG Texture Atlas) ready for Blender, Unreal Engine, or WebGL.'
-              : 'Download original unnormalized Polygon File Format (PLY) mesh with original vertex coordinates.'}
+              : rep?.type === 'glb'
+                ? 'Download standalone Binary glTF (GLB) mesh with embedded geometry and vertex colors.'
+                : 'Download original unnormalized Polygon File Format (PLY) mesh with original vertex coordinates.'}
           </div>
 
           <button
@@ -314,9 +322,11 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
             <span>
               {isExporting
                 ? exportProgress || 'Exporting...'
-                : rep.type === 'obj'
-                ? 'Download Textured Bundle (.zip)'
-                : 'Download Original PLY (.ply)'}
+                : rep?.type === 'obj'
+                  ? 'Download Textured Bundle (.zip)'
+                  : rep?.type === 'glb'
+                    ? 'Download Standalone GLB (.glb)'
+                    : 'Download Original PLY (.ply)'}
             </span>
           </button>
         </div>

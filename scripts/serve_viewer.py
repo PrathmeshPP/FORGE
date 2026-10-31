@@ -43,9 +43,20 @@ class ForgeExplorerHandler(http.server.SimpleHTTPRequestHandler):
             rel = clean_path[len("/models/"):]
             target = (MODELS_DIR / rel).resolve()
             # Prevent directory traversal
-            if str(target).startswith(str(MODELS_DIR.resolve())):
+            if target.is_file() and str(target).startswith(str(MODELS_DIR.resolve())):
                 return str(target)
-            return ""
+            indoor_target = (PROJECT_ROOT / "outputs/indoor/room_001/final_release" / Path(rel).name).resolve()
+            if indoor_target.is_file():
+                return str(indoor_target)
+            dist_target = (DIST_DIR / "models" / rel).resolve()
+            if dist_target.is_file():
+                return str(dist_target)
+            return str(target)
+
+        if clean_path.startswith("/outputs/"):
+            out_target = (PROJECT_ROOT / clean_path.lstrip("/")).resolve()
+            if out_target.is_file() and str(out_target).startswith(str((PROJECT_ROOT / "outputs").resolve())):
+                return str(out_target)
 
         # Default web root: use DIST_DIR if built, otherwise DEV_DIR
         base = DIST_DIR if DIST_DIR.is_dir() else DEV_DIR

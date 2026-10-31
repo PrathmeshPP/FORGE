@@ -9,9 +9,6 @@ import {
   Box,
   Palette,
   CheckCircle2,
-  AlertTriangle,
-  ChevronRight,
-  ExternalLink,
   ShieldAlert,
   Cpu,
   Clock,
@@ -337,7 +334,7 @@ export const WorkflowModal: React.FC<WorkflowModalProps> = ({ isOpen, onClose })
                   Q4: How does texture projection handle multi-camera seamlines?
                 </div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.78rem' }}>
-                  A: A separable raised-cosine windowing function feathers each camera's border contribution ($270\text{px}$ bottom, $200\text{px}$ margins) combined with camera gain harmonization, eliminating the diagonal crease artifacts seen in standard fronto-parallel texturing.
+                  A: A separable raised-cosine windowing function feathers each camera's border contribution (270px bottom, 200px margins) combined with camera gain harmonization, eliminating the diagonal crease artifacts seen in standard fronto-parallel texturing.
                 </div>
               </div>
             </div>

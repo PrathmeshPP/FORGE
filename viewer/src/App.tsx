@@ -23,9 +23,22 @@ export const App: React.FC = () => {
   const manifest = manifestData as unknown as ModelManifest;
   const scenes = manifest.scenes;
 
+  // Parse URL parameter ?scene=...
+  const initialScene = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sceneParam = params.get('scene');
+      if (sceneParam) {
+        const found = scenes.find((s) => s.id === sceneParam);
+        if (found) return found;
+      }
+    } catch (_) { }
+    return scenes[0];
+  })();
+
   // App State
-  const [activeScene, setActiveScene] = useState<SceneEntry>(scenes[0]);
-  const [representation, setRepresentation] = useState<RepresentationType>('textured_obj');
+  const [activeScene, setActiveScene] = useState<SceneEntry>(initialScene);
+  const [representation, setRepresentation] = useState<RepresentationType>(initialScene.default_representation || 'gltf_glb');
   const [isComparisonMode, setIsComparisonMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadProgress, setLoadProgress] = useState<number>(0);
@@ -34,6 +47,7 @@ export const App: React.FC = () => {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isWorkflowOpen, setIsWorkflowOpen] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isWalkthroughMode, setIsWalkthroughMode] = useState<boolean>(false);
 
   const [viewportConfig, setViewportConfig] = useState<ViewportConfig>({
     showGrid: true,
@@ -110,6 +124,8 @@ export const App: React.FC = () => {
   // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore global shortcut keys when in first-person walkthrough mode
+      if (isWalkthroughMode) return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
@@ -166,7 +182,7 @@ export const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isComparisonMode, activeScene, viewportConfig]);
+  }, [isComparisonMode, activeScene, viewportConfig, isWalkthroughMode]);
 
   return (
     <div className="app-container">
@@ -225,6 +241,9 @@ export const App: React.FC = () => {
               onStatsChange={setActiveStats}
               onFallbackToPly={() => setRepresentation('photographic_ply')}
               presetAction={cameraPresetTrigger}
+              onSelectRepresentation={setRepresentation}
+              isWalkthroughMode={isWalkthroughMode}
+              onToggleWalkthrough={setIsWalkthroughMode}
             />
           )}
 

@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type {
   SceneEntry,
   RepresentationType,
@@ -13,6 +14,11 @@ import type {
   CameraPresetAction,
 } from '../types';
 import { GeometryStatsDisplay } from './GeometryStatsDisplay';
+import { FirstPersonNavigationEngine } from '../navigation/FirstPersonNavigationEngine';
+import type { TrajectoryPoint } from '../navigation/FirstPersonNavigationEngine';
+import { MiniMapOverlay } from './MiniMapOverlay';
+import { SourceFramePreview } from './SourceFramePreview';
+import { WalkthroughHUD } from './WalkthroughHUD';
 
 interface Viewport3DProps {
   scene: SceneEntry;
@@ -29,6 +35,9 @@ interface Viewport3DProps {
   customTitle?: string;
   onFallbackToPly?: () => void;
   presetAction?: CameraPresetAction;
+  onSelectRepresentation?: (rep: RepresentationType) => void;
+  isWalkthroughMode?: boolean;
+  onToggleWalkthrough?: (active: boolean) => void;
 }
 
 export const Viewport3D: React.FC<Viewport3DProps> = ({
@@ -43,6 +52,9 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   customTitle,
   onFallbackToPly,
   presetAction,
+  onSelectRepresentation,
+  isWalkthroughMode: externalWalkthroughMode,
+  onToggleWalkthrough,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -53,9 +65,32 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   const gridHelperRef = useRef<THREE.GridHelper | null>(null);
   const axesHelperRef = useRef<THREE.AxesHelper | null>(null);
 
+  // Walkthrough State
+  const [internalWalkthrough, setInternalWalkthrough] = useState<boolean>(false);
+  const isWalkthrough = externalWalkthroughMode !== undefined ? externalWalkthroughMode : internalWalkthrough;
+  const isWalkthroughRef = useRef<boolean>(isWalkthrough);
+  isWalkthroughRef.current = isWalkthrough;
+
+  const navEngineRef = useRef<FirstPersonNavigationEngine | null>(null);
+  const clockRef = useRef<THREE.Clock>(new THREE.Clock());
+
+  const [playerPos, setPlayerPos] = useState<[number, number, number]>([0.12, 0.09, -1.27]);
+  const [playerYaw, setPlayerYaw] = useState<number>(Math.PI);
+  const [collisionStatus, setCollisionStatus] = useState<'CLEAR' | 'SLIDING' | 'BOUNDARY'>('CLEAR');
+  const [fps, setFps] = useState<number>(60);
+  const [currentFrame, setCurrentFrame] = useState<TrajectoryPoint | null>(null);
+  const [frameDistance, setFrameDistance] = useState<number>(0);
+  const [isMiniMapOpen, setIsMiniMapOpen] = useState<boolean>(true);
+  const [isPointerLocked, setIsPointerLocked] = useState<boolean>(false);
+
+  const frameCountRef = useRef<number>(0);
+  const lastFpsTimeRef = useRef<number>(performance.now());
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeStats, setActiveStats] = useState<ActiveGeometryStats | null>(null);
   const modelDimRef = useRef<{ radius: number; fitDist: number }>({ radius: 3, fitDist: 5 });
+
+  const isIndoor = scene.id.startsWith('indoor_') || scene.category === 'Indoor Architecture';
 
   // Background color mapping
   const getBackgroundColor = (bg: string) => {
@@ -100,12 +135,12 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     const height = container.clientHeight;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 1.05;
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -115,7 +150,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     sceneRef.current = threeScene;
 
     // Camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 1000);
+    const camera = new THREE.PerspectiveCamera(48, width / height, 0.05, 1000);
     camera.position.set(...scene.initial_camera.position);
     cameraRef.current = camera;
 
@@ -129,30 +164,30 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     controls.target.set(...scene.initial_camera.target);
     controlsRef.current = controls;
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    // Balanced Lighting for Architectural Interiors
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
     threeScene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    keyLight.position.set(5, 10, 7);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    keyLight.position.set(0, 5, 2);
     threeScene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    fillLight.position.set(-5, 5, -5);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.55);
+    fillLight.position.set(-2, 2, -2);
     threeScene.add(fillLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.6);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.65);
     threeScene.add(hemiLight);
 
     // Helpers
     const gridHelper = new THREE.GridHelper(10, 20, 0x38bdf8, 0x334155);
-    gridHelper.position.y = -0.01;
-    gridHelper.visible = config.showGrid;
+    gridHelper.position.y = isIndoor ? -0.487 : -0.01;
+    gridHelper.visible = config.showGrid && !isWalkthroughRef.current;
     threeScene.add(gridHelper);
     gridHelperRef.current = gridHelper;
 
     const axesHelper = new THREE.AxesHelper(1.5);
-    axesHelper.visible = config.showAxes;
+    axesHelper.visible = config.showAxes && !isWalkthroughRef.current;
     threeScene.add(axesHelper);
     axesHelperRef.current = axesHelper;
 
@@ -161,26 +196,53 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     threeScene.add(modelGroup);
     modelGroupRef.current = modelGroup;
 
-    // Camera change listener for syncing
+    // Camera change listener for syncing in inspection mode
     controls.addEventListener('change', () => {
-      if (onCameraUpdate && cameraRef.current && controlsRef.current) {
+      if (!isWalkthroughRef.current && onCameraUpdate && cameraRef.current && controlsRef.current) {
         const pos = cameraRef.current.position.toArray() as [number, number, number];
         const target = controlsRef.current.target.toArray() as [number, number, number];
         onCameraUpdate(pos, target);
       }
     });
 
+    // Pointer lock change listener
+    const onPLChange = () => {
+      setIsPointerLocked(document.pointerLockElement === renderer.domElement);
+    };
+    document.addEventListener('pointerlockchange', onPLChange);
+
     // Animation Loop
     let animationFrameId: number;
+    clockRef.current.start();
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      if (config.autoRotate && controlsRef.current) {
-        controlsRef.current.autoRotate = true;
-        controlsRef.current.autoRotateSpeed = 1.2;
-      } else if (controlsRef.current) {
-        controlsRef.current.autoRotate = false;
+
+      if (isWalkthroughRef.current && navEngineRef.current) {
+        const delta = clockRef.current.getDelta();
+        navEngineRef.current.update(delta);
+
+        // FPS measurement
+        frameCountRef.current++;
+        const now = performance.now();
+        if (now - lastFpsTimeRef.current >= 500) {
+          const measured = Math.round((frameCountRef.current * 1000) / (now - lastFpsTimeRef.current));
+          setFps(measured);
+          frameCountRef.current = 0;
+          lastFpsTimeRef.current = now;
+        }
+      } else {
+        if (config.autoRotate && controlsRef.current) {
+          controlsRef.current.autoRotate = true;
+          controlsRef.current.autoRotateSpeed = 1.2;
+        } else if (controlsRef.current) {
+          controlsRef.current.autoRotate = false;
+        }
+        if (controlsRef.current && controlsRef.current.enabled) {
+          controlsRef.current.update();
+        }
       }
-      controls.update();
+
       renderer.render(threeScene, camera);
     };
     animate();
@@ -199,6 +261,10 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('pointerlockchange', onPLChange);
+      if (navEngineRef.current) {
+        navEngineRef.current.deactivate();
+      }
       controls.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
@@ -207,29 +273,137 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     };
   }, []);
 
+  // Enter / Exit Walkthrough Handler
+  const handleEnterWalkthrough = useCallback(() => {
+    if (!cameraRef.current || !rendererRef.current || !controlsRef.current) return;
+
+    controlsRef.current.enabled = false;
+    cameraRef.current.near = 0.05;
+    cameraRef.current.far = 100;
+    cameraRef.current.updateProjectionMatrix();
+
+    if (gridHelperRef.current) gridHelperRef.current.visible = false;
+    if (axesHelperRef.current) axesHelperRef.current.visible = false;
+
+    if (!navEngineRef.current) {
+      navEngineRef.current = new FirstPersonNavigationEngine(
+        cameraRef.current,
+        rendererRef.current.domElement,
+        {
+          onPositionUpdate: (pos, yaw) => {
+            setPlayerPos([pos.x, pos.y, pos.z]);
+            setPlayerYaw(yaw);
+          },
+          onClosestFrameChange: (frame, dist) => {
+            setCurrentFrame(frame);
+            setFrameDistance(dist);
+          },
+          onCollisionStatus: (status) => {
+            setCollisionStatus(status);
+          },
+          onExitRequest: () => {
+            handleExitWalkthrough();
+          },
+          onToggleMiniMap: () => {
+            setIsMiniMapOpen((prev) => !prev);
+          },
+          onTogglePointCloud: () => {
+            if (onSelectRepresentation) {
+              const nextRep: RepresentationType = representation === 'photographic_ply' ? 'gltf_glb' : 'photographic_ply';
+              onSelectRepresentation(nextRep);
+            }
+          },
+        }
+      );
+    }
+
+    navEngineRef.current.activate();
+
+    if (onToggleWalkthrough) {
+      onToggleWalkthrough(true);
+    } else {
+      setInternalWalkthrough(true);
+    }
+  }, [representation, onSelectRepresentation, onToggleWalkthrough]);
+
+  const handleExitWalkthrough = useCallback(() => {
+    console.log('[Viewport3D] handleExitWalkthrough called');
+    if (!controlsRef.current || !cameraRef.current) return;
+
+    if (navEngineRef.current) {
+      navEngineRef.current.deactivate();
+      navEngineRef.current = null;
+    }
+
+    controlsRef.current.enabled = true;
+
+    // Reset to inspection view
+    if (scene.initial_camera) {
+      cameraRef.current.position.set(...scene.initial_camera.position);
+      controlsRef.current.target.set(...scene.initial_camera.target);
+    } else {
+      cameraRef.current.position.set(0, 0.75, 1.2);
+      controlsRef.current.target.set(0, 0, 0);
+    }
+
+    cameraRef.current.near = isIndoor ? 0.05 : 0.1;
+    cameraRef.current.updateProjectionMatrix();
+    controlsRef.current.update();
+
+    if (gridHelperRef.current) gridHelperRef.current.visible = config.showGrid;
+    if (axesHelperRef.current) axesHelperRef.current.visible = config.showAxes;
+
+    if (onToggleWalkthrough) {
+      console.log('[Viewport3D] Calling onToggleWalkthrough(false)');
+      onToggleWalkthrough(false);
+    } else {
+      setInternalWalkthrough(false);
+    }
+  }, [scene, isIndoor, config, onToggleWalkthrough]);
+
+  // Sync external walkthrough state if provided
+  useEffect(() => {
+    if (externalWalkthroughMode !== undefined) {
+      if (externalWalkthroughMode && !navEngineRef.current) {
+        handleEnterWalkthrough();
+      } else if (!externalWalkthroughMode && navEngineRef.current) {
+        handleExitWalkthrough();
+      }
+    }
+  }, [externalWalkthroughMode, handleEnterWalkthrough, handleExitWalkthrough]);
+
+  // Sync camera state if provided externally
+  useEffect(() => {
+    if (syncCameraState && cameraRef.current && controlsRef.current && !isWalkthroughRef.current) {
+      cameraRef.current.position.set(...syncCameraState.position);
+      controlsRef.current.target.set(...syncCameraState.target);
+      controlsRef.current.update();
+    }
+  }, [syncCameraState]);
+
   // Handle Preset Camera Actions
   useEffect(() => {
-    if (!presetAction || !cameraRef.current || !controlsRef.current) return;
+    if (isWalkthroughRef.current || !presetAction || !cameraRef.current || !controlsRef.current) return;
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     const d = modelDimRef.current.fitDist || 3.5;
 
     switch (presetAction.type) {
       case 'top':
-        camera.position.set(0, d * 1.5, 0.001);
-        controls.target.set(0, 0, 0);
+        camera.position.set(0, isIndoor ? 1.8 : d * 1.5, 0.001);
+        controls.target.set(0, isIndoor ? -0.2 : 0, 0);
         break;
       case 'front':
-        camera.position.set(0, 0, d * 1.5);
+        camera.position.set(0, isIndoor ? 0.2 : 0, isIndoor ? 1.5 : d * 1.5);
         controls.target.set(0, 0, 0);
         break;
       case 'side':
-        camera.position.set(d * 1.5, 0, 0);
+        camera.position.set(isIndoor ? 1.5 : d * 1.5, isIndoor ? 0.2 : 0, 0);
         controls.target.set(0, 0, 0);
         break;
       case 'iso':
-        camera.position.set(d * 0.8, d * 0.8, d * 0.8);
-        controls.target.set(0, 0, 0);
+        camera.position.set(isIndoor ? 1.0 : d * 0.8, isIndoor ? 0.9 : d * 0.8, isIndoor ? 1.2 : d * 0.8);
+        controls.target.set(0, isIndoor ? -0.1 : 0, 0);
         break;
       case 'reset':
       case 'overview':
@@ -237,54 +411,20 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           camera.position.set(...scene.initial_camera.position);
           controls.target.set(...scene.initial_camera.target);
         } else {
-          camera.position.set(0, d * 0.75, d * 0.85);
+          camera.position.set(0, isIndoor ? 0.5 : d * 0.75, isIndoor ? 1.5 : d * 0.85);
           controls.target.set(0, 0, 0);
         }
-        break;
-      case 'facade':
-        // Campus 0049 facade-focused view
-        camera.position.set(0.55, 0.75, 0.95);
-        controls.target.set(0.013, -0.079, 0.008);
-        break;
-      case 'roadway':
-        // Forest Road roadway-focused downward view
-        camera.position.set(0.021, 0.92, 0.82);
-        controls.target.set(0.021, 0.089, -0.035);
-        break;
-      case 'bridge_structure':
-        // River Bridge deck and piers structural view
-        camera.position.set(1.27, 1.13, 0.52);
-        controls.target.set(0.673, 0.232, -0.681);
-        break;
-      case 'vehicle_focus':
-        // Desert Road Candidate B focus on preserved Mini Cooper at [0.03, 0.04, 0.45]
-        camera.position.set(0.33, 0.28, 0.98);
-        controls.target.set(0.084, -0.053, 0.536);
-        break;
-      case 'full_road':
-        // Desert Road full corridor overview
-        camera.position.set(0.0, 3.2, 1.8);
-        controls.target.set(0.0, 0.0, -0.4);
         break;
       default:
         break;
     }
     controls.update();
-  }, [presetAction, scene]);
-
-  // Sync camera when external sync state changes
-  useEffect(() => {
-    if (syncCameraState && cameraRef.current && controlsRef.current) {
-      cameraRef.current.position.set(...syncCameraState.position);
-      controlsRef.current.target.set(...syncCameraState.target);
-      controlsRef.current.update();
-    }
-  }, [syncCameraState]);
+  }, [presetAction, scene, isIndoor]);
 
   // Update helpers and background on config change
   useEffect(() => {
-    if (gridHelperRef.current) gridHelperRef.current.visible = config.showGrid;
-    if (axesHelperRef.current) axesHelperRef.current.visible = config.showAxes;
+    if (gridHelperRef.current) gridHelperRef.current.visible = config.showGrid && !isWalkthroughRef.current;
+    if (axesHelperRef.current) axesHelperRef.current.visible = config.showAxes && !isWalkthroughRef.current;
     if (sceneRef.current) {
       sceneRef.current.background = new THREE.Color(getBackgroundColor(config.background));
     }
@@ -323,7 +463,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     setErrorMessage(null);
     onLoadingChange(true, 0);
 
-    const repConfig = scene.representations[representation] || scene.representations.textured_obj;
+    const repConfig = scene.representations[representation] || scene.representations.textured_obj || scene.representations.gltf_glb;
     const onProgress = (xhr: ProgressEvent) => {
       if (xhr.lengthComputable && xhr.total > 0) {
         const pct = Math.round((xhr.loaded / xhr.total) * 100);
@@ -331,15 +471,13 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       }
     };
 
-    const setupLoadedObject = (object: THREE.Object3D, format: 'OBJ' | 'PLY', sourceFileName: string) => {
-      // Calculate Bounding Box and Bounding Sphere
+    const setupLoadedObject = (object: THREE.Object3D, format: 'OBJ' | 'PLY' | 'GLB', sourceFileName: string) => {
       const box = new THREE.Box3().setFromObject(object);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
       const sphere = box.getBoundingSphere(new THREE.Sphere());
       const radius = sphere.radius || Math.max(size.x, size.y, size.z) / 2 || 1;
 
-      // Report bounding box to parent
       if (onBoundingBoxChange) {
         onBoundingBoxChange({
           min: box.min.toArray() as [number, number, number],
@@ -349,28 +487,49 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         });
       }
 
-      // Center container group so camera orbits around center without modifying original vertex coordinates!
-      object.position.set(-center.x, -center.y, -center.z);
+      // For indoor models, coordinates are canonically aligned and centered at origin!
+      if (isIndoor) {
+        object.position.set(0, 0, 0);
+      } else {
+        object.position.set(-center.x, -center.y, -center.z);
+      }
 
-      // Apply initial wireframe state and double-sided material
+      // Material setup: Double-sided, proper PBR roughness, sRGB
       object.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
+          const geom = mesh.geometry;
+          const hasColors = geom && !!geom.attributes.color;
+
           if (Array.isArray(mesh.material)) {
             mesh.material.forEach((m) => {
               (m as any).wireframe = config.wireframe;
               m.side = THREE.DoubleSide;
+              if (hasColors) {
+                (m as any).vertexColors = true;
+                m.needsUpdate = true;
+              }
+              if ((m as any).map) {
+                (m as any).map.colorSpace = THREE.SRGBColorSpace;
+              }
             });
           } else if (mesh.material) {
             (mesh.material as any).wireframe = config.wireframe;
             mesh.material.side = THREE.DoubleSide;
+            if (hasColors) {
+              (mesh.material as any).vertexColors = true;
+              mesh.material.needsUpdate = true;
+            }
+            if ((mesh.material as any).map) {
+              (mesh.material as any).map.colorSpace = THREE.SRGBColorSpace;
+            }
           }
         }
       });
 
       modelGroup.add(object);
 
-      // Adaptive near/far clipping planes and framing distance
+      // Adaptive clipping planes
       const width = container?.clientWidth || 800;
       const height = container?.clientHeight || 600;
       const aspect = width / height;
@@ -381,21 +540,21 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
 
       modelDimRef.current = { radius, fitDist };
 
-      camera.near = Math.max(0.01, fitDist / 150);
-      camera.far = Math.max(1000, fitDist * 35);
+      camera.near = isIndoor ? 0.05 : Math.max(0.01, fitDist / 150);
+      camera.far = isIndoor ? 100 : Math.max(1000, fitDist * 35);
       camera.updateProjectionMatrix();
 
-      // Set initial camera framing
-      if (scene.initial_camera) {
-        camera.position.set(...scene.initial_camera.position);
-        controls.target.set(...scene.initial_camera.target);
-      } else {
-        camera.position.set(0, fitDist * 0.75, fitDist * 0.85);
-        controls.target.set(0, 0, 0);
+      if (!isWalkthroughRef.current) {
+        if (scene.initial_camera) {
+          camera.position.set(...scene.initial_camera.position);
+          controls.target.set(...scene.initial_camera.target);
+        } else {
+          camera.position.set(0, fitDist * 0.75, fitDist * 0.85);
+          controls.target.set(0, 0, 0);
+        }
+        controls.update();
       }
-      controls.update();
 
-      // Accurate Geometry Statistics
       let renderedPositions = 0;
       let triangleCount = 0;
 
@@ -406,17 +565,13 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
             renderedPositions += geom.attributes.position?.count || 0;
             if (geom.index) {
               triangleCount += Math.round(geom.index.count / 3);
-            } else {
-              triangleCount += Math.round((geom.attributes.position?.count || 0) / 3);
+            } else if (geom.attributes.position) {
+              triangleCount += Math.round(geom.attributes.position.count / 3);
             }
           }
         }
       });
 
-      // Explicit distinction:
-      // - Unique geometry vertices: source mesh unique vertices (from manifest/source file)
-      // - Rendered position entries: actual position-buffer elements used by Three.js WebGL geometry
-      // - Triangle count: rendered planar triangles
       const stats: ActiveGeometryStats = {
         uniqueVertices: scene.vertex_count || (format === 'PLY' ? renderedPositions : null),
         renderedPositions: renderedPositions,
@@ -438,7 +593,6 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       const mtlUrl = repConfig.mtl_url;
       const objUrl = repConfig.obj_url;
       const sourceFileName = objUrl.split('/').pop() || 'textured_mesh.obj';
-
       const objLoader = new OBJLoader();
 
       if (mtlUrl) {
@@ -500,7 +654,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           const material = new THREE.MeshStandardMaterial({
             vertexColors: hasColors,
             roughness: 0.85,
-            metalness: 0.1,
+            metalness: 0.05,
             color: hasColors ? 0xffffff : 0xcccccc,
             side: THREE.DoubleSide,
             wireframe: config.wireframe,
@@ -515,50 +669,86 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           onLoadingChange(false, 0);
         }
       );
+    } else if ((repConfig.type === 'glb' || repConfig.glb_url) && (repConfig.glb_url || (repConfig as any).url)) {
+      const glbUrl = (repConfig.glb_url || (repConfig as any).url) as string;
+      const sourceFileName = glbUrl.split('/').pop() || 'room_model.glb';
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.load(
+        glbUrl,
+        (gltf) => {
+          setupLoadedObject(gltf.scene, 'GLB', sourceFileName);
+        },
+        onProgress,
+        (err) => {
+          console.error('GLB load error:', err);
+          setErrorMessage('Failed to load GLB model file');
+          onLoadingChange(false, 0);
+        }
+      );
     } else {
       setErrorMessage('Selected representation format is not available');
       onLoadingChange(false, 0);
     }
-  }, [scene, representation]);
+  }, [scene, representation, isIndoor]);
 
   useEffect(() => {
     loadModel();
   }, [loadModel]);
 
   return (
-    <div className="viewport-area" ref={containerRef}>
-      {/* Floating Info Overlay */}
-      <div className="viewport-floating-info">
-        <div className="floating-title">
-          {customTitle || scene.display_name}
-        </div>
-        <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-          Representation: <span style={{ color: '#fff', fontWeight: 600 }}>{scene.representations[representation]?.label || representation}</span>
-        </div>
-        <GeometryStatsDisplay stats={activeStats} mode="overlay" />
-      </div>
-
-      {/* Error / Fallback Banner */}
-      {errorMessage && (
-        <div
-          className="loading-overlay"
-          style={{ background: 'rgba(15, 23, 42, 0.9)' }}
-        >
-          <div
-            style={{
-              color: 'var(--accent-rose)',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-            }}
-          >
-            {errorMessage}
+    <div className="viewport-area" ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Floating Info Overlay (Hidden in Walkthrough mode to avoid clutter) */}
+      {!isWalkthrough && (
+        <div className="viewport-floating-info">
+          <div className="floating-title">{customTitle || scene.display_name}</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+            Representation:{' '}
+            <span style={{ color: '#fff', fontWeight: 600 }}>
+              {scene.representations[representation]?.label || representation}
+            </span>
           </div>
+          <GeometryStatsDisplay stats={activeStats} mode="overlay" />
+        </div>
+      )}
+
+      {/* Walkthrough HUD, Pointer Lock, Telemetry & Controls */}
+      {isIndoor && (
+        <WalkthroughHUD
+          isWalkthroughMode={isWalkthrough}
+          onEnterWalkthrough={handleEnterWalkthrough}
+          onExitWalkthrough={handleExitWalkthrough}
+          playerPos={playerPos}
+          playerYaw={playerYaw}
+          collisionStatus={collisionStatus}
+          fps={fps}
+          isPointerLocked={isPointerLocked}
+          onRequestPointerLock={() => {
+            if (navEngineRef.current) navEngineRef.current.requestPointerLock();
+          }}
+        />
+      )}
+
+      {/* Live Floor Plan Mini-Map */}
+      {isIndoor && isWalkthrough && (
+        <MiniMapOverlay
+          playerPos={playerPos}
+          playerYaw={playerYaw}
+          isOpen={isMiniMapOpen}
+          onToggle={() => setIsMiniMapOpen(!isMiniMapOpen)}
+        />
+      )}
+
+      {/* Real-Time Source Video Capture Preview */}
+      {isIndoor && isWalkthrough && (
+        <SourceFramePreview currentFrame={currentFrame} distanceMeters={frameDistance} />
+      )}
+
+      {/* Error Banner */}
+      {errorMessage && (
+        <div className="loading-overlay" style={{ background: 'rgba(15, 23, 42, 0.9)' }}>
+          <div style={{ color: 'var(--accent-rose)', fontWeight: 600, fontSize: '0.95rem' }}>{errorMessage}</div>
           {onFallbackToPly && representation === 'textured_obj' && (
-            <button
-              className="btn-action primary"
-              onClick={onFallbackToPly}
-              style={{ marginTop: '0.5rem' }}
-            >
+            <button className="btn-action primary" onClick={onFallbackToPly} style={{ marginTop: '0.5rem' }}>
               Load PLY Representation Fallback
             </button>
           )}

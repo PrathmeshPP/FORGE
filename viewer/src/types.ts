@@ -1,12 +1,13 @@
-export type RepresentationType = 'textured_obj' | 'photographic_ply' | 'untextured_ply';
+export type RepresentationType = 'textured_obj' | 'photographic_ply' | 'untextured_ply' | 'gltf_glb';
 
 export interface ModelRepresentation {
-  type: 'obj' | 'ply';
+  type: 'obj' | 'ply' | 'glb';
   label: string;
   obj_url?: string;
   mtl_url?: string;
   texture_urls?: string[];
   ply_url?: string;
+  glb_url?: string;
   file_size_bytes: number;
   sha256: string;
   available: boolean;
@@ -35,7 +36,7 @@ export interface ActiveGeometryStats {
   renderedPositions: number | null;
   triangles: number | null;
   sourceFileName: string | null;
-  format: 'OBJ' | 'PLY' | 'UNKNOWN';
+  format: 'OBJ' | 'PLY' | 'GLB' | 'UNKNOWN';
 }
 
 export interface CameraPresetDefinition {

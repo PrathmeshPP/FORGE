@@ -10,19 +10,47 @@ function serveModelAssets() {
   const modelsDir = path.resolve(currentDir, '../outputs/accuracy_experiment/sprint9_video_to_viewer_release');
 
   const handler = (req: any, res: any, next: any) => {
-    if (!req.url || !req.url.startsWith('/models/')) {
+    if (!req.url) return next();
+
+    if (req.url.startsWith('/outputs/')) {
+      const cleanUrl = req.url.split('?')[0];
+      const relPath = decodeURIComponent(cleanUrl.replace(/^\/outputs\/?/, ''));
+      const filePath = path.resolve(currentDir, '../outputs', relPath);
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const ext = path.extname(filePath).toLowerCase();
+        const mimeTypes: Record<string, string> = {
+          '.glb': 'model/gltf-binary',
+          '.obj': 'text/plain; charset=utf-8',
+          '.mtl': 'text/plain; charset=utf-8',
+          '.ply': 'application/octet-stream',
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.json': 'application/json; charset=utf-8',
+        };
+        res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        fs.createReadStream(filePath).pipe(res);
+        return;
+      }
+    }
+
+    if (!req.url.startsWith('/models/')) {
       return next();
     }
 
     const cleanUrl = req.url.split('?')[0];
     const relPath = decodeURIComponent(cleanUrl.replace(/^\/models\/?/, ''));
-    const filePath = path.join(modelsDir, relPath);
+    let filePath = path.join(modelsDir, relPath);
 
-    // Prevent directory traversal attacks
-    if (!filePath.startsWith(modelsDir)) {
-      res.statusCode = 403;
-      res.end('Access denied');
-      return;
+    if (!fs.existsSync(filePath)) {
+      const publicPath = path.join(currentDir, 'public/models', relPath);
+      const indoorPath = path.join(currentDir, '../outputs/indoor/room_001/final_release', path.basename(relPath));
+      if (fs.existsSync(publicPath)) {
+        filePath = publicPath;
+      } else if (fs.existsSync(indoorPath)) {
+        filePath = indoorPath;
+      }
     }
 
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {

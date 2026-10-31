@@ -66,6 +66,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   ? 'Textured OBJ'
                   : repKey === 'photographic_ply'
                   ? 'Photo PLY'
+                  : repKey === 'gltf_glb'
+                  ? 'Interactive GLB'
                   : 'Raw Mesh'}
               </span>
             </button>
