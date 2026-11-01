@@ -6,6 +6,53 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "texture_experiment_video_20261101_142811",
+      "scene_name": "texture_experiment_video_20261101_142811",
+      "display_name": "HOSTEL ROOM B 314 \u2014 CANONICAL TEXTURED DIGITAL TWIN (NOV 1)",
+      "subtitle": "Screened Poisson (depth=9, 250k triangles) + 4K Multi-View Photographic Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "CANONICAL DENSE TRIANGULAR DIGITAL TWIN",
+      "description": "Authentic photographically reconstructed 3D indoor digital twin from WhatsApp Video 2026-11-01 at 14.28.11.mp4. Generated using the exact reference Screened Poisson reconstruction (depth=9, 250,000 faces) and IndoorPhotographicTextureEngine multi-view ray projection into a unified 4096x4096 texture atlas. Free of synthetic box substitutes.",
+      "vertex_count": 123183,
+      "triangle_count": 250000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Photographic Room GLB (Embedded 4K Atlas)",
+          "glb_url": "/models/texture_experiment_video_20261101_142811/room_photographic_model.glb",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Wavefront OBJ + MTL (with vt texture coordinates)",
+          "obj_url": "/models/texture_experiment_video_20261101_142811/room_photographic_model_canonical.obj",
+          "mtl_url": "/models/texture_experiment_video_20261101_142811/room_photographic_model_canonical.mtl",
+          "available": true
+        },
+        "point_cloud": {
+          "type": "ply",
+          "label": "Filtered Point Cloud (854,870 points)",
+          "ply_url": "/models/texture_experiment_video_20261101_142811/room_photographic_model.ply",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          1.42,
+          1.8
+        ],
+        "target": [
+          0.0,
+          1.2,
+          -1.0
+        ],
+        "fov": 65
+      }
+    },
+    {
       "id": "indoor_room_digital_twin_nov1",
       "scene_name": "indoor_room_digital_twin_nov1",
       "display_name": "HOSTEL ROOM B 314 \u2014 COMPLETE DIGITAL TWIN (NOV 1)",
