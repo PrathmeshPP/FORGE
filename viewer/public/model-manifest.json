@@ -6,6 +6,152 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_nov1_185144_photographic",
+      "scene_name": "indoor_nov1_185144_photographic",
+      "display_name": "NOVEMBER 1 \u2014 18:51:44 INDOOR DIGITAL TWIN",
+      "subtitle": "RRU Computer Lab & Workstations (Ray-Oriented Poisson + 8K Atlas)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "FRESH INDEPENDENT DIGITAL TWIN",
+      "description": "Complete 3D digital twin reconstructed from WhatsApp Video 2026-11-01 at 18.51.44.mp4. Captures the Rashtriya Raksha University academic computer lab, multiple rows of wooden workbenches, black mesh-back swivel chairs, wall-mounted server/network rack enclosure, green entrance door, whiteboard presentation wall, and full perimeter raceway trunking.",
+      "vertex_count": 224484,
+      "triangle_count": 450000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured GLB (Embedded 8K Photographic Atlas)",
+          "glb_url": "/outputs/indoor/texture_experiment_video_20261101_185144/room_photographic_model.glb",
+          "file_size_bytes": 62184672,
+          "sha256": "2d366071f0fddbd77a361539dbe99854d40870d037fcc7525a931c616bd9cb3f",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Wavefront OBJ + MTL (with vt Texture Coordinates)",
+          "obj_url": "/outputs/indoor/texture_experiment_video_20261101_185144/room_photographic_model_canonical.obj",
+          "mtl_url": "/outputs/indoor/texture_experiment_video_20261101_185144/room_photographic_model_canonical.mtl",
+          "file_size_bytes": 56600294,
+          "sha256": "1a3e42d524fdb55bf76f319e1ffd16625b3362c1cbe074cbd33e5400091b174d",
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex PLY (High-Density Mesh)",
+          "ply_url": "/outputs/indoor/texture_experiment_video_20261101_185144/room_photographic_model.ply",
+          "file_size_bytes": 17299010,
+          "sha256": "fef40d7acb4cfe9d861e841a0902ffa5f7ace2a668c48f431a3425040eb67e4f",
+          "available": true
+        }
+      },
+      "thumbnail_url": "/models/indoor_nov1_185144/preview_thumbnail.png",
+      "previews": {
+        "eye_level": "/models/indoor_nov1_185144/preview_eye_level.png",
+        "top": "/models/indoor_nov1_185144/preview_top.png"
+      },
+      "metadata_url": "/models/indoor_nov1_185144/metadata.json",
+      "initial_camera": {
+        "position": [
+          0.0,
+          1.21,
+          -2.4
+        ],
+        "target": [
+          0.0,
+          1.089,
+          0.5
+        ]
+      },
+      "camera_presets": [
+        {
+          "id": "entrance",
+          "label": "Lab Entrance",
+          "description": "Standing at the green door entrance looking into the computer lab",
+          "position": [
+            0.0,
+            1.21,
+            -2.4
+          ],
+          "target": [
+            0.0,
+            1.089,
+            0.5
+          ]
+        },
+        {
+          "id": "desks_closeup",
+          "label": "Workstation Rows & Chairs",
+          "description": "Close perspective on the rows of wooden desks and black mesh swivel chairs",
+          "position": [
+            -0.8,
+            0.847,
+            -0.6
+          ],
+          "target": [
+            -1.6,
+            0.726,
+            0.0
+          ]
+        },
+        {
+          "id": "whiteboard",
+          "label": "Whiteboard Presentation Wall",
+          "description": "Perspective facing the large presentation board and perimeter raceway",
+          "position": [
+            0.6,
+            1.21,
+            0.5
+          ],
+          "target": [
+            1.8,
+            1.21,
+            0.5
+          ]
+        },
+        {
+          "id": "network_rack",
+          "label": "IT Server Rack & Door",
+          "description": "Perspective looking at the wall-mounted server cabinet and green entrance door",
+          "position": [
+            0.3,
+            1.21,
+            1.4
+          ],
+          "target": [
+            0.8,
+            0.968,
+            2.4
+          ]
+        },
+        {
+          "id": "overview",
+          "label": "High-Angle Overview",
+          "description": "Overhead inspection showing complete computer lab boundaries and layout",
+          "position": [
+            0.0,
+            3.4,
+            -3.8
+          ],
+          "target": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "reconstruction_run_id": "texture_experiment_video_20261101_185144",
+      "source_video_provenance": {
+        "path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 18.51.44.mp4",
+        "sha256": "90938be3001909aa97764605e23e57cea59f9b32bf11334eb725cfd3f806811b",
+        "duration_sec": 116.98,
+        "resolution": [
+          480,
+          854
+        ],
+        "fps": 29.93
+      }
+    },
+    {
       "id": "indoor_nov1_180530_photographic",
       "scene_name": "indoor_nov1_180530_photographic",
       "display_name": "RASHTRIYA RAKSHA UNIVERSITY \u2014 NSCS LOBBY & CORRIDOR",
