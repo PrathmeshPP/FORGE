@@ -1,13 +1,22 @@
-export type RepresentationType = 'textured_obj' | 'photographic_ply' | 'untextured_ply' | 'gltf_glb';
+export type RepresentationType =
+  | 'textured_obj'
+  | 'photographic_ply'
+  | 'untextured_ply'
+  | 'gltf_glb'
+  | 'lod0'
+  | 'lod1'
+  | 'lod2'
+  | 'adaptive_chunks';
 
 export interface ModelRepresentation {
-  type: 'obj' | 'ply' | 'glb';
+  type: 'obj' | 'ply' | 'glb' | 'adaptive_chunks';
   label: string;
   obj_url?: string;
   mtl_url?: string;
   texture_urls?: string[];
   ply_url?: string;
   glb_url?: string;
+  chunks_url?: string;
   file_size_bytes: number;
   sha256: string;
   available: boolean;
@@ -108,4 +117,25 @@ export interface BoundingBoxInfo {
   max: [number, number, number];
   size: [number, number, number];
   center: [number, number, number];
+}
+
+export type QualityMode = 'auto' | 'performance' | 'balanced' | 'high' | 'maximum';
+
+export interface PerformanceHUDStats {
+  fps: number;
+  fpsLow: number;
+  cpuMs: number;
+  gpuMs: number;
+  resolution: string;
+  dpr: number;
+  qualityMode: QualityMode;
+  visibleTriangles: number;
+  culledTriangles: number;
+  drawCalls: number;
+  highDetailChunks: number;
+  mediumDetailChunks: number;
+  lowDetailChunks: number;
+  totalChunks: number;
+  activeLOD: string;
+  gpuMemoryMb: number;
 }

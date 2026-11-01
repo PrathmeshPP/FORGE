@@ -6,6 +6,107 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_my_movie_4_adaptive",
+      "scene_name": "indoor_my_movie_4_adaptive",
+      "display_name": "MY MOVIE 4 \u2014 ADAPTIVE 3D DIGITAL TWIN (VIEW-DEPENDENT LOD)",
+      "subtitle": "Hierarchical Multi-Resolution LOD 0/1/2, Dynamic Frame Budgeting & Spatial Culling",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "ADAPTIVE GPU UPGRADE",
+      "description": "Next-generation adaptive view-dependent 3D reconstruction of indoor environment from My movie 4.mp4 (421s, 1080x1920) with VGGT-Omega windowed neural poses, 8mm scale-aware point cloud backprojection (337,439 structural points), floor plane leveling, ray-oriented normal consensus, and depth=10 Screened Poisson meshing. Features hierarchical multi-resolution LODs (LOD 0: 549,999 tris + 8K atlas, LOD 1: 250,000 tris + 4K atlas, LOD 2: 79,999 tris + 2K atlas), 4 spatial quadrant chunks with distance/view-angle screen-space error (SSE) evaluation, frustum culling, dynamic frame-budget throttling, and real-time performance HUD.",
+      "vertex_count": 273591,
+      "triangle_count": 549999,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Master Mesh LOD 0 (550k tris + 8K Atlas)",
+          "glb_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod0.glb",
+          "file_size_bytes": 82136756,
+          "sha256": "270258b3462b49dc3c6de74c77b9e27645b7b987d826dbbedf00d708df405bf4",
+          "available": true
+        },
+        "adaptive_chunks": {
+          "type": "adaptive_chunks",
+          "label": "Adaptive View-Dependent Chunks (Dynamic LOD 0/1/2 + Frustum Culling)",
+          "chunks_url": "/outputs/indoor/dataset_my_movie_4_adaptive/adaptive_spatial_chunks.json",
+          "file_size_bytes": 2470,
+          "sha256": "72a1fdc61e4d5b1853c9790d5b09bd7dccdf2fe4d2e9796abc1901fab7a37936",
+          "available": true
+        },
+        "lod0": {
+          "type": "glb",
+          "label": "LOD 0 \u2014 High Detail (550k tris + 8K Atlas)",
+          "glb_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod0.glb",
+          "file_size_bytes": 82136756,
+          "sha256": "270258b3462b49dc3c6de74c77b9e27645b7b987d826dbbedf00d708df405bf4",
+          "available": true
+        },
+        "lod1": {
+          "type": "glb",
+          "label": "LOD 1 \u2014 Balanced (250k tris + 4K Atlas)",
+          "glb_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod1.glb",
+          "file_size_bytes": 31950928,
+          "sha256": "d4ad6cddb449e73ddb68ddd485e6e1aa4b7a4fae596a4c05a2e87ed9a1e2915c",
+          "available": true
+        },
+        "lod2": {
+          "type": "glb",
+          "label": "LOD 2 \u2014 Performance (80k tris + 2K Atlas)",
+          "glb_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod2.glb",
+          "file_size_bytes": 9936380,
+          "sha256": "c3acbe2b44b661e7e414a3e42c0433c20153a70a7c29dd75529f968ef895254f",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Wavefront OBJ + MTL (LOD 0 Mesh + UV Chart Atlas)",
+          "obj_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod0.obj",
+          "mtl_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod0.mtl",
+          "file_size_bytes": 69569000,
+          "sha256": "073864e6c9f04943b385162b47fe9a19033aad905b616b134433c964d07e35fe",
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex PLY (273k Vertices)",
+          "ply_url": "/outputs/indoor/dataset_my_movie_4_adaptive/room_photographic_model_lod0.ply",
+          "file_size_bytes": 21103454,
+          "sha256": "49605dc7ed6c2baed680bd65a326bb8bb64305afdc3b3c0476c3f93dde7ba270",
+          "available": true
+        }
+      },
+      "thumbnail_url": "/models/indoor_my_movie_4_adaptive/preview_thumbnail.png",
+      "previews": {
+        "eye_level": "/models/indoor_my_movie_4_adaptive/preview_eye_level.png",
+        "top": "/models/indoor_my_movie_4_adaptive/preview_top.png"
+      },
+      "metadata_url": "/models/indoor_my_movie_4_adaptive/metadata.json",
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.45,
+          -0.9
+        ],
+        "target": [
+          0.0,
+          0.1,
+          0.0
+        ]
+      },
+      "walkthrough": {
+        "spawn_position": [
+          0.0,
+          0.25,
+          -0.6
+        ],
+        "spawn_yaw": 0.0,
+        "walk_speed": 1.2,
+        "head_bobbing": true,
+        "collision_radius": 0.25
+      }
+    },
+    {
       "id": "indoor_nov1_191043_photographic_v3",
       "scene_name": "indoor_nov1_191043_photographic_v3",
       "display_name": "NOVEMBER 1 \u2014 19:10:43 INDOOR DIGITAL TWIN (V3 QUALITY)",

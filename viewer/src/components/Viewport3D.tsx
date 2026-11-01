@@ -19,6 +19,9 @@ import type { TrajectoryPoint } from '../navigation/FirstPersonNavigationEngine'
 import { MiniMapOverlay } from './MiniMapOverlay';
 import { SourceFramePreview } from './SourceFramePreview';
 import { WalkthroughHUD } from './WalkthroughHUD';
+import { AdaptivePerformanceHUD } from './AdaptivePerformanceHUD';
+import { AdaptiveLODController } from '../adaptive/AdaptiveLODController';
+import type { PerformanceHUDStats, QualityMode } from '../types';
 
 interface Viewport3DProps {
   scene: SceneEntry;
@@ -97,12 +100,65 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     setPlayerPos(spawn);
   }, [scene.id]);
 
-  const frameCountRef = useRef<number>(0);
-  const lastFpsTimeRef = useRef<number>(performance.now());
-
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeStats, setActiveStats] = useState<ActiveGeometryStats | null>(null);
   const modelDimRef = useRef<{ radius: number; fitDist: number }>({ radius: 3, fitDist: 5 });
+
+  // Adaptive Performance HUD & LOD Controller State
+  const [hudStats, setHudStats] = useState<PerformanceHUDStats>({
+    fps: 60,
+    fpsLow: 55,
+    cpuMs: 1.2,
+    gpuMs: 6.8,
+    resolution: '1280 × 720',
+    dpr: window.devicePixelRatio || 1,
+    qualityMode: 'auto',
+    visibleTriangles: scene.triangle_count || 300000,
+    culledTriangles: 0,
+    drawCalls: 1,
+    highDetailChunks: 1,
+    mediumDetailChunks: 0,
+    lowDetailChunks: 0,
+    totalChunks: 1,
+    activeLOD: 'LOD 0 (Full Quality)',
+    gpuMemoryMb: 42,
+  });
+
+  const lodControllerRef = useRef<AdaptiveLODController>(new AdaptiveLODController());
+  const frameTimesRef = useRef<number[]>([]);
+  const lastHudUpdateRef = useRef<number>(performance.now());
+  const lastGpuMsRef = useRef<number>(8.0);
+
+  const handleQualityModeChange = useCallback((mode: QualityMode) => {
+    lodControllerRef.current.setQualityMode(mode);
+    setHudStats((prev) => ({ ...prev, qualityMode: mode }));
+    if (scene.representations) {
+      if (mode === 'performance' && scene.representations.lod2 && onSelectRepresentation) {
+        onSelectRepresentation('lod2' as any);
+      } else if (mode === 'balanced' && scene.representations.lod1 && onSelectRepresentation) {
+        onSelectRepresentation('lod1' as any);
+      } else if ((mode === 'high' || mode === 'maximum') && scene.representations.lod0 && onSelectRepresentation) {
+        onSelectRepresentation('lod0' as any);
+      } else if (mode === 'auto' && scene.representations.adaptive_chunks && onSelectRepresentation) {
+        onSelectRepresentation('adaptive_chunks' as any);
+      }
+    }
+  }, [scene, onSelectRepresentation]);
+
+  const handleDprChange = useCallback((dpr: number) => {
+    if (rendererRef.current && cameraRef.current && containerRef.current) {
+      const container = containerRef.current;
+      rendererRef.current.setPixelRatio(dpr);
+      rendererRef.current.setSize(container.clientWidth, container.clientHeight);
+      cameraRef.current.aspect = container.clientWidth / container.clientHeight;
+      cameraRef.current.updateProjectionMatrix();
+      setHudStats((prev) => ({
+        ...prev,
+        dpr,
+        resolution: `${rendererRef.current!.domElement.width} × ${rendererRef.current!.domElement.height}`,
+      }));
+    }
+  }, []);
 
   const isIndoor = scene.id.startsWith('indoor_') || scene.category === 'Indoor Architecture';
 
@@ -231,20 +287,11 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      const frameStart = performance.now();
 
       if (isWalkthroughRef.current && navEngineRef.current) {
         const delta = clockRef.current.getDelta();
         navEngineRef.current.update(delta);
-
-        // FPS measurement
-        frameCountRef.current++;
-        const now = performance.now();
-        if (now - lastFpsTimeRef.current >= 500) {
-          const measured = Math.round((frameCountRef.current * 1000) / (now - lastFpsTimeRef.current));
-          setFps(measured);
-          frameCountRef.current = 0;
-          lastFpsTimeRef.current = now;
-        }
       } else {
         if (config.autoRotate && controlsRef.current) {
           controlsRef.current.autoRotate = true;
@@ -257,7 +304,80 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         }
       }
 
+      // Update Adaptive LOD Controller if chunks are registered
+      let lodEval: any = null;
+      if (lodControllerRef.current && lodControllerRef.current.getChunkStates().length > 0) {
+        lodEval = lodControllerRef.current.update(
+          camera,
+          renderer.domElement.clientHeight || 720,
+          lastGpuMsRef.current
+        );
+      }
+
+      const cpuBeforeRender = performance.now();
+      const cpuWorkMs = cpuBeforeRender - frameStart;
+
       renderer.render(threeScene, camera);
+      const renderEnd = performance.now();
+      const totalCpuMs = renderEnd - frameStart;
+
+      // Track frame times for rolling FPS & 1% low
+      const now = performance.now();
+      const frameDelta = now - (frameTimesRef.current[frameTimesRef.current.length - 1] || (now - 16.6));
+      frameTimesRef.current.push(now);
+      if (frameTimesRef.current.length > 60) {
+        frameTimesRef.current.shift();
+      }
+
+      // Approx GPU ms based on frame interval and render load
+      const estimatedGpuMs = Math.max(1.0, Math.min(60.0, frameDelta - cpuWorkMs));
+      lastGpuMsRef.current = estimatedGpuMs;
+
+      // Periodically update HUD (every 250ms)
+      if (now - lastHudUpdateRef.current >= 250 && frameTimesRef.current.length > 5) {
+        const deltas: number[] = [];
+        for (let i = 1; i < frameTimesRef.current.length; i++) {
+          deltas.push(frameTimesRef.current[i] - frameTimesRef.current[i - 1]);
+        }
+        const avgDelta = deltas.reduce((a, b) => a + b, 0) / Math.max(1, deltas.length);
+        const currentFps = Math.round(1000 / Math.max(1, avgDelta));
+
+        deltas.sort((a, b) => b - a);
+        const p99Delta = deltas[Math.min(deltas.length - 1, Math.floor(deltas.length * 0.05))] || avgDelta;
+        const fpsLow = Math.round(1000 / Math.max(1, p99Delta));
+
+        setFps(currentFps);
+
+        // Gather geometry info
+        const visibleTris = lodEval ? lodEval.visibleTriangles : (renderer.info.render.triangles || scene.triangle_count || 0);
+        const culledTris = lodEval ? lodEval.culledTriangles : 0;
+        const highChunks = lodEval ? lodEval.highChunks : (lodControllerRef.current.getQualityMode() === 'performance' ? 0 : 1);
+        const medChunks = lodEval ? lodEval.medChunks : 0;
+        const lowChunks = lodEval ? lodEval.lowChunks : (lodControllerRef.current.getQualityMode() === 'performance' ? 1 : 0);
+        const totalChunks = lodEval ? lodEval.totalChunks : 1;
+        const activeLODSummary = lodEval ? lodEval.activeLODSummary : `LOD (${lodControllerRef.current.getQualityMode()})`;
+
+        setHudStats((prev) => ({
+          ...prev,
+          fps: currentFps,
+          fpsLow: Math.min(currentFps, fpsLow),
+          cpuMs: parseFloat(totalCpuMs.toFixed(2)),
+          gpuMs: parseFloat(estimatedGpuMs.toFixed(1)),
+          resolution: `${renderer.domElement.width} × ${renderer.domElement.height}`,
+          dpr: renderer.getPixelRatio(),
+          visibleTriangles: visibleTris,
+          culledTriangles: culledTris,
+          drawCalls: renderer.info.render.calls || 1,
+          highDetailChunks: highChunks,
+          mediumDetailChunks: medChunks,
+          lowDetailChunks: lowChunks,
+          totalChunks: totalChunks,
+          activeLOD: activeLODSummary,
+          gpuMemoryMb: Math.round((renderer.info.memory.geometries * 2.5 + renderer.info.memory.textures * 15) || 45),
+        }));
+
+        lastHudUpdateRef.current = now;
+      }
     };
     animate();
 
@@ -468,12 +588,13 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     const container = containerRef.current;
     if (!modelGroup || !camera || !controls) return;
 
-    // Clear previous model
+    // Clear previous model & reset LOD controller
     while (modelGroup.children.length > 0) {
       const child = modelGroup.children[0];
       modelGroup.remove(child);
       disposeObject(child);
     }
+    lodControllerRef.current.initFromDefinitions([]);
 
     setErrorMessage(null);
     onLoadingChange(true, 0);
@@ -695,6 +816,67 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           onLoadingChange(false, 0);
         }
       );
+    } else if (repConfig.type === 'adaptive_chunks' || (repConfig as any).chunks_url) {
+      const chunksUrl = ((repConfig as any).chunks_url || (scene as any).adaptive_chunks_url) as string;
+      const basePath = chunksUrl.substring(0, chunksUrl.lastIndexOf('/') + 1);
+      fetch(chunksUrl)
+        .then((res) => res.json())
+        .then((manifest) => {
+          lodControllerRef.current.initFromDefinitions(manifest.chunks);
+          const gltfLoader = new GLTFLoader();
+          let loadedObjects = 0;
+          const totalObjects = manifest.chunks.length * 3;
+
+          manifest.chunks.forEach((chunkDef: any) => {
+            [0, 1, 2].forEach((lodLevel) => {
+              const fileKey = `lod${lodLevel}`;
+              const fileName = chunkDef.files[fileKey];
+              const fileUrl = `${basePath}spatial_chunks/${fileName}`;
+
+              gltfLoader.load(
+                fileUrl,
+                (gltf) => {
+                  const chunkObj = gltf.scene;
+                  chunkObj.position.set(0, 0, 0);
+                  chunkObj.traverse((c) => {
+                    if ((c as THREE.Mesh).isMesh) {
+                      const m = (c as THREE.Mesh).material as any;
+                      if (m) {
+                        m.side = THREE.DoubleSide;
+                        m.wireframe = config.wireframe;
+                        if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+                      }
+                    }
+                  });
+
+                  modelGroup.add(chunkObj);
+                  lodControllerRef.current.registerChunkObjects(
+                    chunkDef.chunk_id,
+                    lodLevel as 0 | 1 | 2,
+                    chunkObj
+                  );
+
+                  loadedObjects++;
+                  onProgress(new ProgressEvent('progress', { loaded: loadedObjects, total: totalObjects, lengthComputable: true }));
+
+                  if (loadedObjects === totalObjects) {
+                    setupLoadedObject(modelGroup, 'GLB', 'adaptive_spatial_chunks.json');
+                    onLoadingChange(false, 100);
+                  }
+                },
+                undefined,
+                (err) => {
+                  console.warn(`Error loading chunk ${fileName}:`, err);
+                }
+              );
+            });
+          });
+        })
+        .catch((err) => {
+          console.error('Error fetching spatial chunks manifest:', err);
+          setErrorMessage('Failed to load adaptive spatial chunks manifest');
+          onLoadingChange(false, 0);
+        });
     } else if ((repConfig.type === 'glb' || repConfig.glb_url) && (repConfig.glb_url || (repConfig as any).url)) {
       const glbUrl = (repConfig.glb_url || (repConfig as any).url) as string;
       const sourceFileName = glbUrl.split('/').pop() || 'room_model.glb';
@@ -768,6 +950,13 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       {isIndoor && isWalkthrough && (
         <SourceFramePreview currentFrame={currentFrame} distanceMeters={frameDistance} />
       )}
+
+      {/* Real-Time Adaptive Performance HUD */}
+      <AdaptivePerformanceHUD
+        stats={hudStats}
+        onQualityModeChange={handleQualityModeChange}
+        onDprChange={handleDprChange}
+      />
 
       {/* Error Banner */}
       {errorMessage && (

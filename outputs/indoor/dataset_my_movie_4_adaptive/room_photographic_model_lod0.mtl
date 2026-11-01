@@ -1,0 +1,7 @@
+newmtl Material_Photographic
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.04 0.04 0.04
+illum 2
+Ns 15
+map_Kd texture_atlas_8k.png
