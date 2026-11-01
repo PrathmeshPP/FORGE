@@ -6,6 +6,146 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_nov1_191043_photographic_v3",
+      "scene_name": "indoor_nov1_191043_photographic_v3",
+      "display_name": "NOVEMBER 1 \u2014 19:10:43 INDOOR DIGITAL TWIN (V3 QUALITY)",
+      "subtitle": "Hostel Room B 314 (Dense 8mm Geometry & Aspect-Preserved 8K Atlas)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "V3 COMPLETE 3D QUALITY IMPROVEMENT",
+      "description": "High-fidelity V3 digital twin of Hostel Room B 314 from WhatsApp Video 2026-11-01 at 19.10.43.mp4. Reconstructed with high-density 8mm point cloud backprojection (294,087 structural points, 4.26x retention increase), ray-oriented normal consensus, depth=10 Screened Poisson meshing (599,999 triangles, boundary edges reduced to 4,105), depth-occlusion gating, 4-pass topological chart consolidation, and aspect-preserving 8K photographic atlas with zero distortion.",
+      "vertex_count": 300035,
+      "triangle_count": 599999,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "V3 Textured GLB (Dense 8mm Mesh + 8K Atlas)",
+          "glb_url": "/outputs/indoor/texture_experiment_video_20261101_191043_v3_quality/room_photographic_model.glb",
+          "file_size_bytes": 77971708,
+          "sha256": "4559a493dd3ddb0ba109269bfd89118a9e683ed58ca2068e735f358b26fe966b",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "V3 Wavefront OBJ + MTL (Dense Geometry + Precise UVs)",
+          "obj_url": "/outputs/indoor/texture_experiment_video_20261101_191043_v3_quality/room_photographic_model_canonical.obj",
+          "mtl_url": "/outputs/indoor/texture_experiment_video_20261101_191043_v3_quality/room_photographic_model_canonical.mtl",
+          "file_size_bytes": 76081471,
+          "sha256": "2c182cae2c71efa288657254b94aead94047c3888325eb0ff2a05346e4224b91",
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "V3 Photographic Vertex PLY (300k Vertices)",
+          "ply_url": "/outputs/indoor/texture_experiment_video_20261101_191043_v3_quality/room_photographic_model.ply",
+          "file_size_bytes": 23102098,
+          "sha256": "0acbe75e63a979e8d9dc69e3fcc076b90b8546b05b6c8670a475231a506b4c83",
+          "available": true
+        }
+      },
+      "thumbnail_url": "/models/indoor_nov1_191043_v3/preview_thumbnail.png",
+      "previews": {
+        "eye_level": "/models/indoor_nov1_191043_v3/preview_eye_level.png",
+        "top": "/models/indoor_nov1_191043_v3/preview_top.png"
+      },
+      "metadata_url": "/models/indoor_nov1_191043_v3/metadata.json",
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.8,
+          -2.4
+        ],
+        "target": [
+          0.0,
+          0.7200000000000001,
+          0.5
+        ]
+      },
+      "camera_presets": [
+        {
+          "id": "entrance",
+          "label": "Room Entrance",
+          "description": "Standing at the entrance doorway looking into Hostel Room B 314",
+          "position": [
+            0.0,
+            0.8,
+            -2.4
+          ],
+          "target": [
+            0.0,
+            0.7200000000000001,
+            0.5
+          ]
+        },
+        {
+          "id": "bed1_wardrobe",
+          "label": "Bed 1 & Dual Steel Wardrobes",
+          "description": "Crisp view of Bed 1 floral mattress and twin steel wardrobes with suitcases",
+          "position": [
+            -0.8,
+            0.6400000000000001,
+            -0.6
+          ],
+          "target": [
+            -1.6,
+            0.5599999999999999,
+            0.0
+          ]
+        },
+        {
+          "id": "bed2_closeup",
+          "label": "Bed 2 & Maroon Mattress",
+          "description": "Perspective facing the second single bed with maroon floral mattress and wall switchboard",
+          "position": [
+            0.6,
+            0.6400000000000001,
+            -0.4
+          ],
+          "target": [
+            1.6,
+            0.5599999999999999,
+            0.0
+          ]
+        },
+        {
+          "id": "bed3_cooler",
+          "label": "Bed 3 & Air Cooler",
+          "description": "Perspective looking towards Bed 3, blue clothes drying rack, and evaporative cooler",
+          "position": [
+            0.3,
+            0.6400000000000001,
+            1.2
+          ],
+          "target": [
+            0.8,
+            0.5599999999999999,
+            2.2
+          ]
+        },
+        {
+          "id": "overview",
+          "label": "High-Angle Overview",
+          "description": "Overhead inspection showing complete hostel room boundaries and furnishings",
+          "position": [
+            0.0,
+            3.4,
+            -3.8
+          ],
+          "target": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "reconstruction_run_id": "texture_experiment_video_20261101_191043_v3_quality",
+      "source_video_provenance": {
+        "path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+        "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454"
+      }
+    },
+    {
       "id": "indoor_nov1_191043_photographic_v2",
       "scene_name": "indoor_nov1_191043_photographic_v2",
       "display_name": "NOVEMBER 1 \u2014 19:10:43 INDOOR DIGITAL TWIN (V2 ENHANCED)",

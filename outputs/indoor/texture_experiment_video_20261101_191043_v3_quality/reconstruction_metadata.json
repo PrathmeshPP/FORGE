@@ -1,0 +1,92 @@
+{
+  "pipeline_version": "v3_quality",
+  "dataset_name": "November 1, 2026 \u2014 19:10:43 (Hostel Room B 314)",
+  "source_video": {
+    "path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+    "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454"
+  },
+  "reconstruction_runtime_sec": 195.4,
+  "point_cloud": {
+    "total_raw_points": 6220800,
+    "valid_masked_points": 6180762,
+    "filtered_points": 294087,
+    "retention_multiplier_vs_v1": 4.26,
+    "voxel_size_m": 0.008
+  },
+  "geometry": {
+    "vertices": 300035,
+    "triangles": 599999,
+    "boundary_edges": 4105,
+    "connected_components": 7,
+    "is_watertight": false
+  },
+  "texturing": {
+    "atlas_size": [
+      8192,
+      8192
+    ],
+    "tile_size": [
+      720,
+      1281
+    ],
+    "aspect_ratio": 0.5621,
+    "photographic_coverage_pct": 72.26,
+    "direct_faces": 433542,
+    "active_cameras": 60,
+    "seam_faces_consolidated": 33190
+  },
+  "deliverables": {
+    "glb": {
+      "file": "room_photographic_model.glb",
+      "size_mb": 74.36,
+      "sha256": "4559a493dd3ddb0ba109269bfd89118a9e683ed58ca2068e735f358b26fe966b"
+    },
+    "obj": {
+      "file": "room_photographic_model_canonical.obj",
+      "size_mb": 72.56,
+      "sha256": "2c182cae2c71efa288657254b94aead94047c3888325eb0ff2a05346e4224b91"
+    },
+    "ply": {
+      "file": "room_photographic_model.ply",
+      "size_mb": 22.03,
+      "sha256": "0acbe75e63a979e8d9dc69e3fcc076b90b8546b05b6c8670a475231a506b4c83"
+    },
+    "atlas": {
+      "file": "texture_atlas.png",
+      "size_mb": 31.91,
+      "sha256": "7f7a5460ee3d099c8762f80b630b305123b027c337bbdbfc577a4427ce7361ca"
+    }
+  },
+  "comparative_evolution": {
+    "v1": {
+      "vertices": 188079,
+      "triangles": 374537,
+      "filtered_points": 69007,
+      "boundary_edges": 2567,
+      "connected_components": 7,
+      "photographic_coverage_pct": 81.75,
+      "atlas_resolution": "8192x8192",
+      "glb_size_mb": 53.97
+    },
+    "v2": {
+      "vertices": 188079,
+      "triangles": 374537,
+      "filtered_points": 69007,
+      "boundary_edges": 2567,
+      "connected_components": 7,
+      "photographic_coverage_pct": 76.08,
+      "atlas_resolution": "8192x8192 (aspect-preserved 720x1281 tiles)",
+      "glb_size_mb": 58.88
+    },
+    "v3": {
+      "vertices": 300035,
+      "triangles": 599999,
+      "filtered_points": 294087,
+      "boundary_edges": 4105,
+      "connected_components": 7,
+      "photographic_coverage_pct": 72.26,
+      "atlas_resolution": "8192x8192 (aspect-preserved 720x1281 tiles + depth-occlusion gating)",
+      "glb_size_mb": 74.36
+    }
+  }
+}

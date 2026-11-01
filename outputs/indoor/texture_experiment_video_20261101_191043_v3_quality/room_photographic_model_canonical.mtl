@@ -1,0 +1,8 @@
+# F.O.R.G.E. High-Quality Photographic Texture Material (V3 Quality)
+newmtl Material_Photographic_Atlas
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.040000 0.040000 0.040000
+illum 2
+Ns 15.000000
+map_Kd texture_atlas.png
