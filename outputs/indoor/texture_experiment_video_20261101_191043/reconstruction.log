@@ -1,0 +1,84 @@
+[21:30:08] ============================================================================
+[21:30:08]   F.O.R.G.E. COMPLETE INDOOR 3D RECONSTRUCTION
+[21:30:08]   Dataset: November 1, 2026 — 19:10:43 (Hostel Room B 314 Complete Survey)
+[21:30:08]   Input Video:  C:\Users\25beevdt025\Downloads\WhatsApp Video 2026-11-01 at 19.10.43.mp4
+[21:30:08]   Output Dir:   C:\Users\25beevdt025\Desktop\FORGE\outputs\indoor\texture_experiment_video_20261101_191043
+[21:30:08]   CUDA Device:  NVIDIA GeForce RTX 2070 SUPER (Free: 7123.0 MB / 8191.7 MB)
+[21:30:08] ============================================================================
+[21:30:08] [*] Curating frames from WhatsApp Video 2026-11-01 at 19.10.43.mp4 (target count: ~60)...
+[21:30:36] [+] Frame curation complete: 60 frames extracted across 149.0s.
+[21:30:36] [Stage 1] Completed in 27.32s. Extracted 60 frames.
+[21:30:36] 
+[Stage 2] Neural Camera Pose & Geometry Estimation (VGGT-Omega Overlapping Windows)...
+[21:30:36] [*] Initializing VGGT-Omega overlapping window engine (Total frames: 60, Window: 6, Overlap: 3)...
+[21:30:49]     Model loaded into GPU in 13.54s
+[21:30:49]     Generated 19 overlapping windows across 60 frames.
+[21:30:51]     Window [0/19] (frames 0:5): Processed in 2.22s (2.70 FPS)
+[21:30:53]     Window [1/19] (frames 3:8): Processed in 1.62s | Sim(3) scale: 0.6452, residual: 1.1 cm
+[21:30:55]     Window [2/19] (frames 6:11): Processed in 1.52s | Sim(3) scale: 0.4985, residual: 0.6 cm
+[21:30:56]     Window [3/19] (frames 9:14): Processed in 1.50s | Sim(3) scale: 0.6208, residual: 0.3 cm
+[21:30:58]     Window [4/19] (frames 12:17): Processed in 1.43s | Sim(3) scale: 0.6699, residual: 0.6 cm
+[21:30:59]     Window [5/19] (frames 15:20): Processed in 1.42s | Sim(3) scale: 0.6408, residual: 0.4 cm
+[21:31:01]     Window [6/19] (frames 18:23): Processed in 1.44s | Sim(3) scale: 0.7060, residual: 0.3 cm
+[21:31:03]     Window [7/19] (frames 21:26): Processed in 1.44s | Sim(3) scale: 0.5899, residual: 0.4 cm
+[21:31:04]     Window [8/19] (frames 24:29): Processed in 1.45s | Sim(3) scale: 0.6784, residual: 0.4 cm
+[21:31:06]     Window [9/19] (frames 27:32): Processed in 1.44s | Sim(3) scale: 0.6042, residual: 0.8 cm
+[21:31:07]     Window [10/19] (frames 30:35): Processed in 1.45s | Sim(3) scale: 0.5603, residual: 1.6 cm
+[21:31:09]     Window [11/19] (frames 33:38): Processed in 1.45s | Sim(3) scale: 0.6628, residual: 0.7 cm
+[21:31:10]     Window [12/19] (frames 36:41): Processed in 1.45s | Sim(3) scale: 0.7446, residual: 0.4 cm
+[21:31:12]     Window [13/19] (frames 39:44): Processed in 1.44s | Sim(3) scale: 0.7892, residual: 0.5 cm
+[21:31:13]     Window [14/19] (frames 42:47): Processed in 1.44s | Sim(3) scale: 0.7999, residual: 0.5 cm
+[21:31:15]     Window [15/19] (frames 45:50): Processed in 1.45s | Sim(3) scale: 0.7178, residual: 0.8 cm
+[21:31:16]     Window [16/19] (frames 48:53): Processed in 1.45s | Sim(3) scale: 0.7092, residual: 0.6 cm
+[21:31:18]     Window [17/19] (frames 51:56): Processed in 1.46s | Sim(3) scale: 0.6683, residual: 0.6 cm
+[21:31:19]     Window [18/19] (frames 54:59): Processed in 1.46s | Sim(3) scale: 0.7871, residual: 0.4 cm
+[21:31:19]   Stage 2 wall-clock duration: 43.75s
+[21:31:19]   Actual VGGT inference time: 28.52s
+[21:31:19]   Peak VRAM: 8.12 MB allocated, 7458.0 MB reserved
+[21:31:19]   Mean Sim(3) Alignment Residual: 0.62 cm
+[21:31:21]   Trajectory: 60 cameras, path length: 4.9791m, net disp: 1.3031m
+[21:31:21] 
+[Stage 3] Point Cloud Backprojection & Optical Ray Direction Tracking...
+[21:31:23]   Raw points: 6,220,800 -> Valid: 6,180,762 -> Clean: 69,007
+[21:31:23]   Spatial extents [X, Y, Z]: [1.2130999565124512, 1.0211000442504883, 1.631600022315979] m
+[21:31:24]   Saved raw point cloud: raw_point_cloud.ply (88.42 MB)
+[21:31:24]   Saved filtered point cloud: filtered_point_cloud.ply (0.99 MB)
+[21:31:24] 
+[Stage 4] Room Plane Detection & Floor Leveling...
+[21:31:24]   [+] Floor leveling applied: Aligned plane normal [0.1366, 0.9881, 0.0704] to [0, 1, 0]
+[21:31:24] 
+[Stage 5] Estimating Ray-Oriented Normals (Guaranteed Interior-Facing)...
+[21:31:24]   [+] Corrected 32,417 (47.0%) normals towards true observing camera locations.
+[21:31:24] 
+[Stage 6] Executing Screened Poisson Surface Reconstruction (depth=9)...
+[21:31:26]   Poisson raw mesh generated in 2.43s: 195,389 vertices, 389,802 triangles.
+[21:31:28]   Cleaned mesh: 188,079 vertices, 374,537 triangles.
+[21:31:28]   Saved baseline Poisson surface mesh: poisson_mesh.ply
+[21:31:28] 
+[Stage 7] Photographic Texture Engine & 8K Atlas Baking...
+[21:31:34]   Direct Photographic Surface Coverage: 81.75% (306,199 / 374,537 faces)
+[21:31:34]   Active Camera Views Employed: 60 / 60
+[21:32:36]   8K Atlas Synthesized: 26.61 MB (Grid: [8, 8], Tile: [1024, 1024])
+[21:33:10]   Textured deliverables exported in 102.31s:
+[21:33:10]     - MTL: room_photographic_model_canonical.mtl (0.00 MB)
+[21:33:10]     - OBJ: room_photographic_model_canonical.obj (44.68 MB)
+[21:33:10]     - GLB: room_photographic_model.glb (53.97 MB)
+[21:33:10]     - PLY: room_photographic_model.ply (13.79 MB)
+[21:33:10] 
+[Stage 8] Rendering 10 Calibrated Multi-Angle Diagnostic Previews...
+[21:33:11]   Canonical bounds: X=[-0.64, 0.60] (1.24m), Y=[-0.34, 0.44] (0.78m), Z=[-0.75, 0.83] (1.58m)
+[21:33:11]     Rendered: render_01_full_room_overview.png
+[21:33:11]     Rendered: render_02_room_entrance_and_door.png
+[21:33:12]     Rendered: render_03_bed1_and_wardrobes.png
+[21:33:12]     Rendered: render_04_double_door_lockers.png
+[21:33:12]     Rendered: render_05_bed2_red_mattress.png
+[21:33:12]     Rendered: render_06_bed3_and_drying_rack.png
+[21:33:13]     Rendered: render_07_portable_air_cooler.png
+[21:33:13]     Rendered: render_08_top_down_floorplan.png
+[21:33:13]     Rendered: render_09_isometric_room_corner.png
+[21:33:13]     Rendered: render_10_study_desks_and_switchboard.png
+[21:33:13] [+] Saved 10-view validation panel to: master_validation_panel_10views.png
+[21:33:14] ============================================================================
+[21:33:14]   RECONSTRUCTION COMPLETE in 185.43s (3.09 minutes)!
+[21:33:14]   GLB Deliverable: room_photographic_model.glb (SHA-256: 3cb1c72ced561f9c...)
+[21:33:14] ============================================================================

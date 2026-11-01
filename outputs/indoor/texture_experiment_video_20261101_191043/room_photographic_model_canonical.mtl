@@ -1,0 +1,8 @@
+# F.O.R.G.E. Photographic Texture Material
+newmtl Material_Photographic_Atlas
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.050000 0.050000 0.050000
+illum 2
+Ns 10.000000
+map_Kd texture_atlas.png

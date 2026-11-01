@@ -1,0 +1,23 @@
+{
+  "video_path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+  "file_size_bytes": 32230263,
+  "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454",
+  "resolution": [
+    480,
+    854
+  ],
+  "aspect_ratio": 0.562,
+  "orientation": "portrait",
+  "fps": 29.929459976057924,
+  "total_frames": 4460,
+  "duration_sec": 149.02,
+  "fourcc": "h264",
+  "sharpness": {
+    "mean": 122.39,
+    "min": 4.62,
+    "max": 332.33
+  },
+  "luminance_mean": 137.58,
+  "contrast_mean": 58.78,
+  "motion_mean": 4.51
+}

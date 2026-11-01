@@ -1,0 +1,59 @@
+{
+  "dataset_name": "November 1, 2026 \u2014 19:10:43 (Hostel Room B 314 Complete 360 Survey)",
+  "source_video": {
+    "path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+    "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454",
+    "duration_sec": 149.02,
+    "resolution": [
+      480,
+      854
+    ],
+    "fps": 29.93
+  },
+  "reconstruction_metrics": {
+    "num_curated_keyframes": 60,
+    "vggt_sliding_windows": 60,
+    "vggt_inference_sec": 28.52,
+    "raw_points": 6220800,
+    "clean_points": 69007,
+    "screened_poisson_depth": 9,
+    "mesh_vertices": 188079,
+    "mesh_triangles": 374537,
+    "direct_photographic_coverage_pct": 81.75,
+    "direct_photographic_faces": 306199,
+    "active_cameras_used": 60,
+    "atlas_resolution": [
+      8192,
+      8192
+    ],
+    "spatial_extents_m": [
+      1.24,
+      0.78,
+      1.58
+    ],
+    "floor_level_y": -0.34
+  },
+  "deliverables": {
+    "glb": {
+      "path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043\\room_photographic_model.glb",
+      "size_bytes": 56594140,
+      "sha256": "3cb1c72ced561f9ce14fc0e37836ab16e1f54acd3347ed5db1a6b04d768f1ecc"
+    },
+    "obj": {
+      "path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043\\room_photographic_model_canonical.obj",
+      "size_bytes": 46853728,
+      "sha256": "c14a43baed8421acd6ed46a9e7aea7d3d30b689f1a859fb9c2377835322d07e6"
+    },
+    "ply": {
+      "path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043\\room_photographic_model.ply",
+      "size_bytes": 14461336,
+      "sha256": "d380d5f68d7b22ff99a6b37335129ed592f01b3c5af2c791e9650b3c5dfdef72"
+    },
+    "texture_atlas": {
+      "path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043\\texture_atlas.png",
+      "size_bytes": 27900440,
+      "sha256": "672a28844d84776c5c6fe296178acd4143db1f5e4a8b1eb81c28274ed8740976"
+    }
+  },
+  "total_pipeline_time_sec": 185.43
+}
