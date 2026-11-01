@@ -74,7 +74,10 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   const navEngineRef = useRef<FirstPersonNavigationEngine | null>(null);
   const clockRef = useRef<THREE.Clock>(new THREE.Clock());
 
-  const [playerPos, setPlayerPos] = useState<[number, number, number]>([0.12, 0.09, -1.27]);
+  const initialSpawn: [number, number, number] = scene.id === 'indoor_candidate_b_sharpest'
+    ? [0.12, 0.09, -1.27]
+    : [0.0, 1.42, -2.2];
+  const [playerPos, setPlayerPos] = useState<[number, number, number]>(initialSpawn);
   const [playerYaw, setPlayerYaw] = useState<number>(Math.PI);
   const [collisionStatus, setCollisionStatus] = useState<'CLEAR' | 'SLIDING' | 'BOUNDARY'>('CLEAR');
   const [fps, setFps] = useState<number>(60);
@@ -82,6 +85,17 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   const [frameDistance, setFrameDistance] = useState<number>(0);
   const [isMiniMapOpen, setIsMiniMapOpen] = useState<boolean>(true);
   const [isPointerLocked, setIsPointerLocked] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (navEngineRef.current) {
+      navEngineRef.current.deactivate();
+      navEngineRef.current = null;
+    }
+    const spawn: [number, number, number] = scene.id === 'indoor_candidate_b_sharpest'
+      ? [0.12, 0.09, -1.27]
+      : [0.0, 1.42, -2.2];
+    setPlayerPos(spawn);
+  }, [scene.id]);
 
   const frameCountRef = useRef<number>(0);
   const lastFpsTimeRef = useRef<number>(performance.now());
@@ -181,7 +195,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
 
     // Helpers
     const gridHelper = new THREE.GridHelper(10, 20, 0x38bdf8, 0x334155);
-    gridHelper.position.y = isIndoor ? -0.487 : -0.01;
+    gridHelper.position.y = (scene.id === 'indoor_candidate_b_sharpest') ? -0.487 : -0.01;
     gridHelper.visible = config.showGrid && !isWalkthroughRef.current;
     threeScene.add(gridHelper);
     gridHelperRef.current = gridHelper;
@@ -313,7 +327,8 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
               onSelectRepresentation(nextRep);
             }
           },
-        }
+        },
+        scene.id
       );
     }
 
@@ -490,6 +505,10 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       // For indoor models, coordinates are canonically aligned and centered at origin!
       if (isIndoor) {
         object.position.set(0, 0, 0);
+        const rot = (scene as any).coordinate_rotation || (repConfig as any).coordinate_rotation;
+        if (rot) {
+          object.rotation.set(rot[0], rot[1], rot[2]);
+        }
       } else {
         object.position.set(-center.x, -center.y, -center.z);
       }
@@ -649,7 +668,14 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       plyLoader.load(
         plyUrl,
         (geometry) => {
-          geometry.computeVertexNormals();
+          if (geometry.attributes.position && geometry.attributes.position.array instanceof Float64Array) {
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.position.array), 3));
+          }
+          if (geometry.attributes.normal && geometry.attributes.normal.array instanceof Float64Array) {
+            geometry.setAttribute('normal', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.normal.array), 3));
+          } else if (!geometry.attributes.normal) {
+            geometry.computeVertexNormals();
+          }
           const hasColors = geometry.hasAttribute('color');
           const material = new THREE.MeshStandardMaterial({
             vertexColors: hasColors,

@@ -60,21 +60,21 @@ export class FirstPersonNavigationEngine {
   };
 
   // Config parameters
-  private readonly playerRadius = 0.18;
-  private readonly eyeHeight = 0.58;
-  private readonly floorY = -0.4867;
-  private readonly walkSpeed = 1.15;
-  private readonly sprintSpeed = 2.10;
-  private readonly mouseSensitivity = 0.0022;
+  private playerRadius = 0.20;
+  private eyeHeight = 1.42;
+  private floorY = 0.0;
+  private walkSpeed = 1.30;
+  private sprintSpeed = 2.30;
+  private mouseSensitivity = 0.0022;
 
   // Collision boundaries
-  private readonly xMin = -1.15;
-  private readonly xMax = 0.95;
-  private readonly zMin = -2.05;
-  private readonly zMax = 1.35;
+  private xMin = -2.40;
+  private xMax = 2.40;
+  private zMin = -3.10;
+  private zMax = 3.10;
 
-  private regions: ArchitecturalRegion[] = walkthroughMetadata.architectural_regions as ArchitecturalRegion[];
-  private trajectory: TrajectoryPoint[] = walkthroughMetadata.camera_trajectory as TrajectoryPoint[];
+  private regions: ArchitecturalRegion[] = ((walkthroughMetadata as any).architectural_regions || []) as ArchitecturalRegion[];
+  private trajectory: TrajectoryPoint[] = ((walkthroughMetadata as any).camera_trajectory || []) as TrajectoryPoint[];
   private lastClosestIndex: number = -1;
 
   // Bound event listeners
@@ -86,16 +86,37 @@ export class FirstPersonNavigationEngine {
   constructor(
     camera: THREE.PerspectiveCamera,
     domElement: HTMLElement,
-    callbacks: NavigationCallbacks = {}
+    callbacks: NavigationCallbacks = {},
+    sceneId?: string
   ) {
     this.camera = camera;
     this.domElement = domElement;
     this.callbacks = callbacks;
 
-    // Spawn inside room at initial video capture location
-    const spawn = walkthroughMetadata.player_physics.spawn_position;
-    this.position = new THREE.Vector3(spawn[0], spawn[1], spawn[2]);
-    this.yaw = Math.PI; // Face towards desk/interior
+    if (sceneId === 'indoor_candidate_b_sharpest') {
+      this.eyeHeight = 0.58;
+      this.floorY = -0.4867;
+      this.xMin = -1.15;
+      this.xMax = 0.95;
+      this.zMin = -2.05;
+      this.zMax = 1.35;
+      this.walkSpeed = 1.15;
+      this.sprintSpeed = 2.10;
+      this.position = new THREE.Vector3(0.12, 0.09, -1.27);
+      this.yaw = Math.PI;
+    } else {
+      this.eyeHeight = (walkthroughMetadata.player_physics as any)?.eye_height || 1.42;
+      this.floorY = (walkthroughMetadata.floor_elevation as any)?.mean_y || 0.0;
+      this.walkSpeed = (walkthroughMetadata.player_physics as any)?.walk_speed || 1.30;
+      this.sprintSpeed = (walkthroughMetadata.player_physics as any)?.sprint_speed || 2.30;
+      this.xMin = (walkthroughMetadata.spatial_bounds as any)?.x_min || -2.40;
+      this.xMax = (walkthroughMetadata.spatial_bounds as any)?.x_max || 2.40;
+      this.zMin = (walkthroughMetadata.spatial_bounds as any)?.z_min || -3.10;
+      this.zMax = (walkthroughMetadata.spatial_bounds as any)?.z_max || 3.10;
+      const spawn = (walkthroughMetadata.player_physics as any)?.spawn_position || [0.0, 1.42, -2.2];
+      this.position = new THREE.Vector3(spawn[0], spawn[1], spawn[2]);
+      this.yaw = Math.PI; // Face towards interior down central aisle
+    }
     this.pitch = 0.0;
   }
 

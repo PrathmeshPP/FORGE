@@ -617,5 +617,857 @@
       -3.25,
       3.25
     ]
-  }
+  },
+  "architectural_regions": [
+    {
+      "id": "doorway_entrance",
+      "name": "Entrance Doorway",
+      "type": "doorway",
+      "bounds": [
+        -0.6,
+        -3.2,
+        0.6,
+        -2.4
+      ],
+      "height_range": [
+        0.0,
+        2.1
+      ],
+      "label": "Entrance"
+    },
+    {
+      "id": "central_aisle",
+      "name": "Central Aisle Walkway",
+      "type": "walkway",
+      "bounds": [
+        -0.95,
+        -2.4,
+        0.95,
+        2.6
+      ],
+      "height_range": [
+        0.0,
+        2.85
+      ],
+      "label": "Walkway"
+    },
+    {
+      "id": "Bed_001",
+      "name": "Bed 1 (Left Cot)",
+      "type": "obstacle",
+      "bounds": [
+        -2.15,
+        -0.95,
+        -1.15,
+        1.05
+      ],
+      "height_range": [
+        0.0,
+        0.55
+      ],
+      "label": "Bed 1 (Left Cot)"
+    },
+    {
+      "id": "Bed_002",
+      "name": "Bed 2 (Right Cot)",
+      "type": "obstacle",
+      "bounds": [
+        1.15,
+        -0.95,
+        2.15,
+        1.05
+      ],
+      "height_range": [
+        0.0,
+        0.55
+      ],
+      "label": "Bed 2 (Right Cot)"
+    },
+    {
+      "id": "Wardrobe_001",
+      "name": "Wardrobe 1",
+      "type": "obstacle",
+      "bounds": [
+        -2.5,
+        -2.25,
+        -1.6,
+        -1.25
+      ],
+      "height_range": [
+        0.0,
+        2.15
+      ],
+      "label": "Wardrobe 1"
+    },
+    {
+      "id": "Wardrobe_002",
+      "name": "Wardrobe 2",
+      "type": "obstacle",
+      "bounds": [
+        1.65,
+        -0.45,
+        2.55,
+        0.55
+      ],
+      "height_range": [
+        0.0,
+        2.1
+      ],
+      "label": "Wardrobe 2"
+    },
+    {
+      "id": "Wardrobe_003",
+      "name": "Wardrobe 3",
+      "type": "obstacle",
+      "bounds": [
+        1.65,
+        -2.35,
+        2.55,
+        -1.35
+      ],
+      "height_range": [
+        0.0,
+        2.15
+      ],
+      "label": "Wardrobe 3"
+    },
+    {
+      "id": "Desk_001",
+      "name": "Study Desk 1",
+      "type": "obstacle",
+      "bounds": [
+        -2.45,
+        1.45,
+        -1.35,
+        2.65
+      ],
+      "height_range": [
+        0.0,
+        0.78
+      ],
+      "label": "Study Desk 1"
+    },
+    {
+      "id": "Desk_002",
+      "name": "Study Desk 2",
+      "type": "obstacle",
+      "bounds": [
+        1.35,
+        1.45,
+        2.45,
+        2.65
+      ],
+      "height_range": [
+        0.0,
+        0.78
+      ],
+      "label": "Study Desk 2"
+    },
+    {
+      "id": "Cooler_001",
+      "name": "Air Cooler",
+      "type": "obstacle",
+      "bounds": [
+        -0.3,
+        1.8,
+        0.3,
+        2.35
+      ],
+      "height_range": [
+        0.0,
+        0.9
+      ],
+      "label": "Air Cooler"
+    },
+    {
+      "id": "ClothesRack_001",
+      "name": "Drying Rack",
+      "type": "obstacle",
+      "bounds": [
+        -0.35,
+        2.4,
+        0.35,
+        2.85
+      ],
+      "height_range": [
+        0.0,
+        1.65
+      ],
+      "label": "Drying Rack"
+    },
+    {
+      "id": "Chair_001",
+      "name": "Wooden Chair",
+      "type": "obstacle",
+      "bounds": [
+        -1.65,
+        -2.55,
+        -1.15,
+        -2.1
+      ],
+      "height_range": [
+        0.0,
+        0.85
+      ],
+      "label": "Wooden Chair"
+    },
+    {
+      "id": "Chair_002",
+      "name": "Desk Chair",
+      "type": "obstacle",
+      "bounds": [
+        1.0,
+        1.7,
+        1.5,
+        2.2
+      ],
+      "height_range": [
+        0.0,
+        0.95
+      ],
+      "label": "Desk Chair"
+    }
+  ],
+  "camera_trajectory": [
+    {
+      "index": 0,
+      "position": [
+        -0.0002,
+        0.0001,
+        0.0007
+      ],
+      "forward": [
+        -0.0,
+        0.0,
+        -1.0
+      ],
+      "timestamp_sec": 0.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_000_f00044.png",
+      "filename": "frame_000_f00044.png"
+    },
+    {
+      "index": 1,
+      "position": [
+        0.0576,
+        -0.0103,
+        -0.1689
+      ],
+      "forward": [
+        -0.035,
+        -0.0292,
+        -0.999
+      ],
+      "timestamp_sec": 0.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_001_f00211.png",
+      "filename": "frame_001_f00211.png"
+    },
+    {
+      "index": 2,
+      "position": [
+        0.0077,
+        0.002,
+        -0.2683
+      ],
+      "forward": [
+        -0.0092,
+        -0.0227,
+        -0.9997
+      ],
+      "timestamp_sec": 1.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_002_f00235.png",
+      "filename": "frame_002_f00235.png"
+    },
+    {
+      "index": 3,
+      "position": [
+        0.0374,
+        0.0253,
+        -1.4045
+      ],
+      "forward": [
+        -0.0422,
+        -0.0708,
+        -0.9966
+      ],
+      "timestamp_sec": 1.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_003_f00380.png",
+      "filename": "frame_003_f00380.png"
+    },
+    {
+      "index": 4,
+      "position": [
+        -0.0272,
+        -0.0177,
+        -2.0123
+      ],
+      "forward": [
+        -0.6388,
+        -0.2439,
+        -0.7297
+      ],
+      "timestamp_sec": 2.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_004_f00504.png",
+      "filename": "frame_004_f00504.png"
+    },
+    {
+      "index": 5,
+      "position": [
+        0.186,
+        0.0016,
+        -2.0596
+      ],
+      "forward": [
+        -0.7768,
+        -0.2031,
+        -0.5961
+      ],
+      "timestamp_sec": 2.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_005_f00572.png",
+      "filename": "frame_005_f00572.png"
+    },
+    {
+      "index": 6,
+      "position": [
+        0.3044,
+        0.0417,
+        -1.9795
+      ],
+      "forward": [
+        -0.8482,
+        -0.114,
+        -0.5173
+      ],
+      "timestamp_sec": 3.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_006_f00673.png",
+      "filename": "frame_006_f00673.png"
+    },
+    {
+      "index": 7,
+      "position": [
+        1.003,
+        0.0124,
+        -1.7001
+      ],
+      "forward": [
+        -0.9681,
+        -0.0852,
+        -0.2358
+      ],
+      "timestamp_sec": 3.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_007_f00874.png",
+      "filename": "frame_007_f00874.png"
+    },
+    {
+      "index": 8,
+      "position": [
+        1.6545,
+        -0.0241,
+        -1.637
+      ],
+      "forward": [
+        -0.9456,
+        -0.0867,
+        -0.3135
+      ],
+      "timestamp_sec": 4.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_008_f01008.png",
+      "filename": "frame_008_f01008.png"
+    },
+    {
+      "index": 9,
+      "position": [
+        1.8831,
+        -0.0499,
+        -1.6137
+      ],
+      "forward": [
+        -0.9489,
+        -0.0697,
+        -0.3078
+      ],
+      "timestamp_sec": 4.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_009_f01087.png",
+      "filename": "frame_009_f01087.png"
+    },
+    {
+      "index": 10,
+      "position": [
+        1.681,
+        -0.0653,
+        -1.4907
+      ],
+      "forward": [
+        -0.9656,
+        -0.1129,
+        -0.2344
+      ],
+      "timestamp_sec": 5.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_010_f01200.png",
+      "filename": "frame_010_f01200.png"
+    },
+    {
+      "index": 11,
+      "position": [
+        1.6859,
+        -0.0965,
+        -1.5148
+      ],
+      "forward": [
+        -0.9621,
+        -0.0967,
+        -0.255
+      ],
+      "timestamp_sec": 5.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_011_f01257.png",
+      "filename": "frame_011_f01257.png"
+    },
+    {
+      "index": 12,
+      "position": [
+        1.5217,
+        -0.0918,
+        -1.4438
+      ],
+      "forward": [
+        -0.9754,
+        -0.2003,
+        -0.0924
+      ],
+      "timestamp_sec": 6.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_012_f01358.png",
+      "filename": "frame_012_f01358.png"
+    },
+    {
+      "index": 13,
+      "position": [
+        1.3422,
+        -0.0866,
+        -1.2607
+      ],
+      "forward": [
+        -0.9766,
+        -0.2039,
+        -0.0682
+      ],
+      "timestamp_sec": 6.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_013_f01471.png",
+      "filename": "frame_013_f01471.png"
+    },
+    {
+      "index": 14,
+      "position": [
+        1.1677,
+        -0.0866,
+        -0.703
+      ],
+      "forward": [
+        -0.9686,
+        -0.2262,
+        0.1029
+      ],
+      "timestamp_sec": 7.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_014_f01671.png",
+      "filename": "frame_014_f01671.png"
+    },
+    {
+      "index": 15,
+      "position": [
+        1.1258,
+        -0.0915,
+        -0.7053
+      ],
+      "forward": [
+        -0.9621,
+        -0.2306,
+        0.1453
+      ],
+      "timestamp_sec": 7.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_015_f01739.png",
+      "filename": "frame_015_f01739.png"
+    },
+    {
+      "index": 16,
+      "position": [
+        1.0206,
+        -0.1227,
+        -0.1448
+      ],
+      "forward": [
+        -0.9634,
+        -0.2417,
+        0.1161
+      ],
+      "timestamp_sec": 8.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_016_f01841.png",
+      "filename": "frame_016_f01841.png"
+    },
+    {
+      "index": 17,
+      "position": [
+        1.0253,
+        -0.1236,
+        0.2379
+      ],
+      "forward": [
+        -0.9683,
+        -0.21,
+        0.1351
+      ],
+      "timestamp_sec": 8.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_017_f01909.png",
+      "filename": "frame_017_f01909.png"
+    },
+    {
+      "index": 18,
+      "position": [
+        0.8957,
+        -0.139,
+        1.2438
+      ],
+      "forward": [
+        -0.9772,
+        -0.2123,
+        0.006
+      ],
+      "timestamp_sec": 9.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_018_f02076.png",
+      "filename": "frame_018_f02076.png"
+    },
+    {
+      "index": 19,
+      "position": [
+        0.9371,
+        -0.1609,
+        1.8175
+      ],
+      "forward": [
+        -0.9726,
+        -0.2012,
+        0.1164
+      ],
+      "timestamp_sec": 9.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_019_f02222.png",
+      "filename": "frame_019_f02222.png"
+    },
+    {
+      "index": 20,
+      "position": [
+        0.9455,
+        -0.1714,
+        1.8709
+      ],
+      "forward": [
+        -0.9532,
+        -0.1495,
+        0.2629
+      ],
+      "timestamp_sec": 10.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_020_f02312.png",
+      "filename": "frame_020_f02312.png"
+    },
+    {
+      "index": 21,
+      "position": [
+        0.9156,
+        -0.0838,
+        1.6835
+      ],
+      "forward": [
+        -0.919,
+        -0.158,
+        0.3613
+      ],
+      "timestamp_sec": 10.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_021_f02358.png",
+      "filename": "frame_021_f02358.png"
+    },
+    {
+      "index": 22,
+      "position": [
+        -0.127,
+        0.0412,
+        0.7822
+      ],
+      "forward": [
+        0.2918,
+        -0.1548,
+        0.9439
+      ],
+      "timestamp_sec": 11.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_022_f02559.png",
+      "filename": "frame_022_f02559.png"
+    },
+    {
+      "index": 23,
+      "position": [
+        -0.5044,
+        0.0374,
+        0.9718
+      ],
+      "forward": [
+        0.793,
+        -0.1219,
+        0.597
+      ],
+      "timestamp_sec": 11.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_023_f02627.png",
+      "filename": "frame_023_f02627.png"
+    },
+    {
+      "index": 24,
+      "position": [
+        -1.5898,
+        -0.0064,
+        1.7844
+      ],
+      "forward": [
+        0.9383,
+        -0.0997,
+        0.3312
+      ],
+      "timestamp_sec": 12.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_024_f02794.png",
+      "filename": "frame_024_f02794.png"
+    },
+    {
+      "index": 25,
+      "position": [
+        -1.7624,
+        -0.0056,
+        1.651
+      ],
+      "forward": [
+        0.9465,
+        -0.1203,
+        0.2995
+      ],
+      "timestamp_sec": 12.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_025_f02863.png",
+      "filename": "frame_025_f02863.png"
+    },
+    {
+      "index": 26,
+      "position": [
+        -1.667,
+        -0.0242,
+        1.6975
+      ],
+      "forward": [
+        0.9624,
+        -0.1157,
+        0.2458
+      ],
+      "timestamp_sec": 13.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_026_f02942.png",
+      "filename": "frame_026_f02942.png"
+    },
+    {
+      "index": 27,
+      "position": [
+        -1.6785,
+        -0.0461,
+        1.5223
+      ],
+      "forward": [
+        0.9752,
+        -0.1442,
+        0.1681
+      ],
+      "timestamp_sec": 13.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_027_f03043.png",
+      "filename": "frame_027_f03043.png"
+    },
+    {
+      "index": 28,
+      "position": [
+        -1.6016,
+        -0.0374,
+        1.0815
+      ],
+      "forward": [
+        0.9814,
+        -0.1871,
+        -0.0418
+      ],
+      "timestamp_sec": 14.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_028_f03233.png",
+      "filename": "frame_028_f03233.png"
+    },
+    {
+      "index": 29,
+      "position": [
+        -1.4533,
+        -0.0357,
+        0.8219
+      ],
+      "forward": [
+        0.9827,
+        -0.1848,
+        -0.0144
+      ],
+      "timestamp_sec": 14.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_029_f03356.png",
+      "filename": "frame_029_f03356.png"
+    },
+    {
+      "index": 30,
+      "position": [
+        -1.5052,
+        -0.0214,
+        0.6653
+      ],
+      "forward": [
+        0.9828,
+        -0.1757,
+        -0.0565
+      ],
+      "timestamp_sec": 15.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_030_f03446.png",
+      "filename": "frame_030_f03446.png"
+    },
+    {
+      "index": 31,
+      "position": [
+        -1.0027,
+        -0.0645,
+        0.1243
+      ],
+      "forward": [
+        0.9299,
+        -0.2011,
+        -0.308
+      ],
+      "timestamp_sec": 15.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_031_f03559.png",
+      "filename": "frame_031_f03559.png"
+    },
+    {
+      "index": 32,
+      "position": [
+        -0.9931,
+        -0.0711,
+        0.0717
+      ],
+      "forward": [
+        0.9413,
+        -0.2024,
+        -0.27
+      ],
+      "timestamp_sec": 16.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_032_f03605.png",
+      "filename": "frame_032_f03605.png"
+    },
+    {
+      "index": 33,
+      "position": [
+        -0.716,
+        -0.0697,
+        -0.3835
+      ],
+      "forward": [
+        0.9213,
+        -0.2086,
+        -0.3281
+      ],
+      "timestamp_sec": 16.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_033_f03750.png",
+      "filename": "frame_033_f03750.png"
+    },
+    {
+      "index": 34,
+      "position": [
+        -1.5185,
+        -0.0775,
+        -1.5569
+      ],
+      "forward": [
+        0.9777,
+        -0.2057,
+        0.0428
+      ],
+      "timestamp_sec": 17.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_034_f03929.png",
+      "filename": "frame_034_f03929.png"
+    },
+    {
+      "index": 35,
+      "position": [
+        -1.506,
+        -0.0835,
+        -1.5562
+      ],
+      "forward": [
+        0.9794,
+        -0.1979,
+        0.0392
+      ],
+      "timestamp_sec": 17.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_035_f03942.png",
+      "filename": "frame_035_f03942.png"
+    },
+    {
+      "index": 36,
+      "position": [
+        -1.543,
+        -0.0306,
+        -1.9859
+      ],
+      "forward": [
+        0.9554,
+        -0.2,
+        -0.2174
+      ],
+      "timestamp_sec": 18.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_036_f04131.png",
+      "filename": "frame_036_f04131.png"
+    },
+    {
+      "index": 37,
+      "position": [
+        -1.5977,
+        -0.0126,
+        -1.7285
+      ],
+      "forward": [
+        0.9503,
+        -0.1864,
+        -0.2492
+      ],
+      "timestamp_sec": 18.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_037_f04255.png",
+      "filename": "frame_037_f04255.png"
+    },
+    {
+      "index": 38,
+      "position": [
+        -1.5846,
+        -0.0121,
+        -1.7162
+      ],
+      "forward": [
+        0.9536,
+        -0.1776,
+        -0.243
+      ],
+      "timestamp_sec": 19.0,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_038_f04268.png",
+      "filename": "frame_038_f04268.png"
+    },
+    {
+      "index": 39,
+      "position": [
+        -1.584,
+        -0.012,
+        -1.7017
+      ],
+      "forward": [
+        0.9532,
+        -0.1705,
+        -0.2495
+      ],
+      "timestamp_sec": 19.5,
+      "frame_url": "/outputs/indoor/texture_experiment_video_20261101_142811/frames/frame_039_f04380.png",
+      "filename": "frame_039_f04380.png"
+    }
+  ]
 }

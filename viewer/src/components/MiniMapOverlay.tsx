@@ -57,7 +57,8 @@ export const MiniMapOverlay: React.FC<MiniMapOverlayProps> = ({
     }
 
     // Draw Architectural Regions
-    walkthroughMetadata.architectural_regions.forEach((reg) => {
+    const regions = ((walkthroughMetadata as any).architectural_regions || []) as any[];
+    regions.forEach((reg: any) => {
       const [ox1, oz1, ox2, oz2] = reg.bounds;
       const [px1, py1] = worldToCanvas(ox1, oz1);
       const [px2, py2] = worldToCanvas(ox2, oz2);
@@ -89,12 +90,12 @@ export const MiniMapOverlay: React.FC<MiniMapOverlayProps> = ({
     });
 
     // Draw Video Capture Trajectory Route
-    const trajectory = walkthroughMetadata.camera_trajectory;
+    const trajectory = ((walkthroughMetadata as any).camera_trajectory || []) as any[];
     ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
     ctx.lineWidth = 2;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
-    trajectory.forEach((pt, idx) => {
+    trajectory.forEach((pt: any, idx: number) => {
       const [cx, cy] = worldToCanvas(pt.position[0], pt.position[2]);
       if (idx === 0) ctx.moveTo(cx, cy);
       else ctx.lineTo(cx, cy);
