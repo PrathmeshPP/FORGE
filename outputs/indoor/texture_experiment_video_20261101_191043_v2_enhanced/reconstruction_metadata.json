@@ -1,0 +1,68 @@
+{
+  "dataset_name": "November 1, 2026 \u2014 19:10:43 (Hostel Room B 314 V2 High-Quality Texture Enhancement)",
+  "source_video": {
+    "path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+    "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454",
+    "duration_sec": 149.02,
+    "resolution": [
+      480,
+      854
+    ],
+    "fps": 29.93
+  },
+  "enhancement_metrics": {
+    "num_curated_keyframes": 60,
+    "baseline_mean_sharpness": 164.26,
+    "optimized_mean_sharpness": 165.51,
+    "sharpness_gain_pct": 0.76,
+    "exposure_harmonization_target_lum": 138.21,
+    "min_cos_theta": 0.18,
+    "angular_weight_exponent": 3.0,
+    "mesh_vertices": 188079,
+    "mesh_triangles": 374537,
+    "direct_photographic_coverage_pct": 76.08,
+    "direct_photographic_faces": 284953,
+    "active_cameras_used": 60,
+    "seam_faces_consolidated": 20277,
+    "atlas_resolution": [
+      8192,
+      8192
+    ],
+    "tile_dimensions": [
+      720,
+      1281
+    ],
+    "tile_aspect_ratio": 0.5621,
+    "native_frame_aspect_ratio": 0.5621,
+    "aspect_ratio_distortion": 0.0,
+    "spatial_extents_m": [
+      1.24,
+      0.78,
+      1.58
+    ],
+    "floor_level_y": -0.34
+  },
+  "deliverables": {
+    "glb": {
+      "path": "outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\room_photographic_model.glb",
+      "size_bytes": 61738876,
+      "sha256": "8acd8e87164728f04ebecc358df620e36ad425189ad7dd99eef0a864bfb64532"
+    },
+    "obj": {
+      "path": "outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\room_photographic_model_canonical.obj",
+      "size_bytes": 46853746,
+      "sha256": "5fcf65c4ef4ae2a7c53bda93672b82fac80857045479b65762f9a630075aa621"
+    },
+    "ply": {
+      "path": "outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\room_photographic_model.ply",
+      "size_bytes": 14461336,
+      "sha256": "a1f195f3dad584ad03fcfc24b2ad4d29183ed9b173e20e15e420fd04463947a4"
+    },
+    "texture_atlas": {
+      "path": "outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\texture_atlas.png",
+      "size_bytes": 33459120,
+      "sha256": "4f1da8397e9058859a964de400969b2b7e5f99cdb5ccf1a42733bb79dd9cdb6a"
+    }
+  },
+  "total_pipeline_time_sec": 165.2
+}

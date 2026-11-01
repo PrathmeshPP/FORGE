@@ -1,0 +1,43 @@
+[21:50:58] ============================================================================
+[21:50:58]   F.O.R.G.E. HIGH-QUALITY PHOTOGRAPHIC TEXTURE ENHANCEMENT (V2)
+[21:50:58]   Dataset: November 1, 2026 — 19:10:43 (Hostel Room B 314 Complete Survey)
+[21:50:58]   V1 Source:   C:\Users\25beevdt025\Desktop\FORGE\outputs\indoor\texture_experiment_video_20261101_191043
+[21:50:58]   V2 Output:   C:\Users\25beevdt025\Desktop\FORGE\outputs\indoor\texture_experiment_video_20261101_191043_v2_enhanced
+[21:50:58] ============================================================================
+[21:50:58] 
+[Step 1] Preserving existing geometry and point clouds unchanged...
+[21:50:58]   [+] Copied raw/filtered point clouds and baseline meshes.
+[21:50:58]   Loaded mesh geometry: 188,079 vertices, 374,537 triangles (STRICTLY PRESERVED).
+[21:50:58] [*] Re-evaluating original video frames for maximum optical sharpness and exposure consistency...
+[21:51:35]   Target reference luminance: 138.21 (frame range: 124.2 - 147.2)
+[21:51:36] [+] Frame optimization complete: 60 frames enhanced.
+[21:51:36]     Baseline Sharpness: 164.26 -> Optimized Sharpness: 165.51 (+0.8%)
+[21:51:36] [Step 2] Completed frame optimization in 37.63s.
+[21:51:36] 
+[Step 3] Initializing Enhanced Photographic Texture Engine...
+[21:51:36] [*] Evaluating multi-view photographic visibility with cubic normal weighting...
+[21:51:40] [*] Building face adjacency graph for topological chart consolidation...
+[21:51:43] [*] Performing 3 passes of topological chart consolidation...
+[21:51:49]     Consolidation pass 1: unified 17,032 seam faces into continuous charts.
+[21:51:56]     Consolidation pass 2: unified 2,720 seam faces into continuous charts.
+[21:52:03]     Consolidation pass 3: unified 525 seam faces into continuous charts.
+[21:52:03]   Direct Photographic Surface Coverage: 76.08% (284,953 / 374,537 faces)
+[21:52:03]   Active Camera Views Employed: 60 / 60
+[21:52:03] [*] Synthesizing aspect-preserving 8K atlas for 60 active cameras...
+[21:52:57] [+] Aspect-preserving 8K atlas saved (31.91 MB, tile: 720x1281, aspect: 0.5621)
+[21:52:57] [*] Writing aspect-precise textured OBJ: room_photographic_model_canonical.obj...
+[21:53:12] [*] Converting and embedding enhanced texture into GLB: room_photographic_model.glb...
+[21:53:28]   [+] Saved enhanced textured GLB (58.88 MB)
+[21:53:28] [*] Sampling enhanced photographic vertex colors: room_photographic_model.ply...
+[21:53:35] [Step 3-5] Completed in 118.75s.
+[21:53:35] 
+[Step 6] Rendering Calibrated Previews & Side-by-Side Comparisons...
+[21:53:36]     Rendered comparison: 01_room_overview
+[21:53:36]     Rendered comparison: 02_entrance_and_door
+[21:53:37]     Rendered comparison: 03_bed1_and_wardrobes
+[21:53:38]     Rendered comparison: 04_bed2_red_mattress
+[21:53:38]     Rendered comparison: 05_bed3_cooler_and_rack
+[21:53:39]     Rendered comparison: 06_bed1_floral_closeup
+[21:53:39]     Rendered comparison: 07_wardrobe_suitcases_closeup
+[21:53:40]     Rendered comparison: 08_top_down_floorplan
+[21:53:40] [+] Saved master before/after comparative panel to: texture_enhancement_comparison_panel.png

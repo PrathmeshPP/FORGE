@@ -1,0 +1,602 @@
+[
+  {
+    "rank": 0,
+    "orig_frame_index": 39,
+    "opt_frame_index": 39,
+    "timestamp_sec": 1.303,
+    "orig_sharpness": 99.23,
+    "opt_sharpness": 99.23,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_00_f0039_01.30s.png",
+    "harmonized_gain": 1.106
+  },
+  {
+    "rank": 1,
+    "orig_frame_index": 144,
+    "opt_frame_index": 144,
+    "timestamp_sec": 4.811,
+    "orig_sharpness": 99.4,
+    "opt_sharpness": 99.4,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_01_f0144_04.81s.png",
+    "harmonized_gain": 1.109
+  },
+  {
+    "rank": 2,
+    "orig_frame_index": 179,
+    "opt_frame_index": 179,
+    "timestamp_sec": 5.981,
+    "orig_sharpness": 100.46,
+    "opt_sharpness": 100.46,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_02_f0179_05.98s.png",
+    "harmonized_gain": 1.11
+  },
+  {
+    "rank": 3,
+    "orig_frame_index": 254,
+    "opt_frame_index": 254,
+    "timestamp_sec": 8.487,
+    "orig_sharpness": 102.91,
+    "opt_sharpness": 102.91,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_03_f0254_08.49s.png",
+    "harmonized_gain": 1.108
+  },
+  {
+    "rank": 4,
+    "orig_frame_index": 300,
+    "opt_frame_index": 300,
+    "timestamp_sec": 10.024,
+    "orig_sharpness": 104.45,
+    "opt_sharpness": 104.45,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_04_f0300_10.02s.png",
+    "harmonized_gain": 1.113
+  },
+  {
+    "rank": 5,
+    "orig_frame_index": 445,
+    "opt_frame_index": 446,
+    "timestamp_sec": 14.902,
+    "orig_sharpness": 97.91,
+    "opt_sharpness": 104.44,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_05_f0446_14.90s.png",
+    "harmonized_gain": 1.023
+  },
+  {
+    "rank": 6,
+    "orig_frame_index": 492,
+    "opt_frame_index": 492,
+    "timestamp_sec": 16.439,
+    "orig_sharpness": 245.02,
+    "opt_sharpness": 245.02,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_06_f0492_16.44s.png",
+    "harmonized_gain": 1.023
+  },
+  {
+    "rank": 7,
+    "orig_frame_index": 573,
+    "opt_frame_index": 573,
+    "timestamp_sec": 19.145,
+    "orig_sharpness": 317.74,
+    "opt_sharpness": 317.74,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_07_f0573_19.14s.png",
+    "harmonized_gain": 0.982
+  },
+  {
+    "rank": 8,
+    "orig_frame_index": 605,
+    "opt_frame_index": 605,
+    "timestamp_sec": 20.214,
+    "orig_sharpness": 331.75,
+    "opt_sharpness": 331.75,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_08_f0605_20.21s.png",
+    "harmonized_gain": 0.997
+  },
+  {
+    "rank": 9,
+    "orig_frame_index": 697,
+    "opt_frame_index": 697,
+    "timestamp_sec": 23.288,
+    "orig_sharpness": 327.18,
+    "opt_sharpness": 327.18,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_09_f0697_23.29s.png",
+    "harmonized_gain": 0.987
+  },
+  {
+    "rank": 10,
+    "orig_frame_index": 783,
+    "opt_frame_index": 783,
+    "timestamp_sec": 26.162,
+    "orig_sharpness": 332.33,
+    "opt_sharpness": 332.33,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_10_f0783_26.16s.png",
+    "harmonized_gain": 0.967
+  },
+  {
+    "rank": 11,
+    "orig_frame_index": 857,
+    "opt_frame_index": 857,
+    "timestamp_sec": 28.634,
+    "orig_sharpness": 314.14,
+    "opt_sharpness": 314.14,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_11_f0857_28.63s.png",
+    "harmonized_gain": 1.003
+  },
+  {
+    "rank": 12,
+    "orig_frame_index": 962,
+    "opt_frame_index": 962,
+    "timestamp_sec": 32.142,
+    "orig_sharpness": 315.37,
+    "opt_sharpness": 315.37,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_12_f0962_32.14s.png",
+    "harmonized_gain": 1.005
+  },
+  {
+    "rank": 13,
+    "orig_frame_index": 972,
+    "opt_frame_index": 964,
+    "timestamp_sec": 32.209,
+    "orig_sharpness": 307.92,
+    "opt_sharpness": 308.14,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_13_f0964_32.21s.png",
+    "harmonized_gain": 1.005
+  },
+  {
+    "rank": 14,
+    "orig_frame_index": 1090,
+    "opt_frame_index": 1090,
+    "timestamp_sec": 36.419,
+    "orig_sharpness": 191.6,
+    "opt_sharpness": 191.6,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_14_f1090_36.42s.png",
+    "harmonized_gain": 0.961
+  },
+  {
+    "rank": 15,
+    "orig_frame_index": 1157,
+    "opt_frame_index": 1157,
+    "timestamp_sec": 38.658,
+    "orig_sharpness": 184.33,
+    "opt_sharpness": 184.33,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_15_f1157_38.66s.png",
+    "harmonized_gain": 0.939
+  },
+  {
+    "rank": 16,
+    "orig_frame_index": 1200,
+    "opt_frame_index": 1200,
+    "timestamp_sec": 40.094,
+    "orig_sharpness": 147.98,
+    "opt_sharpness": 147.98,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_16_f1200_40.09s.png",
+    "harmonized_gain": 0.972
+  },
+  {
+    "rank": 17,
+    "orig_frame_index": 1303,
+    "opt_frame_index": 1303,
+    "timestamp_sec": 43.536,
+    "orig_sharpness": 134.14,
+    "opt_sharpness": 134.14,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_17_f1303_43.54s.png",
+    "harmonized_gain": 0.974
+  },
+  {
+    "rank": 18,
+    "orig_frame_index": 1408,
+    "opt_frame_index": 1408,
+    "timestamp_sec": 47.044,
+    "orig_sharpness": 125.36,
+    "opt_sharpness": 125.36,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_18_f1408_47.04s.png",
+    "harmonized_gain": 0.971
+  },
+  {
+    "rank": 19,
+    "orig_frame_index": 1428,
+    "opt_frame_index": 1428,
+    "timestamp_sec": 47.712,
+    "orig_sharpness": 115.41,
+    "opt_sharpness": 115.41,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_19_f1428_47.71s.png",
+    "harmonized_gain": 0.991
+  },
+  {
+    "rank": 20,
+    "orig_frame_index": 1500,
+    "opt_frame_index": 1500,
+    "timestamp_sec": 50.118,
+    "orig_sharpness": 118.64,
+    "opt_sharpness": 118.64,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_20_f1500_50.12s.png",
+    "harmonized_gain": 0.997
+  },
+  {
+    "rank": 21,
+    "orig_frame_index": 1606,
+    "opt_frame_index": 1606,
+    "timestamp_sec": 53.66,
+    "orig_sharpness": 106.17,
+    "opt_sharpness": 106.17,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_21_f1606_53.66s.png",
+    "harmonized_gain": 1.054
+  },
+  {
+    "rank": 22,
+    "orig_frame_index": 1659,
+    "opt_frame_index": 1659,
+    "timestamp_sec": 55.43,
+    "orig_sharpness": 91.12,
+    "opt_sharpness": 91.12,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_22_f1659_55.43s.png",
+    "harmonized_gain": 0.949
+  },
+  {
+    "rank": 23,
+    "orig_frame_index": 1770,
+    "opt_frame_index": 1770,
+    "timestamp_sec": 59.139,
+    "orig_sharpness": 109.46,
+    "opt_sharpness": 109.46,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_23_f1770_59.14s.png",
+    "harmonized_gain": 0.978
+  },
+  {
+    "rank": 24,
+    "orig_frame_index": 1820,
+    "opt_frame_index": 1820,
+    "timestamp_sec": 60.81,
+    "orig_sharpness": 152.68,
+    "opt_sharpness": 152.68,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_24_f1820_60.81s.png",
+    "harmonized_gain": 0.97
+  },
+  {
+    "rank": 25,
+    "orig_frame_index": 1869,
+    "opt_frame_index": 1869,
+    "timestamp_sec": 62.447,
+    "orig_sharpness": 115.07,
+    "opt_sharpness": 115.07,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_25_f1869_62.45s.png",
+    "harmonized_gain": 0.952
+  },
+  {
+    "rank": 26,
+    "orig_frame_index": 1981,
+    "opt_frame_index": 1981,
+    "timestamp_sec": 66.189,
+    "orig_sharpness": 132.55,
+    "opt_sharpness": 132.55,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_26_f1981_66.19s.png",
+    "harmonized_gain": 1.038
+  },
+  {
+    "rank": 27,
+    "orig_frame_index": 2069,
+    "opt_frame_index": 2069,
+    "timestamp_sec": 69.129,
+    "orig_sharpness": 162.23,
+    "opt_sharpness": 162.23,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_27_f2069_69.13s.png",
+    "harmonized_gain": 1.049
+  },
+  {
+    "rank": 28,
+    "orig_frame_index": 2153,
+    "opt_frame_index": 2158,
+    "timestamp_sec": 72.103,
+    "orig_sharpness": 174.05,
+    "opt_sharpness": 180.93,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_28_f2158_72.10s.png",
+    "harmonized_gain": 0.994
+  },
+  {
+    "rank": 29,
+    "orig_frame_index": 2183,
+    "opt_frame_index": 2183,
+    "timestamp_sec": 72.938,
+    "orig_sharpness": 185.51,
+    "opt_sharpness": 185.51,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_29_f2183_72.94s.png",
+    "harmonized_gain": 0.998
+  },
+  {
+    "rank": 30,
+    "orig_frame_index": 2230,
+    "opt_frame_index": 2226,
+    "timestamp_sec": 74.375,
+    "orig_sharpness": 138.8,
+    "opt_sharpness": 180.23,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_30_f2226_74.38s.png",
+    "harmonized_gain": 0.995
+  },
+  {
+    "rank": 31,
+    "orig_frame_index": 2372,
+    "opt_frame_index": 2372,
+    "timestamp_sec": 79.253,
+    "orig_sharpness": 59.75,
+    "opt_sharpness": 59.75,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_31_f2372_79.25s.png",
+    "harmonized_gain": 1.015
+  },
+  {
+    "rank": 32,
+    "orig_frame_index": 2452,
+    "opt_frame_index": 2452,
+    "timestamp_sec": 81.926,
+    "orig_sharpness": 100.76,
+    "opt_sharpness": 100.76,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_32_f2452_81.93s.png",
+    "harmonized_gain": 1.064
+  },
+  {
+    "rank": 33,
+    "orig_frame_index": 2525,
+    "opt_frame_index": 2533,
+    "timestamp_sec": 84.632,
+    "orig_sharpness": 105.5,
+    "opt_sharpness": 110.38,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_33_f2533_84.63s.png",
+    "harmonized_gain": 1.019
+  },
+  {
+    "rank": 34,
+    "orig_frame_index": 2570,
+    "opt_frame_index": 2570,
+    "timestamp_sec": 85.869,
+    "orig_sharpness": 118.08,
+    "opt_sharpness": 118.08,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_34_f2570_85.87s.png",
+    "harmonized_gain": 1.002
+  },
+  {
+    "rank": 35,
+    "orig_frame_index": 2644,
+    "opt_frame_index": 2644,
+    "timestamp_sec": 88.341,
+    "orig_sharpness": 116.49,
+    "opt_sharpness": 116.49,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_35_f2644_88.34s.png",
+    "harmonized_gain": 1.056
+  },
+  {
+    "rank": 36,
+    "orig_frame_index": 2700,
+    "opt_frame_index": 2700,
+    "timestamp_sec": 90.212,
+    "orig_sharpness": 121.31,
+    "opt_sharpness": 121.31,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_36_f2700_90.21s.png",
+    "harmonized_gain": 1.042
+  },
+  {
+    "rank": 37,
+    "orig_frame_index": 2781,
+    "opt_frame_index": 2781,
+    "timestamp_sec": 92.918,
+    "orig_sharpness": 118.54,
+    "opt_sharpness": 118.54,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_37_f2781_92.92s.png",
+    "harmonized_gain": 1.029
+  },
+  {
+    "rank": 38,
+    "orig_frame_index": 2829,
+    "opt_frame_index": 2829,
+    "timestamp_sec": 94.522,
+    "orig_sharpness": 117.07,
+    "opt_sharpness": 117.07,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_38_f2829_94.52s.png",
+    "harmonized_gain": 1.056
+  },
+  {
+    "rank": 39,
+    "orig_frame_index": 2967,
+    "opt_frame_index": 2967,
+    "timestamp_sec": 99.133,
+    "orig_sharpness": 145.29,
+    "opt_sharpness": 145.29,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_39_f2967_99.13s.png",
+    "harmonized_gain": 1.0
+  },
+  {
+    "rank": 40,
+    "orig_frame_index": 2983,
+    "opt_frame_index": 2983,
+    "timestamp_sec": 99.668,
+    "orig_sharpness": 163.82,
+    "opt_sharpness": 163.82,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_40_f2983_99.67s.png",
+    "harmonized_gain": 1.0
+  },
+  {
+    "rank": 41,
+    "orig_frame_index": 3048,
+    "opt_frame_index": 3048,
+    "timestamp_sec": 101.839,
+    "orig_sharpness": 144.73,
+    "opt_sharpness": 144.73,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_41_f3048_101.84s.png",
+    "harmonized_gain": 0.992
+  },
+  {
+    "rank": 42,
+    "orig_frame_index": 3157,
+    "opt_frame_index": 3157,
+    "timestamp_sec": 105.481,
+    "orig_sharpness": 128.89,
+    "opt_sharpness": 128.89,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_42_f3157_105.48s.png",
+    "harmonized_gain": 0.997
+  },
+  {
+    "rank": 43,
+    "orig_frame_index": 3226,
+    "opt_frame_index": 3226,
+    "timestamp_sec": 107.787,
+    "orig_sharpness": 124.98,
+    "opt_sharpness": 124.98,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_43_f3226_107.79s.png",
+    "harmonized_gain": 1.031
+  },
+  {
+    "rank": 44,
+    "orig_frame_index": 3344,
+    "opt_frame_index": 3350,
+    "timestamp_sec": 111.93,
+    "orig_sharpness": 141.71,
+    "opt_sharpness": 145.12,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_44_f3350_111.93s.png",
+    "harmonized_gain": 0.969
+  },
+  {
+    "rank": 45,
+    "orig_frame_index": 3386,
+    "opt_frame_index": 3386,
+    "timestamp_sec": 113.133,
+    "orig_sharpness": 156.55,
+    "opt_sharpness": 156.55,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_45_f3386_113.13s.png",
+    "harmonized_gain": 0.961
+  },
+  {
+    "rank": 46,
+    "orig_frame_index": 3431,
+    "opt_frame_index": 3431,
+    "timestamp_sec": 114.636,
+    "orig_sharpness": 154.1,
+    "opt_sharpness": 154.1,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_46_f3431_114.64s.png",
+    "harmonized_gain": 0.962
+  },
+  {
+    "rank": 47,
+    "orig_frame_index": 3557,
+    "opt_frame_index": 3557,
+    "timestamp_sec": 118.846,
+    "orig_sharpness": 151.44,
+    "opt_sharpness": 151.44,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_47_f3557_118.85s.png",
+    "harmonized_gain": 0.966
+  },
+  {
+    "rank": 48,
+    "orig_frame_index": 3574,
+    "opt_frame_index": 3574,
+    "timestamp_sec": 119.414,
+    "orig_sharpness": 149.79,
+    "opt_sharpness": 149.79,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_48_f3574_119.41s.png",
+    "harmonized_gain": 0.966
+  },
+  {
+    "rank": 49,
+    "orig_frame_index": 3677,
+    "opt_frame_index": 3677,
+    "timestamp_sec": 122.856,
+    "orig_sharpness": 177.73,
+    "opt_sharpness": 177.73,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_49_f3677_122.86s.png",
+    "harmonized_gain": 1.013
+  },
+  {
+    "rank": 50,
+    "orig_frame_index": 3788,
+    "opt_frame_index": 3788,
+    "timestamp_sec": 126.564,
+    "orig_sharpness": 223.55,
+    "opt_sharpness": 223.55,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_50_f3788_126.56s.png",
+    "harmonized_gain": 0.977
+  },
+  {
+    "rank": 51,
+    "orig_frame_index": 3790,
+    "opt_frame_index": 3788,
+    "timestamp_sec": 126.564,
+    "orig_sharpness": 219.24,
+    "opt_sharpness": 223.55,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_51_f3788_126.56s.png",
+    "harmonized_gain": 0.977
+  },
+  {
+    "rank": 52,
+    "orig_frame_index": 3867,
+    "opt_frame_index": 3867,
+    "timestamp_sec": 129.204,
+    "orig_sharpness": 205.93,
+    "opt_sharpness": 205.93,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_52_f3867_129.20s.png",
+    "harmonized_gain": 0.976
+  },
+  {
+    "rank": 53,
+    "orig_frame_index": 3946,
+    "opt_frame_index": 3946,
+    "timestamp_sec": 131.843,
+    "orig_sharpness": 198.11,
+    "opt_sharpness": 198.11,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_53_f3946_131.84s.png",
+    "harmonized_gain": 0.989
+  },
+  {
+    "rank": 54,
+    "orig_frame_index": 4056,
+    "opt_frame_index": 4056,
+    "timestamp_sec": 135.519,
+    "orig_sharpness": 182.57,
+    "opt_sharpness": 182.57,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_54_f4056_135.52s.png",
+    "harmonized_gain": 1.058
+  },
+  {
+    "rank": 55,
+    "orig_frame_index": 4118,
+    "opt_frame_index": 4118,
+    "timestamp_sec": 137.59,
+    "orig_sharpness": 184.02,
+    "opt_sharpness": 184.02,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_55_f4118_137.59s.png",
+    "harmonized_gain": 1.093
+  },
+  {
+    "rank": 56,
+    "orig_frame_index": 4236,
+    "opt_frame_index": 4237,
+    "timestamp_sec": 141.566,
+    "orig_sharpness": 155.78,
+    "opt_sharpness": 159.66,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_56_f4237_141.57s.png",
+    "harmonized_gain": 1.07
+  },
+  {
+    "rank": 57,
+    "orig_frame_index": 4308,
+    "opt_frame_index": 4312,
+    "timestamp_sec": 144.072,
+    "orig_sharpness": 164.31,
+    "opt_sharpness": 167.68,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_57_f4312_144.07s.png",
+    "harmonized_gain": 1.102
+  },
+  {
+    "rank": 58,
+    "orig_frame_index": 4312,
+    "opt_frame_index": 4312,
+    "timestamp_sec": 144.072,
+    "orig_sharpness": 167.68,
+    "opt_sharpness": 167.68,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_58_f4312_144.07s.png",
+    "harmonized_gain": 1.102
+  },
+  {
+    "rank": 59,
+    "orig_frame_index": 4431,
+    "opt_frame_index": 4431,
+    "timestamp_sec": 148.048,
+    "orig_sharpness": 177.2,
+    "opt_sharpness": 177.2,
+    "file_path": "C:\\Users\\25beevdt025\\Desktop\\FORGE\\outputs\\indoor\\texture_experiment_video_20261101_191043_v2_enhanced\\enhanced_frames\\enhanced_frame_59_f4431_148.05s.png",
+    "harmonized_gain": 1.102
+  }
+]
