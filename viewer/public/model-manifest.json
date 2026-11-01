@@ -6,6 +6,60 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_room_digital_twin_nov1",
+      "scene_name": "indoor_room_digital_twin_nov1",
+      "display_name": "HOSTEL ROOM B 314 \u2014 COMPLETE DIGITAL TWIN (NOV 1)",
+      "subtitle": "Renderify-Style Walkable Environment + 13 Discrete Furniture Objects + 4K Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "COMPLETE 3D DIGITAL TWIN",
+      "description": "Authentic 3D indoor digital twin reconstructed from WhatsApp Video 2026-11-01 at 14.28.11.mp4. Full 360-degree loop encompassing entrance door, dual single beds, metal wardrobes with luggage, study desks with drawers, office chairs, standing air cooler, clothes drying rack, and window curtains. Features 100% collision-bounded walkable interior, interactive object selection, top-down mini-map, and zero-distortion 4096x4096 photographic texture atlas.",
+      "vertex_count": 172740,
+      "triangle_count": 57580,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Photographic Room GLB (Embedded 4K Atlas)",
+          "glb_url": "/models/digital_twin_nov1/room_model.glb",
+          "available": true
+        },
+        "architectural_shell": {
+          "type": "glb",
+          "label": "Architectural Shell GLB (Walls, Floor, Ceiling, Openings)",
+          "glb_url": "/models/digital_twin_nov1/architectural_shell.glb",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Wavefront OBJ + MTL (with vn and vt)",
+          "obj_url": "/models/digital_twin_nov1/room_model_canonical.obj",
+          "mtl_url": "/models/digital_twin_nov1/room_model_canonical.mtl",
+          "available": true
+        },
+        "point_cloud": {
+          "type": "ply",
+          "label": "Dense RGB Point Cloud (102,936 points)",
+          "ply_url": "/models/digital_twin_nov1/room_model.ply",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.0,
+          1.42,
+          -2.5
+        ],
+        "target": [
+          0.0,
+          1.42,
+          1.5
+        ]
+      },
+      "walkthrough_supported": true,
+      "walkthrough_metadata_url": "/data/indoor_walkthrough_metadata.json"
+    },
+    {
       "id": "indoor_controlled_three_frame_small_scene",
       "scene_name": "indoor_controlled_three_frame_small_scene",
       "display_name": "CONTROLLED 3-FRAME RECONSTRUCTION \u2014 STUDY DESK & WINDOW WALL",
