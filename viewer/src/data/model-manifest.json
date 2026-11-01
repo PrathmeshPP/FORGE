@@ -6,6 +6,152 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_nov1_180530_photographic",
+      "scene_name": "indoor_nov1_180530_photographic",
+      "display_name": "RASHTRIYA RAKSHA UNIVERSITY \u2014 NSCS LOBBY & CORRIDOR",
+      "subtitle": "Ray-Oriented Screened Poisson + 8K Photographic Multi-View Texture Atlas",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "FRESH INDEPENDENT DIGITAL TWIN",
+      "description": "Full 3D photographic digital twin reconstructed from WhatsApp Video 2026-11-01 at 18.05.30.mp4. Captures the National Security Council Secretariat lobby, 3-seater waiting chairs, brown architectural switchboard frame, corridor pillars with Fire Exit signage, multi-story courtyard window facade, and concrete staircase well.",
+      "vertex_count": 209332,
+      "triangle_count": 420000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured GLB (Embedded 8K Photographic Atlas)",
+          "glb_url": "/outputs/indoor/texture_experiment_video_20261101_180530/room_photographic_model.glb",
+          "file_size_bytes": 59029852,
+          "sha256": "64184589dd587b1afeb8e3eb3fcbf4433a22689ef5cc304a7ad95365a8094f54",
+          "available": true
+        },
+        "textured_obj": {
+          "type": "obj",
+          "label": "Wavefront OBJ + MTL (with vt Texture Coordinates)",
+          "obj_url": "/outputs/indoor/texture_experiment_video_20261101_180530/room_photographic_model_canonical.obj",
+          "mtl_url": "/outputs/indoor/texture_experiment_video_20261101_180530/room_photographic_model_canonical.mtl",
+          "file_size_bytes": 52696218,
+          "sha256": "4fdb0518fb96e56c85c3d4f4932bfd44318508afe7075f8430669f0ea68d5b6f",
+          "available": true
+        },
+        "photographic_ply": {
+          "type": "ply",
+          "label": "Photographic Vertex PLY (High-Density Mesh)",
+          "ply_url": "/outputs/indoor/texture_experiment_video_20261101_180530/room_photographic_model.ply",
+          "file_size_bytes": 16136258,
+          "sha256": "96f3a7ef525d3c1ef8c816ccd4970175a436e1d4a354f154e24012913ea3ab47",
+          "available": true
+        }
+      },
+      "thumbnail_url": "/models/indoor_nov1_180530/preview_thumbnail.png",
+      "previews": {
+        "eye_level": "/models/indoor_nov1_180530/preview_eye_level.png",
+        "top": "/models/indoor_nov1_180530/preview_top.png"
+      },
+      "metadata_url": "/models/indoor_nov1_180530/metadata.json",
+      "initial_camera": {
+        "position": [
+          0.0,
+          0.46,
+          -2.2
+        ],
+        "target": [
+          0.0,
+          0.41400000000000003,
+          0.5
+        ]
+      },
+      "camera_presets": [
+        {
+          "id": "entrance",
+          "label": "Lobby Entrance",
+          "description": "Standing at lobby entrance looking along the corridor",
+          "position": [
+            0.0,
+            0.46,
+            -2.2
+          ],
+          "target": [
+            0.0,
+            0.41400000000000003,
+            0.5
+          ]
+        },
+        {
+          "id": "waiting_chairs",
+          "label": "Waiting Chairs & NSCS Banner",
+          "description": "Close perspective on the 3-seater metal chairs and display wall",
+          "position": [
+            -0.8,
+            0.322,
+            -0.6
+          ],
+          "target": [
+            -1.6,
+            0.276,
+            0.0
+          ]
+        },
+        {
+          "id": "window_facade",
+          "label": "Courtyard Window Wall",
+          "description": "Facing the multi-story architectural glass facade and pillars",
+          "position": [
+            0.6,
+            0.46,
+            0.5
+          ],
+          "target": [
+            1.8,
+            0.46,
+            0.5
+          ]
+        },
+        {
+          "id": "staircase",
+          "label": "Staircase Well",
+          "description": "Looking down the descending staircase with handrail and wall gallery",
+          "position": [
+            0.3,
+            0.46,
+            1.4
+          ],
+          "target": [
+            0.8,
+            0.138,
+            2.4
+          ]
+        },
+        {
+          "id": "overview",
+          "label": "High-Angle Overview",
+          "description": "Overhead inspection showing complete lobby and corridor boundaries",
+          "position": [
+            0.0,
+            3.2,
+            -3.8
+          ],
+          "target": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "reconstruction_run_id": "texture_experiment_video_20261101_180530",
+      "source_video_provenance": {
+        "path": "C:\\Users\\25beevdt025\\Downloads\\WhatsApp Video 2026-11-01 at 18.05.30.mp4",
+        "sha256": "8ce0c6e964249772acdabddf0346c10fe804964878dffc529a498a7cf5298f42",
+        "duration_sec": 95.31,
+        "resolution": [
+          480,
+          854
+        ],
+        "fps": 29.92
+      }
+    },
+    {
       "id": "indoor_nov1_candidate_c_photographic",
       "scene_name": "indoor_nov1_candidate_c_photographic",
       "display_name": "HOSTEL ROOM B 314 \u2014 CANDIDATE C (OBJECT-AWARE 8K TWIN)",
