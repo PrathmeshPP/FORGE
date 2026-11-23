@@ -33,7 +33,8 @@ export const App: React.FC = () => {
         if (found) return found;
       }
     } catch (_) { }
-    return scenes[0];
+    // Default to the requested November 1 — 19:10:43 V3 Photographic reconstruction
+    return scenes.find((s) => s.id === 'indoor_nov1_191043_photographic_v3') || scenes[0];
   })();
 
   // App State

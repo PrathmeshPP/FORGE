@@ -77,10 +77,17 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   const navEngineRef = useRef<FirstPersonNavigationEngine | null>(null);
   const clockRef = useRef<THREE.Clock>(new THREE.Clock());
 
-  const initialSpawn: [number, number, number] = scene.id === 'indoor_candidate_b_sharpest'
-    ? [0.12, 0.09, -1.27]
-    : [0.0, 1.42, -2.2];
-  const [playerPos, setPlayerPos] = useState<[number, number, number]>(initialSpawn);
+  const getInitialSpawn = (scId: string): [number, number, number] => {
+    if (scId.includes('191043') || scId === 'indoor_nov1_191043_photographic_v3') {
+      return [-0.12, 0.12, -0.20];
+    }
+    if (scId === 'indoor_candidate_b_sharpest') {
+      return [0.12, 0.09, -1.27];
+    }
+    return [0.0, 1.42, -2.2];
+  };
+
+  const [playerPos, setPlayerPos] = useState<[number, number, number]>(getInitialSpawn(scene.id));
   const [playerYaw, setPlayerYaw] = useState<number>(Math.PI);
   const [collisionStatus, setCollisionStatus] = useState<'CLEAR' | 'SLIDING' | 'BOUNDARY'>('CLEAR');
   const [fps, setFps] = useState<number>(60);
@@ -94,10 +101,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       navEngineRef.current.deactivate();
       navEngineRef.current = null;
     }
-    const spawn: [number, number, number] = scene.id === 'indoor_candidate_b_sharpest'
-      ? [0.12, 0.09, -1.27]
-      : [0.0, 1.42, -2.2];
-    setPlayerPos(spawn);
+    setPlayerPos(getInitialSpawn(scene.id));
   }, [scene.id]);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -233,6 +237,38 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     controls.panSpeed = 0.8;
     controls.target.set(...scene.initial_camera.target);
     controlsRef.current = controls;
+
+    (window as any).__viewportCamera = camera;
+    (window as any).__viewportControls = controls;
+    (window as any).__viewportRenderer = renderer;
+    (window as any).__viewportScene = threeScene;
+    (window as any).__setClayMode = (enabled: boolean) => {
+      threeScene.traverse((obj) => {
+        if ((obj as any).isMesh && (obj as any).material) {
+          const mesh = obj as any;
+          if (enabled) {
+            if (!mesh.__origMat) mesh.__origMat = mesh.material;
+            mesh.material = new THREE.MeshStandardMaterial({
+              color: 0xc8cdd0,
+              roughness: 0.82,
+              metalness: 0.05,
+              side: THREE.DoubleSide
+            });
+          } else if (mesh.__origMat) {
+            mesh.material = mesh.__origMat;
+          }
+        }
+      });
+    };
+    (window as any).__setCameraExactPose = (pos: number[], quat: number[], fovDeg?: number) => {
+      if (controls) controls.enabled = false;
+      camera.position.set(pos[0], pos[1], pos[2]);
+      camera.quaternion.set(quat[0], quat[1], quat[2], quat[3]);
+      if (fovDeg) {
+        camera.fov = fovDeg;
+        camera.updateProjectionMatrix();
+      }
+    };
 
     // Balanced Lighting for Architectural Interiors
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
@@ -412,13 +448,20 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     if (!cameraRef.current || !rendererRef.current || !controlsRef.current) return;
 
     controlsRef.current.enabled = false;
-    cameraRef.current.near = 0.05;
+    const isRoomV3 = scene.id.includes('191043') || scene.id === 'indoor_nov1_191043_photographic_v3';
+    cameraRef.current.near = isRoomV3 ? 0.02 : 0.05;
     cameraRef.current.far = 100;
     cameraRef.current.updateProjectionMatrix();
+
+    if (isRoomV3) {
+      cameraRef.current.position.set(-0.12, 0.12, -0.20);
+      cameraRef.current.rotation.set(0, Math.PI, 0);
+    }
 
     if (gridHelperRef.current) gridHelperRef.current.visible = false;
     if (axesHelperRef.current) axesHelperRef.current.visible = false;
 
+    const modelBox = modelGroupRef.current ? new THREE.Box3().setFromObject(modelGroupRef.current) : null;
     if (!navEngineRef.current) {
       navEngineRef.current = new FirstPersonNavigationEngine(
         cameraRef.current,
@@ -448,7 +491,9 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
             }
           },
         },
-        scene.id
+        scene.id,
+        modelBox,
+        (scene as any).navigation_metadata
       );
     }
 
@@ -919,22 +964,20 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         </div>
       )}
 
-      {/* Walkthrough HUD, Pointer Lock, Telemetry & Controls */}
-      {isIndoor && (
-        <WalkthroughHUD
-          isWalkthroughMode={isWalkthrough}
-          onEnterWalkthrough={handleEnterWalkthrough}
-          onExitWalkthrough={handleExitWalkthrough}
-          playerPos={playerPos}
-          playerYaw={playerYaw}
-          collisionStatus={collisionStatus}
-          fps={fps}
-          isPointerLocked={isPointerLocked}
-          onRequestPointerLock={() => {
-            if (navEngineRef.current) navEngineRef.current.requestPointerLock();
-          }}
-        />
-      )}
+      {/* Walkthrough HUD, Pointer Lock, Telemetry & Controls (Universal across all scenes) */}
+      <WalkthroughHUD
+        isWalkthroughMode={isWalkthrough}
+        onEnterWalkthrough={handleEnterWalkthrough}
+        onExitWalkthrough={handleExitWalkthrough}
+        playerPos={playerPos}
+        playerYaw={playerYaw}
+        collisionStatus={collisionStatus}
+        fps={fps}
+        isPointerLocked={isPointerLocked}
+        onRequestPointerLock={() => {
+          if (navEngineRef.current) navEngineRef.current.requestPointerLock();
+        }}
+      />
 
       {/* Live Floor Plan Mini-Map */}
       {isIndoor && isWalkthrough && (

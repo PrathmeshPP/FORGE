@@ -200,3 +200,4 @@ artifact_dest = ARTIFACTS_DIR / "master_room_recovery_comparison_panel.png"
 canvas.save(str(artifact_dest), quality=92)
 print(f"[+] Copied to Artifacts: {artifact_dest}", flush=True)
 print("=" * 76, flush=True)
+

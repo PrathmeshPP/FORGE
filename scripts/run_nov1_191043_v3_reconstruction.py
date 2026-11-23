@@ -20,6 +20,7 @@ import os
 import sys
 import json
 import time
+import math
 import shutil
 import hashlib
 from pathlib import Path
@@ -310,9 +311,27 @@ class V3PhotographicTextureEngine:
         M_act = len(active_cams)
         log(f"[*] Synthesizing aspect-preserving 8K atlas for {M_act} active cameras...")
 
-        cols, rows = 11, 6
-        tile_w = 720
-        tile_h = 1281
+        # Dynamically compute optimal grid layout preserving frame aspect ratio without overflow
+        aspect = self.W_native / self.H_native
+        best_area = 0
+        best_layout = (11, 6, 720, 1281)
+        border_pad = 8
+        for c in range(1, M_act + 1):
+            r = math.ceil(M_act / c)
+            avail_w = atlas_size - (c + 1) * border_pad
+            avail_h = atlas_size - (r + 1) * border_pad
+            if avail_w <= 0 or avail_h <= 0:
+                continue
+            max_tw = avail_w / c
+            max_th = avail_h / r
+            tw_cand = min(max_tw, max_th * aspect)
+            th_cand = tw_cand / aspect
+            area = tw_cand * th_cand
+            if area > best_area:
+                best_area = area
+                best_layout = (c, r, int(math.floor(tw_cand)), int(math.floor(th_cand)))
+
+        cols, rows, tile_w, tile_h = best_layout
         pad_x = (atlas_size - (cols * tile_w)) // (cols + 1)
         pad_y = (atlas_size - (rows * tile_h)) // (rows + 1)
 
@@ -414,8 +433,12 @@ class V3PhotographicTextureEngine:
                 u_cam = np.clip(u / float(self.W_native), 0.0, 1.0)
                 v_cam = np.clip(v / float(self.H_native), 0.0, 1.0)
 
-                u_atlas = (x_off + u_cam * tw) * inv_atlas
-                v_atlas = 1.0 - (y_off + v_cam * th) * inv_atlas
+                x_pad = 2
+                y_pad = 2
+                eff_tw = max(1, tw - 2 * x_pad)
+                eff_th = max(1, th - 2 * y_pad)
+                u_atlas = (x_off + x_pad + u_cam * eff_tw) * inv_atlas
+                v_atlas = 1.0 - (y_off + y_pad + v_cam * eff_th) * inv_atlas
 
                 for k in range(3):
                     f_obj.write(f"vt {u_atlas[k]:.6f} {v_atlas[k]:.6f}\n")

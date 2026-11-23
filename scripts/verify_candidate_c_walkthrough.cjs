@@ -22,7 +22,7 @@ async function run() {
   });
 
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
-  
+
   const consoleLogs = [];
   page.on('console', msg => {
     const text = msg.text();

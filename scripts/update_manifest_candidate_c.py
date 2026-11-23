@@ -141,3 +141,4 @@ for p in manifest_paths:
     with open(p, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     print(f"Updated {p} (total scenes: {len(data['scenes'])})")
+

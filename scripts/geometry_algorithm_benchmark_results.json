@@ -1,0 +1,114 @@
+[
+  {
+    "algorithm": "Screened Poisson (depth=9, 8mm)",
+    "runtime_sec": 23.51,
+    "vertices": 922878,
+    "triangles": 1843696,
+    "is_watertight": false,
+    "is_edge_manifold": true,
+    "is_vertex_manifold": false,
+    "boundary_edges": 8086,
+    "strict_non_manifold_edges": 0,
+    "connected_components": 20,
+    "surface_area_m2": 11.67,
+    "bounds_min": [
+      -0.574,
+      -0.497,
+      -0.152
+    ],
+    "bounds_max": [
+      0.623,
+      0.296,
+      1.465
+    ],
+    "span_xyz": [
+      1.197,
+      0.793,
+      1.617
+    ]
+  },
+  {
+    "algorithm": "Screened Poisson (depth=10, 8mm)",
+    "runtime_sec": 11.69,
+    "vertices": 497829,
+    "triangles": 994170,
+    "is_watertight": false,
+    "is_edge_manifold": true,
+    "is_vertex_manifold": false,
+    "boundary_edges": 5688,
+    "strict_non_manifold_edges": 0,
+    "connected_components": 16,
+    "surface_area_m2": 11.356,
+    "bounds_min": [
+      -0.575,
+      -0.495,
+      -0.152
+    ],
+    "bounds_max": [
+      0.622,
+      0.296,
+      1.465
+    ],
+    "span_xyz": [
+      1.196,
+      0.791,
+      1.617
+    ]
+  },
+  {
+    "algorithm": "Scalable TSDF Volume (15mm)",
+    "runtime_sec": 0.28,
+    "vertices": 33686,
+    "triangles": 61489,
+    "is_watertight": false,
+    "is_edge_manifold": true,
+    "is_vertex_manifold": false,
+    "boundary_edges": 6359,
+    "strict_non_manifold_edges": 0,
+    "connected_components": 5,
+    "surface_area_m2": 5.48,
+    "bounds_min": [
+      -0.57,
+      -0.488,
+      -0.124
+    ],
+    "bounds_max": [
+      0.609,
+      0.295,
+      1.467
+    ],
+    "span_xyz": [
+      1.179,
+      0.784,
+      1.591
+    ]
+  },
+  {
+    "algorithm": "Multi-Scale BPA (8-64mm)",
+    "runtime_sec": 9.06,
+    "vertices": 134284,
+    "triangles": 246608,
+    "is_watertight": false,
+    "is_edge_manifold": true,
+    "is_vertex_manifold": false,
+    "boundary_edges": 30582,
+    "strict_non_manifold_edges": 0,
+    "connected_components": 42,
+    "surface_area_m2": 7.909,
+    "bounds_min": [
+      -0.572,
+      -0.497,
+      -0.155
+    ],
+    "bounds_max": [
+      0.623,
+      0.291,
+      1.467
+    ],
+    "span_xyz": [
+      1.195,
+      0.788,
+      1.622
+    ]
+  }
+]

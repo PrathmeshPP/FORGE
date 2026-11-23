@@ -266,3 +266,4 @@ def generate_stage_visualizations():
 
 if __name__ == "__main__":
     generate_stage_visualizations()
+

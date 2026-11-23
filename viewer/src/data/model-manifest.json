@@ -6,6 +6,182 @@
   "baseline_freeze": "outputs/accuracy_experiment/sprint9_video_to_viewer_release",
   "scenes": [
     {
+      "id": "indoor_candidate_lab_185144_boundary_aligned",
+      "scene_name": "indoor_candidate_lab_185144_boundary_aligned",
+      "display_name": "RRU COMPUTER LAB \u2014 BOUNDARY-ALIGNED CANDIDATE",
+      "subtitle": "Computer Lab 18.51.44 (105 Frames, Desktop Alignment, Room Boundary & Texture Fixes)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "FRESH CANDIDATE (BOUNDARY-ALIGNED)",
+      "description": "Fresh reconstruction of the RRU computer lab with desktop alignment, room boundary preservation, and aspect-preserving photographic texture mapping from 105 curated frames.",
+      "vertex_count": 299207,
+      "triangle_count": 600000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured Candidate GLB (73.37 MB, 0 OOR UVs)",
+          "glb_url": "/outputs/indoor/candidate_lab_185144_boundary_aligned/room_photographic_model.glb",
+          "file_size_bytes": 76933328,
+          "sha256": "d251e291635d341987ccd40d8c4a6743b1279053d1dbe3884147be4acd731cac",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.4,
+          1.1,
+          1.8
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.2
+        ]
+      },
+      "reconstruction_run_id": "candidate_lab_185144_boundary_aligned",
+      "source_video_provenance": {
+        "path": "C:\\\\Users\\\\25beevdt025\\\\Downloads\\\\WhatsApp Video 2026-11-01 at 18.51.44.mp4",
+        "sha256": "90938be3001909aa97764605e23e57cea59f9b32bf11334eb725cfd3f806811b"
+      }
+    },
+    {
+      "id": "indoor_candidate_b314_191043_boundary_aligned",
+      "scene_name": "indoor_candidate_b314_191043_boundary_aligned",
+      "display_name": "HOSTEL ROOM B-314 \u2014 BOUNDARY-ALIGNED CANDIDATE",
+      "subtitle": "Room B-314 (88 Frames, Desktop Alignment, Room Boundary & Texture Fixes)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "FRESH VALIDATION (BOUNDARY-ALIGNED)",
+      "description": "Validation digital twin of Hostel Room B-314 reconstructed using identical parameters tuned on the computer lab without retuning. Bed frame posts, floor levelness, and room boundaries are preserved.",
+      "vertex_count": 299398,
+      "triangle_count": 600000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured Candidate GLB (71.76 MB, 0 OOR UVs)",
+          "glb_url": "/outputs/indoor/candidate_b314_191043_boundary_aligned/room_photographic_model.glb",
+          "file_size_bytes": 75248524,
+          "sha256": "8ee6e5566ca1bc540c82e6113dfb1117a31060f445f5e63ba308dcc8a9327801",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          2.2,
+          1.4,
+          1.8
+        ],
+        "target": [
+          0.0,
+          0.2,
+          0.0
+        ]
+      },
+      "reconstruction_run_id": "candidate_b314_191043_boundary_aligned",
+      "source_video_provenance": {
+        "path": "C:\\\\Users\\\\25beevdt025\\\\Downloads\\\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+        "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454"
+      }
+    },
+    {
+      "id": "indoor_improved_lab_185144",
+      "scene_name": "indoor_improved_lab_185144",
+      "display_name": "RRU COMPUTER LAB \u2014 LEARNED DEPTH FUSION CANDIDATE",
+      "subtitle": "Computer Lab 18.51.44 (Learned Fusion + Rigid Leveling + Watertight Mesh)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "CANDIDATE DIGITAL TWIN (LEARNED FUSION)",
+      "description": "High-fidelity digital twin of the RRU computer lab reconstructed with learned depth confidence filtering and Screened Poisson meshing. Eliminates edge webbing between chair/desk legs and the aisle floor while preserving complete floor geometry and leveling the scene (0.20 deg tilt).",
+      "vertex_count": 304401,
+      "triangle_count": 600000,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured Candidate GLB (72.48 MB, 0 OOR UVs)",
+          "glb_url": "/outputs/indoor/improved_quality_lab_185144/room_photographic_model.glb",
+          "file_size_bytes": 76001004,
+          "sha256": "4fc392ca6939f86d8e503983171f7ae1e0854ac4686f0baebc6d13329fac692f",
+          "available": true
+        },
+        "gaussian_splat": {
+          "type": "ply",
+          "label": "3D Gaussian Splatting PLY (13.55 MB)",
+          "ply_url": "/outputs/indoor/improved_quality_lab_185144/point_gaussian_splat.ply",
+          "file_size_bytes": 14208000,
+          "sha256": "e114ef2c9bdddac305ac5e66dc9a0a70cf505a53570c2498296d0a57487c4fee",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          0.4,
+          1.1,
+          1.8
+        ],
+        "target": [
+          0.0,
+          0.0,
+          0.2
+        ]
+      },
+      "reconstruction_run_id": "improved_quality_lab_185144",
+      "source_video_provenance": {
+        "path": "C:\\\\Users\\\\25beevdt025\\\\Downloads\\\\WhatsApp Video 2026-11-01 at 18.51.44.mp4",
+        "sha256": "90938be3001909aa97764605e23e57cea59f9b32bf11334eb725cfd3f806811b"
+      }
+    },
+    {
+      "id": "indoor_improved_b314_191043",
+      "scene_name": "indoor_improved_b314_191043",
+      "display_name": "HOSTEL ROOM B-314 \u2014 LEARNED DEPTH FUSION CANDIDATE",
+      "subtitle": "Hostel Room B-314 (Learned Fusion + Rigid Leveling + Watertight Mesh)",
+      "category": "Indoor Architecture",
+      "acceptance_status": "PRODUCTION_PASS",
+      "acceptance_label": "VALIDATION CANDIDATE (ZERO RETUNING)",
+      "description": "Validation digital twin of Hostel Room B-314 reconstructed using identical parameters tuned on the computer lab without retuning. Tubular red bed frames and legs are cleanly separated from the floor, floor tilt is leveled from 3.8 deg down to 0.40 deg, and mesh boundary edges are reduced to 1,189.",
+      "vertex_count": 255392,
+      "triangle_count": 510375,
+      "default_representation": "gltf_glb",
+      "representations": {
+        "gltf_glb": {
+          "type": "glb",
+          "label": "Textured Candidate GLB (65.61 MB, 0 OOR UVs)",
+          "glb_url": "/outputs/indoor/improved_quality_b314_191043/room_photographic_model.glb",
+          "file_size_bytes": 68798544,
+          "sha256": "c26163afceee042676ec2009106e4b74645ba58077828f9c5e923701d14d5e10",
+          "available": true
+        },
+        "gaussian_splat": {
+          "type": "ply",
+          "label": "3D Gaussian Splatting PLY (7.27 MB)",
+          "ply_url": "/outputs/indoor/improved_quality_b314_191043/point_gaussian_splat.ply",
+          "file_size_bytes": 7623000,
+          "sha256": "d8e22b21683297a2793299c4bdaaad6763ebcfb5a796d36afb7565b9f8d63f1c",
+          "available": true
+        }
+      },
+      "initial_camera": {
+        "position": [
+          2.2,
+          1.4,
+          1.8
+        ],
+        "target": [
+          0.0,
+          0.2,
+          0.0
+        ]
+      },
+      "reconstruction_run_id": "improved_quality_b314_191043",
+      "source_video_provenance": {
+        "path": "C:\\\\Users\\\\25beevdt025\\\\Downloads\\\\WhatsApp Video 2026-11-01 at 19.10.43.mp4",
+        "sha256": "de9ae93a43cb15eaa62339d159d920592439d827a587851c1ed45b5d42052454"
+      }
+    },
+    {
       "id": "indoor_my_movie_4_adaptive",
       "scene_name": "indoor_my_movie_4_adaptive",
       "display_name": "MY MOVIE 4 \u2014 ADAPTIVE 3D DIGITAL TWIN (VIEW-DEPENDENT LOD)",

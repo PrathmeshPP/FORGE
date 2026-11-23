@@ -1,12 +1,14 @@
 /**
- * F.O.R.G.E. - First-Person Indoor Navigation & Collision Engine.
+ * F.O.R.G.E. - Universal First-Person Navigation & Collision Engine
  * 
  * Implements:
  * 1. PointerLock mouse-controlled camera (pitch & yaw with vertical clamping).
- * 2. WASD movement with Shift sprinting and wall-sliding physics.
- * 3. Spatial collision against obstacles (bed, desk, wardrobe, room walls).
- * 4. Floor height tracking and void/hole fall-protection clamping.
- * 5. Dynamic Euclidean proximity matching against original video capture trajectory.
+ * 2. W, A, S, D horizontal translation relative to camera yaw.
+ * 3. U key for moving vertically upward into the air; P key for moving vertically downward.
+ * 4. Normalised diagonal & 3D compound movement (e.g. W+D, W+U, A+P never exceed max speed).
+ * 5. Scale-aware collision and sliding physics against furniture and boundary walls.
+ * 6. Protection against page scrolling (e.preventDefault on all movement keys) and input field conflicts.
+ * 7. Window blur safety resets so the camera never drifts.
  */
 
 import * as THREE from 'three';
@@ -37,6 +39,7 @@ export interface NavigationCallbacks {
   onExitRequest?: () => void;
   onToggleMiniMap?: () => void;
   onTogglePointCloud?: () => void;
+  onModeChange?: (mode: 'WALK' | 'FLY') => void;
 }
 
 export class FirstPersonNavigationEngine {
@@ -51,29 +54,36 @@ export class FirstPersonNavigationEngine {
   private pitch: number = 0;
   private isPointerLocked: boolean = false;
   private isSprinting: boolean = false;
+  private isFlyMode: boolean = false;
 
   private moveState = {
     forward: false,
     backward: false,
     left: false,
     right: false,
+    up: false,
+    down: false,
   };
 
   // Config parameters
-  private playerRadius = 0.20;
-  private eyeHeight = 1.42;
-  private floorY = 0.0;
-  private walkSpeed = 1.30;
-  private sprintSpeed = 2.30;
+  private playerRadius = 0.08;
+  private eyeHeight = 0.395;
+  private floorY = -0.275;
+  private ceilingY = 0.375;
+  private walkSpeed = 0.45;
+  private sprintSpeed = 0.85;
+  private verticalSpeed = 0.40;
   private mouseSensitivity = 0.0022;
 
-  // Collision boundaries
-  private xMin = -2.40;
-  private xMax = 2.40;
-  private zMin = -3.10;
-  private zMax = 3.10;
+  // Spatial boundaries
+  private xMin = -0.56;
+  private xMax = 0.50;
+  private yMin = -0.22;
+  private yMax = 0.33;
+  private zMin = -0.68;
+  private zMax = 0.76;
 
-  private regions: ArchitecturalRegion[] = ((walkthroughMetadata as any).architectural_regions || []) as ArchitecturalRegion[];
+  private regions: ArchitecturalRegion[] = [];
   private trajectory: TrajectoryPoint[] = ((walkthroughMetadata as any).camera_trajectory || []) as TrajectoryPoint[];
   private lastClosestIndex: number = -1;
 
@@ -82,42 +92,170 @@ export class FirstPersonNavigationEngine {
   private onKeyUpBound = this.onKeyUp.bind(this);
   private onMouseMoveBound = this.onMouseMove.bind(this);
   private onPointerLockChangeBound = this.onPointerLockChange.bind(this);
+  private onBlurBound = this.onBlur.bind(this);
+  private onWheelBound = this.onWheel.bind(this);
 
   constructor(
     camera: THREE.PerspectiveCamera,
     domElement: HTMLElement,
     callbacks: NavigationCallbacks = {},
-    sceneId?: string
+    sceneId?: string,
+    modelBoundingBox?: THREE.Box3 | null,
+    sceneNavigationData?: any
   ) {
     this.camera = camera;
     this.domElement = domElement;
     this.callbacks = callbacks;
 
-    if (sceneId === 'indoor_candidate_b_sharpest') {
+    if (sceneNavigationData && (sceneNavigationData.bounds_xyz || sceneNavigationData.bounds)) {
+      const b = sceneNavigationData.bounds_xyz || sceneNavigationData.bounds;
+      this.floorY = sceneNavigationData.floor_y ?? -0.275;
+      this.ceilingY = sceneNavigationData.ceiling_y ?? 0.375;
+      this.eyeHeight = sceneNavigationData.eye_height ?? (this.floorY + (this.ceilingY - this.floorY) * 0.42);
+      this.walkSpeed = sceneNavigationData.walk_speed ?? 0.45;
+      this.sprintSpeed = sceneNavigationData.sprint_speed ?? 0.85;
+      this.verticalSpeed = sceneNavigationData.vertical_speed ?? 0.40;
+      this.playerRadius = sceneNavigationData.player_radius ?? 0.08;
+
+      this.xMin = b[0];
+      this.yMin = sceneNavigationData.floor_y !== undefined ? sceneNavigationData.floor_y + 0.05 : b[1];
+      this.zMin = b[2];
+      this.xMax = b[3];
+      this.yMax = sceneNavigationData.ceiling_y !== undefined ? sceneNavigationData.ceiling_y - 0.05 : b[4];
+      this.zMax = b[5];
+
+      if (sceneNavigationData.collision_obstacles && sceneNavigationData.collision_obstacles.length > 0) {
+        this.regions = sceneNavigationData.collision_obstacles;
+      }
+      if (sceneNavigationData.camera_trajectory && sceneNavigationData.camera_trajectory.length > 0) {
+        this.trajectory = sceneNavigationData.camera_trajectory;
+      }
+      if (sceneNavigationData.spawn_position) {
+        const sp = sceneNavigationData.spawn_position;
+        this.position = new THREE.Vector3(sp[0], sp[1], sp[2]);
+      } else {
+        this.position = new THREE.Vector3((b[0] + b[3]) / 2, this.eyeHeight, (b[2] + b[5]) / 2);
+      }
+      if (sceneNavigationData.spawn_yaw_deg !== undefined) {
+        this.yaw = (sceneNavigationData.spawn_yaw_deg * Math.PI) / 180;
+      } else {
+        this.yaw = Math.PI;
+      }
+      this.pitch = 0.0;
+    } else {
+      const isHostelRoomV3 = !sceneId || sceneId.includes('191043') || sceneId === 'indoor_nov1_191043_photographic_v3';
+
+    if (isHostelRoomV3) {
+      // Precise geometry for November 1 — 19:10:43 (Hostel Room B 314 V3 Photographic)
+      this.floorY = -0.275;
+      this.ceilingY = 0.375;
+      this.eyeHeight = 0.395;
+      this.walkSpeed = 0.45;
+      this.sprintSpeed = 0.85;
+      this.verticalSpeed = 0.40;
+      this.playerRadius = 0.08;
+
+      this.xMin = -0.56;
+      this.xMax = 0.50;
+      this.yMin = -0.22; // Floor boundary (cannot clip into floor)
+      this.yMax = 0.33;  // Ceiling boundary (cannot fly through ceiling)
+      this.zMin = -0.68;
+      this.zMax = 0.76;
+
+      // Realistic obstacle collision regions for Hostel Room B 314
+      this.regions = [
+        {
+          id: 'wardrobes',
+          name: 'Twin Steel Wardrobes',
+          type: 'obstacle',
+          bounds: [-0.60, -0.70, -0.28, -0.10],
+          height_range: [-0.28, 0.35],
+          label: 'Wardrobes'
+        },
+        {
+          id: 'bed1',
+          name: 'Bed 1 (Floral Mattress)',
+          type: 'obstacle',
+          bounds: [-0.60, 0.15, -0.20, 0.75],
+          height_range: [-0.28, 0.10],
+          label: 'Bed 1'
+        },
+        {
+          id: 'bed2',
+          name: 'Bed 2 (Maroon Mattress)',
+          type: 'obstacle',
+          bounds: [0.18, -0.70, 0.55, 0.35],
+          height_range: [-0.28, 0.10],
+          label: 'Bed 2'
+        },
+        {
+          id: 'cooler',
+          name: 'Bed 3 & Air Cooler',
+          type: 'obstacle',
+          bounds: [0.10, 0.35, 0.55, 0.75],
+          height_range: [-0.28, 0.20],
+          label: 'Cooler & Bed 3'
+        }
+      ];
+
+      // Set initial player spawn inside the open central aisle of the room
+      this.position = new THREE.Vector3(-0.12, 0.12, -0.20);
+      this.yaw = Math.PI; // Look towards +Z down the length of the room
+      this.pitch = 0.0;
+    } else if (sceneId === 'indoor_candidate_b_sharpest') {
       this.eyeHeight = 0.58;
       this.floorY = -0.4867;
-      this.xMin = -1.15;
-      this.xMax = 0.95;
-      this.zMin = -2.05;
-      this.zMax = 1.35;
-      this.walkSpeed = 1.15;
-      this.sprintSpeed = 2.10;
+      this.xMin = -2.50;
+      this.xMax = 2.50;
+      this.zMin = -3.50;
+      this.zMax = 2.50;
+      this.walkSpeed = 1.20;
+      this.sprintSpeed = 2.20;
+      this.verticalSpeed = 1.10;
       this.position = new THREE.Vector3(0.12, 0.09, -1.27);
       this.yaw = Math.PI;
+      this.pitch = 0.0;
+    } else if (modelBoundingBox && !modelBoundingBox.isEmpty()) {
+      const size = modelBoundingBox.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z, 2.0);
+      const padding = Math.max(2.0, maxDim * 0.35);
+
+      this.xMin = modelBoundingBox.min.x - padding;
+      this.xMax = modelBoundingBox.max.x + padding;
+      this.yMin = modelBoundingBox.min.y - 1.0;
+      this.yMax = modelBoundingBox.max.y + padding;
+      this.zMin = modelBoundingBox.min.z - padding;
+      this.zMax = modelBoundingBox.max.z + padding;
+      this.floorY = modelBoundingBox.min.y;
+
+      const speedScale = Math.max(1.0, Math.min(8.0, maxDim / 6.0));
+      this.walkSpeed = 1.30 * speedScale;
+      this.sprintSpeed = 2.60 * speedScale;
+      this.verticalSpeed = 1.20 * speedScale;
+
+      this.position = this.camera.position.clone();
+      const euler = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
+      this.yaw = euler.y;
+      this.pitch = Math.max(-1.48, Math.min(1.48, euler.x));
     } else {
       this.eyeHeight = (walkthroughMetadata.player_physics as any)?.eye_height || 1.42;
       this.floorY = (walkthroughMetadata.floor_elevation as any)?.mean_y || 0.0;
       this.walkSpeed = (walkthroughMetadata.player_physics as any)?.walk_speed || 1.30;
-      this.sprintSpeed = (walkthroughMetadata.player_physics as any)?.sprint_speed || 2.30;
-      this.xMin = (walkthroughMetadata.spatial_bounds as any)?.x_min || -2.40;
-      this.xMax = (walkthroughMetadata.spatial_bounds as any)?.x_max || 2.40;
-      this.zMin = (walkthroughMetadata.spatial_bounds as any)?.z_min || -3.10;
-      this.zMax = (walkthroughMetadata.spatial_bounds as any)?.z_max || 3.10;
-      const spawn = (walkthroughMetadata.player_physics as any)?.spawn_position || [0.0, 1.42, -2.2];
-      this.position = new THREE.Vector3(spawn[0], spawn[1], spawn[2]);
-      this.yaw = Math.PI; // Face towards interior down central aisle
+      this.sprintSpeed = (walkthroughMetadata.player_physics as any)?.sprint_speed || 2.40;
+      this.verticalSpeed = 1.20;
+      this.xMin = (walkthroughMetadata.spatial_bounds as any)?.x_min || -5.0;
+      this.xMax = (walkthroughMetadata.spatial_bounds as any)?.x_max || 5.0;
+      this.zMin = (walkthroughMetadata.spatial_bounds as any)?.z_min || -6.0;
+      this.zMax = (walkthroughMetadata.spatial_bounds as any)?.z_max || 6.0;
+
+      this.position = this.camera.position.clone();
+      const euler = new THREE.Euler().setFromQuaternion(this.camera.quaternion, 'YXZ');
+      this.yaw = euler.y;
+      this.pitch = Math.max(-1.48, Math.min(1.48, euler.x));
     }
-    this.pitch = 0.0;
+    }
+
+    this.syncCamera();
   }
 
   public activate(): void {
@@ -125,6 +263,8 @@ export class FirstPersonNavigationEngine {
     document.addEventListener('keyup', this.onKeyUpBound);
     document.addEventListener('mousemove', this.onMouseMoveBound);
     document.addEventListener('pointerlockchange', this.onPointerLockChangeBound);
+    window.addEventListener('blur', this.onBlurBound);
+    this.domElement.addEventListener('wheel', this.onWheelBound, { passive: false });
 
     this.requestPointerLock();
     this.syncCamera();
@@ -135,7 +275,10 @@ export class FirstPersonNavigationEngine {
     document.removeEventListener('keyup', this.onKeyUpBound);
     document.removeEventListener('mousemove', this.onMouseMoveBound);
     document.removeEventListener('pointerlockchange', this.onPointerLockChangeBound);
+    window.removeEventListener('blur', this.onBlurBound);
+    this.domElement.removeEventListener('wheel', this.onWheelBound);
 
+    this.onBlur();
     this.exitPointerLock();
   }
 
@@ -161,34 +304,70 @@ export class FirstPersonNavigationEngine {
     this.yaw -= e.movementX * this.mouseSensitivity;
     this.pitch -= e.movementY * this.mouseSensitivity;
 
-    // Clamp pitch between -85 and +85 degrees
+    // Clamp pitch between -85 and +85 degrees to prevent flipping
     const maxPitch = (85 * Math.PI) / 180;
     this.pitch = Math.max(-maxPitch, Math.min(maxPitch, this.pitch));
   }
 
+  private onWheel(e: WheelEvent): void {
+    if (!this.isPointerLocked) return;
+    e.preventDefault();
+    const zoomDir = new THREE.Vector3();
+    this.camera.getWorldDirection(zoomDir);
+    const zoomAmount = (e.deltaY > 0 ? -0.05 : 0.05) * (this.isSprinting ? 2.0 : 1.0);
+    this.position.addScaledVector(zoomDir, zoomAmount);
+    this.syncCamera();
+  }
+
   private onKeyDown(e: KeyboardEvent): void {
+    const target = e.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+      return;
+    }
+
     switch (e.code) {
       case 'KeyW':
+      case 'ArrowUp':
         this.moveState.forward = true;
+        e.preventDefault();
         break;
       case 'KeyS':
+      case 'ArrowDown':
         this.moveState.backward = true;
+        e.preventDefault();
         break;
       case 'KeyA':
+      case 'ArrowLeft':
         this.moveState.left = true;
+        e.preventDefault();
         break;
       case 'KeyD':
+      case 'ArrowRight':
         this.moveState.right = true;
+        e.preventDefault();
+        break;
+      case 'KeyU':
+      case 'Space':
+        this.moveState.up = true;
+        e.preventDefault();
+        break;
+      case 'KeyP':
+      case 'KeyC':
+        this.moveState.down = true;
+        e.preventDefault();
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
         this.isSprinting = true;
         break;
+      case 'KeyO':
+        this.isFlyMode = !this.isFlyMode;
+        if (this.callbacks.onModeChange) {
+          this.callbacks.onModeChange(this.isFlyMode ? 'FLY' : 'WALK');
+        }
+        break;
       case 'KeyM':
         if (this.callbacks.onToggleMiniMap) this.callbacks.onToggleMiniMap();
-        break;
-      case 'KeyP':
-        if (this.callbacks.onTogglePointCloud) this.callbacks.onTogglePointCloud();
         break;
       case 'KeyG':
       case 'Escape':
@@ -198,18 +377,41 @@ export class FirstPersonNavigationEngine {
   }
 
   private onKeyUp(e: KeyboardEvent): void {
+    const target = e.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+      return;
+    }
+
     switch (e.code) {
       case 'KeyW':
+      case 'ArrowUp':
         this.moveState.forward = false;
+        e.preventDefault();
         break;
       case 'KeyS':
+      case 'ArrowDown':
         this.moveState.backward = false;
+        e.preventDefault();
         break;
       case 'KeyA':
+      case 'ArrowLeft':
         this.moveState.left = false;
+        e.preventDefault();
         break;
       case 'KeyD':
+      case 'ArrowRight':
         this.moveState.right = false;
+        e.preventDefault();
+        break;
+      case 'KeyU':
+      case 'Space':
+        this.moveState.up = false;
+        e.preventDefault();
+        break;
+      case 'KeyP':
+      case 'KeyC':
+        this.moveState.down = false;
+        e.preventDefault();
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
@@ -218,44 +420,56 @@ export class FirstPersonNavigationEngine {
     }
   }
 
+  private onBlur(): void {
+    this.moveState.forward = false;
+    this.moveState.backward = false;
+    this.moveState.left = false;
+    this.moveState.right = false;
+    this.moveState.up = false;
+    this.moveState.down = false;
+    this.isSprinting = false;
+    this.velocity.set(0, 0, 0);
+  }
+
   /**
    * Main physics & movement update loop (called on every requestAnimationFrame).
    */
   public update(deltaTimeSec: number): void {
     const dt = Math.min(deltaTimeSec, 0.05);
 
-    // Calculate movement direction relative to camera yaw
+    // Calculate horizontal forward and right vectors strictly from camera yaw
     const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
     const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
+    // World vertical axis: moves vertically upward/downward independently of camera pitch/viewing direction
+    const worldUp = new THREE.Vector3(0, 1, 0);
 
     const moveDir = new THREE.Vector3();
     if (this.moveState.forward) moveDir.add(forward);
     if (this.moveState.backward) moveDir.sub(forward);
     if (this.moveState.right) moveDir.add(right);
     if (this.moveState.left) moveDir.sub(right);
+    const vertFactor = this.verticalSpeed / Math.max(0.1, this.walkSpeed);
+    if (this.moveState.up) moveDir.add(worldUp.clone().multiplyScalar(vertFactor));
+    if (this.moveState.down) moveDir.sub(worldUp.clone().multiplyScalar(vertFactor));
 
     const speed = this.isSprinting ? this.sprintSpeed : this.walkSpeed;
 
+    // Normalise compound 3D movement vector so diagonal / multi-key motion (e.g. W+D, W+U, A+P) is never faster
     if (moveDir.lengthSq() > 0.001) {
       moveDir.normalize();
       const targetVelocity = moveDir.clone().multiplyScalar(speed);
-      this.velocity.lerp(targetVelocity, 0.25);
+      this.velocity.lerp(targetVelocity, 0.35);
     } else {
-      this.velocity.lerp(new THREE.Vector3(), 0.35);
+      this.velocity.lerp(new THREE.Vector3(), 0.45);
     }
 
-    // Attempted movement
+    // Apply attempted displacement with collision resolution
     const displacement = this.velocity.clone().multiplyScalar(dt);
     if (displacement.lengthSq() > 1e-6) {
       this.applyCollisionAndMove(displacement);
     }
 
-    // Keep camera anchored at human eye level above floor
-    this.position.y = this.floorY + this.eyeHeight;
-
     this.syncCamera();
-
-    // Trigger proximity tracking against original video frames
     this.updateProximityFrame();
 
     if (this.callbacks.onPositionUpdate) {
@@ -264,14 +478,24 @@ export class FirstPersonNavigationEngine {
   }
 
   /**
-   * Resolves horizontal obstacle and boundary collision with sliding physics.
+   * Resolves obstacle and boundary collision with sliding physics.
    */
   private applyCollisionAndMove(displacement: THREE.Vector3): void {
     let newX = this.position.x + displacement.x;
+    let newY = this.position.y + displacement.y;
     let newZ = this.position.z + displacement.z;
     let status: 'CLEAR' | 'SLIDING' | 'BOUNDARY' = 'CLEAR';
 
-    // 1. Room Boundary Clamping (prevents escaping outside scanned room)
+    // 1. Vertical Clamping (Real Floor & Ceiling Protection)
+    if (newY < this.yMin) {
+      newY = this.yMin;
+      status = 'BOUNDARY';
+    } else if (newY > this.yMax) {
+      newY = this.yMax;
+      status = 'BOUNDARY';
+    }
+
+    // 2. Spatial Boundary Clamping (Room Outer Perimeter)
     const clampedX = Math.max(this.xMin + this.playerRadius, Math.min(this.xMax - this.playerRadius, newX));
     const clampedZ = Math.max(this.zMin + this.playerRadius, Math.min(this.zMax - this.playerRadius, newZ));
 
@@ -281,42 +505,42 @@ export class FirstPersonNavigationEngine {
       newZ = clampedZ;
     }
 
-    // 2. Obstacle Collision with Wall-Sliding (Bed, Desk, Wardrobe)
-    for (const reg of this.regions) {
-      if (reg.type !== 'obstacle') continue;
+    // 3. Obstacle Collision with Wall-Sliding (Solid furniture: wardrobes, beds, cooler)
+    if (this.regions.length > 0) {
+      for (const reg of this.regions) {
+        if (reg.type !== 'obstacle') continue;
 
-      const [ox1, oz1, ox2, oz2] = reg.bounds;
-      const expandedX1 = ox1 - this.playerRadius;
-      const expandedX2 = ox2 + this.playerRadius;
-      const expandedZ1 = oz1 - this.playerRadius;
-      const expandedZ2 = oz2 + this.playerRadius;
+        // If player is flying high enough above obstacle, allow pass
+        if (reg.height_range && newY > reg.height_range[1] + 0.04) {
+          continue;
+        }
 
-      // Check if new position penetrates obstacle bounding volume
-      if (newX >= expandedX1 && newX <= expandedX2 && newZ >= expandedZ1 && newZ <= expandedZ2) {
-        status = 'SLIDING';
+        const [ox1, oz1, ox2, oz2] = reg.bounds;
+        const expandedX1 = ox1 - this.playerRadius;
+        const expandedX2 = ox2 + this.playerRadius;
+        const expandedZ1 = oz1 - this.playerRadius;
+        const expandedZ2 = oz2 + this.playerRadius;
 
-        // Calculate overlap depths to find collision normal
-        const dLeft = Math.abs(newX - expandedX1);
-        const dRight = Math.abs(newX - expandedX2);
-        const dFront = Math.abs(newZ - expandedZ1);
-        const dBack = Math.abs(newZ - expandedZ2);
+        if (newX >= expandedX1 && newX <= expandedX2 && newZ >= expandedZ1 && newZ <= expandedZ2) {
+          status = 'SLIDING';
 
-        const minOverlap = Math.min(dLeft, dRight, dFront, dBack);
+          const dLeft = Math.abs(newX - expandedX1);
+          const dRight = Math.abs(newX - expandedX2);
+          const dFront = Math.abs(newZ - expandedZ1);
+          const dBack = Math.abs(newZ - expandedZ2);
 
-        // Project out along smallest penetration axis (sliding response)
-        if (minOverlap === dLeft) {
-          newX = expandedX1;
-        } else if (minOverlap === dRight) {
-          newX = expandedX2;
-        } else if (minOverlap === dFront) {
-          newZ = expandedZ1;
-        } else {
-          newZ = expandedZ2;
+          const minOverlap = Math.min(dLeft, dRight, dFront, dBack);
+
+          if (minOverlap === dLeft) newX = expandedX1;
+          else if (minOverlap === dRight) newX = expandedX2;
+          else if (minOverlap === dFront) newZ = expandedZ1;
+          else newZ = expandedZ2;
         }
       }
     }
 
     this.position.x = newX;
+    this.position.y = newY;
     this.position.z = newZ;
 
     if (this.callbacks.onCollisionStatus) {
@@ -364,8 +588,32 @@ export class FirstPersonNavigationEngine {
     return this.position.clone();
   }
 
+  public getFloorElevation(): number {
+    return this.floorY;
+  }
+
+  public getCeilingElevation(): number {
+    return this.ceilingY;
+  }
+
+  public getEyeHeight(): number {
+    return this.eyeHeight;
+  }
+
+  public getVerticalSpeed(): number {
+    return this.verticalSpeed;
+  }
+
   public getYaw(): number {
     return this.yaw;
+  }
+
+  public isFlying(): boolean {
+    return this.isFlyMode;
+  }
+
+  public setFlyMode(fly: boolean): void {
+    this.isFlyMode = fly;
   }
 
   public setPosition(pos: [number, number, number]): void {
@@ -373,4 +621,3 @@ export class FirstPersonNavigationEngine {
     this.syncCamera();
   }
 }
-

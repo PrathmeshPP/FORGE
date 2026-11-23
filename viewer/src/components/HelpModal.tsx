@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Navigation, Keyboard, ShieldCheck } from 'lucide-react';
+import { X, Navigation, Keyboard } from 'lucide-react';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -25,11 +25,55 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="modal-body">
-          {/* Navigation Controls */}
+          {/* First-Person Walkthrough & Free-Roam Controls */}
           <div>
+            <div style={{ fontWeight: 600, color: '#38bdf8', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Keyboard size={15} />
+              <span>First-Person Room Walkthrough & Free-Roam (Exact Controls)</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Move Forward</span>
+              <span className="kbd">W</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Move Backward</span>
+              <span className="kbd">S</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Move Left (Strafe)</span>
+              <span className="kbd">A</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Move Right (Strafe)</span>
+              <span className="kbd">D</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Move Vertically Upward into the Air</span>
+              <span className="kbd" style={{ color: '#4ade80' }}>U</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Move Vertically Downward</span>
+              <span className="kbd" style={{ color: '#facc15' }}>P</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Sprint / Move Faster</span>
+              <span className="kbd">Shift</span>
+            </div>
+            <div className="shortcut-row">
+              <span>First-Person Mouse Look (Yaw & Pitch)</span>
+              <span className="kbd">Mouse (Click Viewport)</span>
+            </div>
+            <div className="shortcut-row">
+              <span>Release Mouse / Pause / Exit Walkthrough</span>
+              <span className="kbd">ESC / G</span>
+            </div>
+          </div>
+
+          {/* Mouse & Orbit Controls */}
+          <div style={{ marginTop: '1rem' }}>
             <div style={{ fontWeight: 600, color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Navigation size={15} />
-              <span>Mouse & Touch Gestures</span>
+              <span>Orbit Inspection Mode (When Walkthrough is Off)</span>
             </div>
             <div className="shortcut-row">
               <span>Orbit / Rotate</span>
@@ -41,31 +85,19 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div className="shortcut-row">
               <span>Zoom In / Out</span>
-              <span className="kbd">Scroll Wheel / Pinch</span>
+              <span className="kbd">Scroll Wheel</span>
             </div>
           </div>
 
-          {/* Keyboard Shortcuts */}
-          <div>
+          {/* Inspection View Shortcuts */}
+          <div style={{ marginTop: '1rem' }}>
             <div style={{ fontWeight: 600, color: '#fff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Keyboard size={15} />
-              <span>Keyboard Shortcuts</span>
+              <span>Inspection View Hotkeys</span>
             </div>
             <div className="shortcut-row">
-              <span>Top View Preset</span>
-              <span className="kbd">1</span>
-            </div>
-            <div className="shortcut-row">
-              <span>Front View Preset</span>
-              <span className="kbd">2</span>
-            </div>
-            <div className="shortcut-row">
-              <span>Side View Preset</span>
-              <span className="kbd">3</span>
-            </div>
-            <div className="shortcut-row">
-              <span>Isometric Preset</span>
-              <span className="kbd">4</span>
+              <span>Camera Presets</span>
+              <span className="kbd">1 (Top) · 2 (Front) · 3 (Side) · 4 (Iso)</span>
             </div>
             <div className="shortcut-row">
               <span>Reset Camera</span>
@@ -76,27 +108,8 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <span className="kbd">W</span>
             </div>
             <div className="shortcut-row">
-              <span>Toggle Ground Grid</span>
+              <span>Toggle Grid</span>
               <span className="kbd">G</span>
-            </div>
-            <div className="shortcut-row">
-              <span>Toggle A/B Comparison</span>
-              <span className="kbd">C</span>
-            </div>
-            <div className="shortcut-row">
-              <span>Pipeline Architecture Modal</span>
-              <span className="kbd">P</span>
-            </div>
-          </div>
-
-          {/* Provenance Notice */}
-          <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontWeight: 600, color: 'var(--accent-cyan)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <ShieldCheck size={14} />
-              <span>Sprint 9 Release Baseline Verification</span>
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              All models rendered are loaded directly from the verified Sprint 9 video-to-3D release artifacts (<code style={{ color: 'var(--accent-cyan)' }}>outputs/accuracy_experiment/sprint9_video_to_viewer_release/</code>). No synthetic mockups or modified geometries are served.
             </div>
           </div>
         </div>
