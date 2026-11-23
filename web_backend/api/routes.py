@@ -37,6 +37,11 @@ from web_backend.services.job_service import (
 )
 from web_backend.database import get_job_by_id, list_jobs
 from web_backend.worker.mock_worker import mock_worker
+from web_backend.services.model_discovery_service import (
+    get_recent_qualifying_models,
+    get_model_file_path,
+)
+from web_backend.config import FORGE_PIPELINE_ROOT
 
 router = APIRouter(prefix="/api/v1")
 
@@ -270,3 +275,107 @@ def download_job_artifact(job_id: str, artifact_key: str):
         media_type=media_type,
         headers={"Content-Disposition": f'inline; filename="{filename}"'}
     )
+
+
+# ------------------------------------------------------------------------------
+# Recent Qualifying Models & 3D Model Asset Endpoints
+# ------------------------------------------------------------------------------
+
+@router.get("/recent-models")
+def get_recent_models(limit: int = 5):
+    """
+    Returns the top qualifying genuinely completed reconstructions (up to 5),
+    sorted by completion timestamp (newest first).
+    """
+    return get_recent_qualifying_models(limit=min(limit, 10))
+
+
+@router.get("/models/{model_id}/glb")
+def download_model_glb(model_id: str):
+    """
+    Streams the verified genuine GLB for the requested model.
+    """
+    file_path = get_model_file_path(model_id)
+    if not file_path or not file_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "MODEL_NOT_FOUND", "message": f"Model GLB for '{model_id}' was not found on host."}
+        )
+
+    return FileResponse(
+        path=str(file_path),
+        filename=f"{model_id}.glb",
+        media_type="model/gltf-binary",
+        headers={
+            "Content-Disposition": f'inline; filename="{model_id}.glb"',
+            "Cache-Control": "public, max-age=3600"
+        }
+    )
+
+
+@router.get("/models/{model_id}/thumbnail")
+def get_model_thumbnail(model_id: str):
+    """
+    Serves the preview thumbnail or contact sheet for the requested model.
+    """
+    scene_dir = FORGE_PIPELINE_ROOT / "outputs" / "indoor" / model_id
+    if not scene_dir.exists():
+        job_dir = JOBS_DIR / model_id / "outputs"
+        if job_dir.exists():
+            scene_dir = job_dir
+
+    candidate_thumbs = [
+        scene_dir / "preview_thumbnail.png",
+        scene_dir / "video_audit_contact_sheet.png",
+        scene_dir / "renders" / "baseline_textured_59.6s.png",
+        scene_dir / "renders" / "candidate_textured_59.6s.png",
+    ]
+
+    for thumb_path in candidate_thumbs:
+        if thumb_path.exists():
+            return FileResponse(
+                path=str(thumb_path),
+                media_type="image/png",
+                headers={"Cache-Control": "public, max-age=86400"}
+            )
+
+    # Fallback placeholder SVG
+    svg_content = f'''<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
+        <rect width="400" height="240" fill="#0f172a"/>
+        <rect x="20" y="20" width="360" height="200" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4"/>
+        <text x="200" y="115" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="16" font-weight="600" text-anchor="middle">F.O.R.G.E. 3D Digital Twin</text>
+        <text x="200" y="145" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12" text-anchor="middle">{model_id}</text>
+    </svg>'''
+    return Response(content=svg_content, media_type="image/svg+xml")
+
+
+@router.get("/models/{model_id}/metadata")
+def get_model_metadata(model_id: str):
+    """
+    Returns full scene navigation and quality metadata for the model.
+    """
+    scene_dir = FORGE_PIPELINE_ROOT / "outputs" / "indoor" / model_id
+    nav_path = scene_dir / "scene_navigation_metadata.json"
+    meta_path = scene_dir / "reconstruction_metadata.json"
+
+    result = {}
+    if nav_path.exists():
+        try:
+            with open(nav_path, "r", encoding="utf-8") as f:
+                result["navigation"] = json.load(f)
+        except Exception:
+            pass
+    if meta_path.exists():
+        try:
+            with open(meta_path, "r", encoding="utf-8") as f:
+                result["reconstruction"] = json.load(f)
+        except Exception:
+            pass
+
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "METADATA_NOT_FOUND", "message": f"Metadata for '{model_id}' was not found."}
+        )
+
+    return result

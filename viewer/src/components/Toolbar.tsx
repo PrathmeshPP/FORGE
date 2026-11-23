@@ -6,6 +6,8 @@ import {
   Eye,
   FileCheck2,
   Download,
+  Sun,
+  Footprints,
 } from 'lucide-react';
 import type {
   SceneEntry,
@@ -24,6 +26,8 @@ interface ToolbarProps {
   onViewPreset: (preset: CameraPresetType) => void;
   onResetCamera: () => void;
   onOpenQualityModal: () => void;
+  isWalkthroughMode?: boolean;
+  onToggleWalkthrough?: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -35,6 +39,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onViewPreset,
   onResetCamera,
   onOpenQualityModal,
+  isWalkthroughMode,
+  onToggleWalkthrough,
 }) => {
   const bgThemes: { key: BackgroundTheme; label: string }[] = [
     { key: 'slate', label: 'Dark Slate' },
@@ -45,7 +51,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   const handleDownload = () => {
     const rep = scene.representations[currentRepresentation];
-    const url = rep?.obj_url || rep?.ply_url;
+    const url = rep?.glb_url || rep?.obj_url || rep?.ply_url;
     if (url) {
       const a = document.createElement('a');
       a.href = url;
@@ -73,16 +79,60 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             >
               <Eye size={13} />
               <span>
-                {repKey === 'textured_obj'
-                  ? 'Textured OBJ'
-                  : repKey === 'photographic_ply'
-                    ? 'Photo PLY'
-                    : 'Raw PLY'}
+                {repKey === 'glb'
+                  ? 'GLB Photographic'
+                  : repKey === 'textured_obj'
+                    ? 'Textured OBJ'
+                    : repKey === 'photographic_ply'
+                      ? 'Photo PLY'
+                      : 'Raw PLY'}
               </span>
             </button>
           );
         })}
       </div>
+
+      <div className="toolbar-separator" />
+
+      {/* Brightness Control */}
+      <div className="toolbar-group brightness-control-group" title="Adjust Viewport Brightness (0.5x - 2.0x)">
+        <Sun size={13} className="text-amber" />
+        <input
+          type="range"
+          min="0.5"
+          max="2.0"
+          step="0.05"
+          value={config.brightness ?? 1.0}
+          onChange={(e) => onUpdateConfig({ brightness: parseFloat(e.target.value) })}
+          className="brightness-slider"
+          title={`Brightness: ${Math.round((config.brightness ?? 1.0) * 100)}% (${(config.brightness ?? 1.0).toFixed(2)}x)`}
+        />
+        <span className="brightness-value-label">
+          {Math.round((config.brightness ?? 1.0) * 100)}%
+        </span>
+        <button
+          className="toolbar-btn icon-only reset-brightness-btn"
+          onClick={() => onUpdateConfig({ brightness: 1.0 })}
+          title="Reset Brightness to 1.0x (100%)"
+          disabled={(config.brightness ?? 1.0) === 1.0}
+        >
+          <RotateCcw size={11} />
+        </button>
+      </div>
+
+      <div className="toolbar-separator" />
+
+      {/* Walkthrough Mode Toggle */}
+      {onToggleWalkthrough && (
+        <button
+          className={`toolbar-btn walkthrough-btn ${isWalkthroughMode ? 'active' : ''}`}
+          onClick={onToggleWalkthrough}
+          title={isWalkthroughMode ? 'Exit Walkthrough Mode (Return to Orbit)' : 'Enter First-Person Free-Roam Mode (WASD + UP)'}
+        >
+          <Footprints size={13} />
+          <span>{isWalkthroughMode ? 'Exit Walk' : 'Walkthrough'}</span>
+        </button>
+      )}
 
       <div className="toolbar-separator" />
 

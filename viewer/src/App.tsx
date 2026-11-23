@@ -1,304 +1,205 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type {
-  ActiveTab,
-} from './components/Header';
-import { Header } from './components/Header';
-import { UploadView } from './components/UploadView';
-import { PreflightView } from './components/PreflightView';
-import { JobStatusView } from './components/JobStatusView';
-import { Viewport3D } from './components/Viewport3D';
-import { Toolbar } from './components/Toolbar';
-import { GeometryStatsDisplay } from './components/GeometryStatsDisplay';
-import { QualityReportModal } from './components/QualityReportModal';
-import { JobLibraryView } from './components/JobLibraryView';
-import { SystemDiagnosticsView } from './components/SystemDiagnosticsView';
-
-import { apiClient } from './services/apiClient';
-import { SAMPLE_INDOOR_SCENE } from './data/sampleScene';
-import type {
-  JobRecord,
-  HealthResponse,
-  PreflightMetadata,
-  SceneEntry,
-  RepresentationType,
-  ViewportConfig,
-  ActiveGeometryStats,
-  BoundingBoxInfo,
-  CameraPresetAction,
-  CameraPresetType,
-} from './types';
+import { NavigationViewer } from './components/NavigationViewer';
+import { Minimap } from './components/Minimap';
+import { ControlsFooter } from './components/ControlsFooter';
+import { TopBar, type ModelOption } from './components/TopBar';
 
 export const App: React.FC = () => {
-  const getInitialTab = (): ActiveTab => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const qTab = params.get('tab') as ActiveTab;
-      if (['upload', 'preflight', 'status', 'viewer', 'library', 'diagnostics'].includes(qTab)) {
-        return qTab;
-      }
-      const hash = window.location.hash.replace('#', '') as ActiveTab;
-      if (['upload', 'preflight', 'status', 'viewer', 'library', 'diagnostics'].includes(hash)) {
-        return hash;
-      }
-    } catch {
-      // Fallback
-    }
-    return 'upload';
-  };
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [selectedModel, setSelectedModel] = useState<ModelOption | null>(null);
+  const [localFile, setLocalFile] = useState<File | null>(null);
 
-  const [activeTab, setActiveTabState] = useState<ActiveTab>(getInitialTab);
-  const [health, setHealth] = useState<HealthResponse | null>(null);
+  // Minimap state
+  const [cameraPos, setCameraPos] = useState<{ x: number; y: number; z: number }>({ x: 0, y: 1.2, z: 2.5 });
+  const [cameraYaw, setCameraYaw] = useState<number>(0);
+  const [modelBounds, setModelBounds] = useState<{ minX: number; maxX: number; minZ: number; maxZ: number } | null>(null);
+  const [footprintPoints, setFootprintPoints] = useState<{ x: number; z: number }[]>([]);
 
-  const setActiveTab = (tab: ActiveTab) => {
-    window.location.hash = tab;
-    setActiveTabState(tab);
-  };
+  // Loading state
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const [resetTrigger, setResetTrigger] = useState<number>(0);
 
+  // Drag and drop state
+  const [isDraggingFile, setIsDraggingFile] = useState<boolean>(false);
+
+  // 1. Fetch available qualifying models stored on PC from backend API
   useEffect(() => {
-    const onHashChange = () => {
-      const h = window.location.hash.replace('#', '') as ActiveTab;
-      if (['upload', 'preflight', 'status', 'viewer', 'library', 'diagnostics'].includes(h)) {
-        setActiveTabState(h);
-      }
-    };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
-
-  // Upload & Preflight State
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [preflightData, setPreflightData] = useState<PreflightMetadata | null>(null);
-  const [keepRawInput, setKeepRawInput] = useState(false);
-
-  // Active Job State
-  const [activeJob, setActiveJob] = useState<JobRecord | null>(null);
-  const [allJobs, setAllJobs] = useState<JobRecord[]>([
-    {
-      id: 'sample-job-0001',
-      display_name: 'Living Room Corridor Scan',
-      original_filename: 'living_room_scan.mp4',
-      status: 'ready',
-      progress_stage: 'idle',
-      progress_stage_label: 'Reconstruction Ready',
-      worker_mode: 'mock',
-      is_sample_job: true,
-      keep_raw_input: false,
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-      duration_seconds: 180,
-      attempt_count: 1,
-      scene: SAMPLE_INDOOR_SCENE,
-      quality_summary: SAMPLE_INDOOR_SCENE.quality_summary,
-      logs: [
-        { timestamp: '14:00:00', stage: 'ingestion', message: 'Input video verified (1080p, 24 FPS, 45s)' },
-        { timestamp: '14:00:05', stage: 'keyframe_extraction', message: 'Extracted 45 sharp keyframes with viewpoint disparity' },
-        { timestamp: '14:00:30', stage: 'spatial_inference', message: 'VGGT spatial prediction completed (Peak VRAM: 5.8 GB)' },
-        { timestamp: '14:01:45', stage: 'dense_meshing', message: 'Dense point cloud fused and Poisson meshing converged' },
-        { timestamp: '14:02:30', stage: 'texturing', message: 'Surface charts projected and texture atlas baked' },
-        { timestamp: '14:03:00', stage: 'qa_verification', message: 'Gate A-E checks passed. Bounding box [4.5m x 2.7m x 4.0m]' },
-      ],
-    },
-  ]);
-
-  // 3D Viewer State
-  const [currentScene, setCurrentScene] = useState<SceneEntry>(SAMPLE_INDOOR_SCENE);
-  const [currentRepresentation, setCurrentRepresentation] = useState<RepresentationType>('textured_obj');
-  const [viewportConfig, setViewportConfig] = useState<ViewportConfig>({
-    showGrid: true,
-    showAxes: false,
-    wireframe: false,
-    autoRotate: false,
-    background: 'slate',
-  });
-  const [presetAction, setPresetAction] = useState<CameraPresetAction | undefined>(undefined);
-  const [activeStats, setActiveStats] = useState<ActiveGeometryStats | null>(null);
-  const [boundingBox, setBoundingBox] = useState<BoundingBoxInfo | null>(null);
-  const [isQualityModalOpen, setIsQualityModalOpen] = useState(false);
-
-  // Poll Health and Job list on mount
-  const refreshState = useCallback(async () => {
-    try {
-      const h = await apiClient.getHealth();
-      setHealth(h);
-      const jobs = await apiClient.listJobs();
-      setAllJobs(jobs);
-    } catch {
-      // Offline fallback is handled gracefully
-    }
-  }, []);
-
-  useEffect(() => {
-    refreshState();
-    const interval = setInterval(refreshState, 5000);
-    return () => clearInterval(interval);
-  }, [refreshState]);
-
-  // Handler: When user selects a video file for preflight
-  const handleVideoSelected = (file: File, preflight: PreflightMetadata, keepRaw: boolean) => {
-    setSelectedFile(file);
-    setPreflightData(preflight);
-    setKeepRawInput(keepRaw);
-    setActiveTab('preflight');
-  };
-
-  // Handler: Start reconstruction from preflight
-  const handleStartReconstruction = async () => {
-    if (!selectedFile || !preflightData) return;
-
-    try {
-      const job = await apiClient.createJob(selectedFile, preflightData, keepRawInput);
-      setActiveJob(job);
-      setActiveTab('status');
-
-      // Begin execution
-      apiClient.startJob(job.id, (updated) => {
-        setActiveJob({ ...updated });
-        if (updated.status === 'ready' && updated.scene) {
-          setCurrentScene(updated.scene);
+    const fetchModels = async () => {
+      try {
+        const res = await fetch('/api/v1/recent-models?limit=10');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const formatted: ModelOption[] = data.map((item: any) => ({
+              id: item.id,
+              name: formatModelName(item.id, item.scene_name),
+              url: item.glb_url || `/api/v1/models/${item.id}/glb`,
+              sizeMb: item.file_size_mb,
+              source: 'server',
+            }));
+            setModels(formatted);
+            setSelectedModel(formatted[0]);
+            return;
+          }
         }
-        refreshState();
-      });
-    } catch (err: any) {
-      alert(`Error starting reconstruction: ${err.message}`);
+      } catch (err) {
+        console.warn('Could not connect to /api/v1/recent-models:', err);
+      }
+
+      // Default fallback option
+      const fallback: ModelOption = {
+        id: 'sample-viewer-fixture',
+        name: 'Drop any .GLB model from PC',
+        url: '/sample/sample_indoor_fixture.glb',
+        sizeMb: 5.2,
+        source: 'server',
+      };
+      setModels([fallback]);
+      setSelectedModel(fallback);
+    };
+
+    fetchModels();
+  }, []);
+
+  const formatModelName = (id: string, sceneName?: string): string => {
+    if (sceneName && sceneName.length > 2) return sceneName;
+    if (id.includes('improved_b314_floor_leveled')) return 'Hostel Room B-314 (Floor Leveled)';
+    if (id.includes('improved_lab_tsdf_flattened')) return 'RRU Computer Lab (TSDF Flattened)';
+    if (id.includes('candidate_b314')) return 'Room B-314 (Candidate Boundary)';
+    if (id.includes('candidate_lab')) return 'Computer Lab (Candidate Boundary)';
+    if (id.includes('improved_quality_b314')) return 'Room B-314 (Improved Baseline)';
+    if (id.includes('improved_quality_lab')) return 'Computer Lab (Improved Baseline)';
+    if (id.includes('floor_fixed_b314')) return 'Room B-314 (Floor Fixed)';
+    if (id.includes('floor_fixed_corridor')) return 'Corridor (Floor Fixed)';
+    if (id.includes('floor_fixed_nov21')) return 'Multi-Room Living Room (Floor Fixed)';
+    return id.replace(/_/g, ' ');
+  };
+
+  // 2. Select Model from Dropdown
+  const handleSelectModel = (model: ModelOption) => {
+    setLocalFile(null);
+    setSelectedModel(model);
+  };
+
+  // 3. Upload / Select Local File from PC
+  const handleUploadLocalFile = (file: File) => {
+    const localOption: ModelOption = {
+      id: `local-${file.name}-${Date.now()}`,
+      name: `📁 ${file.name}`,
+      url: '',
+      sizeMb: Math.round((file.size / (1024 * 1024)) * 10) / 10,
+      source: 'local',
+    };
+    setModels((prev) => [localOption, ...prev]);
+    setSelectedModel(localOption);
+    setLocalFile(file);
+  };
+
+  // 4. Drag & Drop File Handling
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingFile(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingFile(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingFile(false);
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.name.toLowerCase().endsWith('.glb') || file.name.toLowerCase().endsWith('.gltf')) {
+        handleUploadLocalFile(file);
+      }
     }
-  };
-
-  // Handler: Load sample model directly
-  const handleLoadSampleModel = () => {
-    setCurrentScene(SAMPLE_INDOOR_SCENE);
-    setCurrentRepresentation('textured_obj');
-    setActiveTab('viewer');
-  };
-
-  // Handler: Cancel active job
-  const handleCancelJob = async (jobId: string) => {
-    if (confirm('Cancel running reconstruction? Workstation subprocesses will be terminated.')) {
-      await apiClient.cancelJob(jobId);
-      const updated = await apiClient.getJob(jobId);
-      if (updated) setActiveJob(updated);
-      refreshState();
-    }
-  };
-
-  // Handler: Select job from library to view
-  const handleSelectJobFromLibrary = (job: JobRecord) => {
-    if (job.scene) {
-      setCurrentScene(job.scene);
-      setActiveTab('viewer');
-    } else {
-      setActiveJob(job);
-      setActiveTab('status');
-    }
-  };
-
-  // Handler: Delete job
-  const handleDeleteJob = async (jobId: string) => {
-    await apiClient.deleteJob(jobId);
-    if (activeJob?.id === jobId) setActiveJob(null);
-    refreshState();
-  };
-
-  // Preset camera action helper
-  const handlePresetCamera = (type: CameraPresetType) => {
-    setPresetAction({ type, nonce: Date.now() });
-  };
+  }, []);
 
   return (
-    <div className="app-container">
-      <Header
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        health={health}
-        activeJobId={activeJob && activeJob.status === 'running' ? activeJob.id : null}
-        hasReadyResult={currentScene !== null}
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={{
+        width: '100vw',
+        height: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+        background: '#090d16',
+        margin: 0,
+        padding: 0,
+      }}
+    >
+      {/* Floating Top Bar (Model Picker & Open File from PC) */}
+      <TopBar
+        models={models}
+        selectedModelId={selectedModel?.id || ''}
+        onSelectModel={handleSelectModel}
+        onUploadLocalFile={handleUploadLocalFile}
+        onResetCamera={() => setResetTrigger((prev) => prev + 1)}
+        isLoading={isLoading}
+        loadingProgress={loadingProgress}
       />
 
-      <main className="main-content">
-        {/* TAB 1: UPLOAD */}
-        {activeTab === 'upload' && (
-          <UploadView
-            onVideoSelected={handleVideoSelected}
-            onLoadSampleModel={handleLoadSampleModel}
-            maxUploadBytes={health?.limits.max_upload_bytes || 2147483648}
-            acceptedExtensions={health?.limits.accepted_extensions || ['.mp4', '.mov']}
-          />
-        )}
+      {/* Minimap in the Right Corner */}
+      <Minimap
+        cameraPos={cameraPos}
+        cameraYaw={cameraYaw}
+        bounds={modelBounds}
+        footprintPoints={footprintPoints}
+      />
 
-        {/* TAB 2: PREFLIGHT */}
-        {activeTab === 'preflight' && preflightData && (
-          <PreflightView
-            metadata={preflightData}
-            keepRawInput={keepRawInput}
-            onConfirmStart={handleStartReconstruction}
-            onBackToUpload={() => setActiveTab('upload')}
-          />
-        )}
+      {/* Main Full-Screen 3D Navigation Viewport */}
+      <NavigationViewer
+        modelUrl={localFile ? null : selectedModel?.url || null}
+        modelFile={localFile}
+        onCameraUpdate={(pos, yaw) => {
+          setCameraPos(pos);
+          setCameraYaw(yaw);
+        }}
+        onBoundsUpdate={(bounds, pts) => {
+          setModelBounds(bounds);
+          setFootprintPoints(pts);
+        }}
+        onLoadingChange={(loading, pct) => {
+          setIsLoading(loading);
+          setLoadingProgress(pct);
+        }}
+        resetTrigger={resetTrigger}
+      />
 
-        {/* TAB 3: PROCESSING / JOB STATUS */}
-        {activeTab === 'status' && (activeJob || allJobs[0]) && (
-          <JobStatusView
-            job={activeJob || allJobs[0]}
-            onCancelJob={handleCancelJob}
-            onOpenViewer={() => {
-              const j = activeJob || allJobs[0];
-              if (j?.scene) {
-                setCurrentScene(j.scene);
-              }
-              setActiveTab('viewer');
-            }}
-            onStartNewUpload={() => setActiveTab('upload')}
-          />
-        )}
+      {/* Navigation Controls Legend (Explicitly written at bottom of website) */}
+      <ControlsFooter />
 
-        {/* TAB 4: 3D VIEWPORT */}
-        {activeTab === 'viewer' && (
-          <div className="viewer-layout">
-            <Toolbar
-              scene={currentScene}
-              currentRepresentation={currentRepresentation}
-              onSelectRepresentation={setCurrentRepresentation}
-              config={viewportConfig}
-              onUpdateConfig={(up) => setViewportConfig((prev) => ({ ...prev, ...up }))}
-              onViewPreset={handlePresetCamera}
-              onResetCamera={() => handlePresetCamera('reset')}
-              onOpenQualityModal={() => setIsQualityModalOpen(true)}
-            />
-
-            <div className="viewport-stage">
-              <Viewport3D
-                scene={currentScene}
-                representation={currentRepresentation}
-                config={viewportConfig}
-                onLoadingChange={() => { }}
-                onBoundingBoxChange={setBoundingBox}
-                onStatsChange={setActiveStats}
-                presetAction={presetAction}
-              />
-
-              <GeometryStatsDisplay stats={activeStats} boundingBox={boundingBox} />
-            </div>
-
-            <QualityReportModal
-              isOpen={isQualityModalOpen}
-              onClose={() => setIsQualityModalOpen(false)}
-              summary={currentScene.quality_summary}
-              modelName={currentScene.display_name}
-            />
-          </div>
-        )}
-
-        {/* TAB 5: JOB LIBRARY */}
-        {activeTab === 'library' && (
-          <JobLibraryView
-            jobs={allJobs}
-            onSelectJob={handleSelectJobFromLibrary}
-            onDeleteJob={handleDeleteJob}
-          />
-        )}
-
-        {/* TAB 6: DIAGNOSTICS */}
-        {activeTab === 'diagnostics' && <SystemDiagnosticsView health={health} />}
-      </main>
+      {/* Drag & Drop Visual Overlay */}
+      {isDraggingFile && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(2, 132, 199, 0.4)',
+            border: '3px dashed #38bdf8',
+            backdropFilter: 'blur(4px)',
+            zIndex: 100,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#f8fafc',
+            fontFamily: 'system-ui, sans-serif',
+            fontSize: '20px',
+            fontWeight: 700,
+            pointerEvents: 'none',
+          }}
+        >
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>📥</div>
+          Drop .GLB file here to navigate 3D model!
+        </div>
+      )}
     </div>
   );
 };
-

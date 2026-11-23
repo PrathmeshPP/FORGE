@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
-import { AlertTriangle, AlertCircle } from 'lucide-react';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { AlertTriangle, AlertCircle, Footprints } from 'lucide-react';
 import type {
   SceneEntry,
   RepresentationType,
@@ -22,6 +23,8 @@ interface Viewport3DProps {
   onBoundingBoxChange?: (info: BoundingBoxInfo) => void;
   onStatsChange?: (stats: ActiveGeometryStats) => void;
   presetAction?: CameraPresetAction;
+  isWalkthroughMode?: boolean;
+  onToggleWalkthrough?: () => void;
 }
 
 export const Viewport3D: React.FC<Viewport3DProps> = ({
@@ -32,6 +35,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   onBoundingBoxChange,
   onStatsChange,
   presetAction,
+  isWalkthroughMode = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -41,6 +45,20 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   const modelGroupRef = useRef<THREE.Group | null>(null);
   const gridHelperRef = useRef<THREE.GridHelper | null>(null);
   const axesHelperRef = useRef<THREE.AxesHelper | null>(null);
+
+  // Lights refs for dynamic brightness scaling
+  const ambientLightRef = useRef<THREE.AmbientLight | null>(null);
+  const keyLightRef = useRef<THREE.DirectionalLight | null>(null);
+  const fillLightRef = useRef<THREE.DirectionalLight | null>(null);
+  const hemiLightRef = useRef<THREE.HemisphereLight | null>(null);
+
+  // First-Person Walkthrough navigation state
+  const isPointerLockedRef = useRef<boolean>(false);
+  const [isPointerLocked, setIsPointerLocked] = useState<boolean>(false);
+  const keysPressedRef = useRef<{ [key: string]: boolean }>({});
+  const playerYawRef = useRef<number>(0);
+  const playerPitchRef = useRef<number>(0);
+  const playerPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const modelDimRef = useRef<{ radius: number; fitDist: number }>({ radius: 3, fitDist: 5 });
@@ -77,7 +95,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     });
   };
 
-  // Initialize Three.js scene
+  // 1. Initialize Three.js scene
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -90,7 +108,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = config.brightness ?? 1.0;
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
@@ -102,6 +120,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 1000);
     camera.position.set(...scene.initial_camera.position);
     cameraRef.current = camera;
+    playerPosRef.current.copy(camera.position);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -113,19 +132,24 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     controlsRef.current = controls;
 
     // Lighting setup for indoor inspection
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    const b = config.brightness ?? 1.0;
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2 * b);
     threeScene.add(ambientLight);
+    ambientLightRef.current = ambientLight;
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.5 * b);
     keyLight.position.set(5, 10, 7);
     threeScene.add(keyLight);
+    keyLightRef.current = keyLight;
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.8 * b);
     fillLight.position.set(-5, 5, -5);
     threeScene.add(fillLight);
+    fillLightRef.current = fillLight;
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.6);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x334155, 0.6 * b);
     threeScene.add(hemiLight);
+    hemiLightRef.current = hemiLight;
 
     // Helpers
     const gridHelper = new THREE.GridHelper(10, 20, 0x38bdf8, 0x334155);
@@ -143,16 +167,51 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     threeScene.add(modelGroup);
     modelGroupRef.current = modelGroup;
 
+    // First-person free-roam animation loop
     let animationFrameId: number;
+    let lastTime = performance.now();
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      if (config.autoRotate && controlsRef.current) {
-        controlsRef.current.autoRotate = true;
-        controlsRef.current.autoRotateSpeed = 1.2;
-      } else if (controlsRef.current) {
-        controlsRef.current.autoRotate = false;
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      if (isWalkthroughMode) {
+        // Free-roam first-person movement (WASD + UP)
+        const moveSpeed = 1.8 * dt; // 1.8 m/s
+        const keys = keysPressedRef.current;
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        forward.y = 0;
+        forward.normalize();
+
+        const right = new THREE.Vector3();
+        right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+        const delta = new THREE.Vector3(0, 0, 0);
+
+        if (keys['KeyW'] || keys['ArrowUp']) delta.addScaledVector(forward, moveSpeed);
+        if (keys['KeyS'] || keys['ArrowDown']) delta.addScaledVector(forward, -moveSpeed);
+        if (keys['KeyA'] || keys['ArrowLeft']) delta.addScaledVector(right, -moveSpeed);
+        if (keys['KeyD'] || keys['ArrowRight']) delta.addScaledVector(right, moveSpeed);
+        if (keys['KeyU']) delta.y += moveSpeed * 0.8;
+        if (keys['KeyP']) delta.y -= moveSpeed * 0.8;
+
+        if (delta.lengthSq() > 0) {
+          camera.position.add(delta);
+        }
+      } else {
+        // Orbit Controls update
+        if (config.autoRotate && controlsRef.current) {
+          controlsRef.current.autoRotate = true;
+          controlsRef.current.autoRotateSpeed = 1.2;
+        } else if (controlsRef.current) {
+          controlsRef.current.autoRotate = false;
+        }
+        controls.update();
       }
-      controls.update();
+
       renderer.render(threeScene, camera);
     };
     animate();
@@ -178,7 +237,89 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     };
   }, []);
 
-  // Handle Preset Camera Actions
+  // 2. Dynamic, Non-Destructive Brightness Scaling
+  useEffect(() => {
+    const b = config.brightness ?? 1.0;
+    if (rendererRef.current) {
+      rendererRef.current.toneMappingExposure = b;
+    }
+    if (ambientLightRef.current) ambientLightRef.current.intensity = 1.2 * b;
+    if (keyLightRef.current) keyLightRef.current.intensity = 1.5 * b;
+    if (fillLightRef.current) fillLightRef.current.intensity = 0.8 * b;
+    if (hemiLightRef.current) hemiLightRef.current.intensity = 0.6 * b;
+  }, [config.brightness]);
+
+  // 3. Handle First-Person Mode switching and input listeners
+  useEffect(() => {
+    const controls = controlsRef.current;
+    const camera = cameraRef.current;
+    const container = containerRef.current;
+
+    if (isWalkthroughMode) {
+      if (controls) controls.enabled = false;
+
+      const onKeyDown = (e: KeyboardEvent) => {
+        keysPressedRef.current[e.code] = true;
+      };
+      const onKeyUp = (e: KeyboardEvent) => {
+        keysPressedRef.current[e.code] = false;
+      };
+
+      const onMouseMove = (e: MouseEvent) => {
+        if (!isPointerLockedRef.current || !camera) return;
+        const sensitivity = 0.0022;
+        playerYawRef.current -= e.movementX * sensitivity;
+        playerPitchRef.current = Math.max(
+          -Math.PI / 2.2,
+          Math.min(Math.PI / 2.2, playerPitchRef.current - e.movementY * sensitivity)
+        );
+
+        const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        euler.x = playerPitchRef.current;
+        euler.y = playerYawRef.current;
+        camera.quaternion.setFromEuler(euler);
+      };
+
+      const onClickCanvas = () => {
+        if (container && !document.pointerLockElement) {
+          container.requestPointerLock?.();
+        }
+      };
+
+      const onPointerLockChange = () => {
+        const locked = document.pointerLockElement === container;
+        isPointerLockedRef.current = locked;
+        setIsPointerLocked(locked);
+      };
+
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+      window.addEventListener('mousemove', onMouseMove);
+      container?.addEventListener('click', onClickCanvas);
+      document.addEventListener('pointerlockchange', onPointerLockChange);
+
+      return () => {
+        window.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('keyup', onKeyUp);
+        window.removeEventListener('mousemove', onMouseMove);
+        container?.removeEventListener('click', onClickCanvas);
+        document.removeEventListener('pointerlockchange', onPointerLockChange);
+        if (document.pointerLockElement === container) {
+          document.exitPointerLock?.();
+        }
+        keysPressedRef.current = {};
+      };
+    } else {
+      if (controls) controls.enabled = true;
+      if (document.pointerLockElement === container) {
+        document.exitPointerLock?.();
+      }
+      isPointerLockedRef.current = false;
+      setIsPointerLocked(false);
+    }
+  }, [isWalkthroughMode]);
+
+  // 4. Handle Preset Camera Actions
   useEffect(() => {
     if (!presetAction || !cameraRef.current || !controlsRef.current) return;
     const camera = cameraRef.current;
@@ -215,7 +356,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     controls.update();
   }, [presetAction, scene]);
 
-  // Update helpers and background on config change
+  // 5. Update helpers and background on config change
   useEffect(() => {
     if (gridHelperRef.current) gridHelperRef.current.visible = config.showGrid;
     if (axesHelperRef.current) axesHelperRef.current.visible = config.showAxes;
@@ -236,9 +377,9 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         }
       });
     }
-  }, [config]);
+  }, [config.showGrid, config.showAxes, config.background, config.wireframe]);
 
-  // Load Model Asset
+  // 6. Load Model Asset (GLB, OBJ, PLY)
   const loadModel = useCallback(() => {
     const modelGroup = modelGroupRef.current;
     const camera = cameraRef.current;
@@ -246,6 +387,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     const container = containerRef.current;
     if (!modelGroup || !camera || !controls) return;
 
+    // Thorough GPU memory cleanup before loading next model
     while (modelGroup.children.length > 0) {
       const child = modelGroup.children[0];
       modelGroup.remove(child);
@@ -255,9 +397,13 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     setErrorMessage(null);
     onLoadingChange(true, 0);
 
-    const repConfig = scene.representations[representation] || scene.representations.textured_obj;
+    const repConfig =
+      scene.representations[representation] ||
+      scene.representations.glb ||
+      scene.representations.textured_obj ||
+      Object.values(scene.representations)[0];
 
-    const setupLoadedObject = (object: THREE.Object3D, format: 'OBJ' | 'PLY', sourceFileName: string) => {
+    const setupLoadedObject = (object: THREE.Object3D, format: 'GLB' | 'OBJ' | 'PLY', sourceFileName: string) => {
       const box = new THREE.Box3().setFromObject(object);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
@@ -338,7 +484,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         renderedPositions: renderedPositions,
         triangles: triangleCount,
         sourceFileName: sourceFileName,
-        format: format,
+        format: format as any,
       };
 
       if (onStatsChange) {
@@ -347,8 +493,30 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       onLoadingChange(false, 100);
     };
 
-    // Load OBJ
-    if (repConfig.type === 'obj' && repConfig.obj_url) {
+    // A. Load GLB (Primary Photographic Reconstruction Format)
+    if (repConfig?.type === 'glb' || repConfig?.glb_url) {
+      const glbUrl = repConfig.glb_url || (repConfig as any).url;
+      const sourceFileName = glbUrl.split('/').pop() || 'room_photographic_model.glb';
+      const gltfLoader = new GLTFLoader();
+
+      gltfLoader.load(
+        glbUrl,
+        (gltf) => {
+          setupLoadedObject(gltf.scene, 'GLB', sourceFileName);
+        },
+        (xhr) => {
+          if (xhr.total > 0) {
+            onLoadingChange(true, Math.round((xhr.loaded / xhr.total) * 100));
+          }
+        },
+        (_err) => {
+          setErrorMessage(`Failed to load GLB model from ${glbUrl}. Verify file exists on host.`);
+          onLoadingChange(false, 0);
+        }
+      );
+    }
+    // B. Load OBJ + MTL
+    else if (repConfig?.type === 'obj' && repConfig.obj_url) {
       const objUrl = repConfig.obj_url;
       const mtlUrl = repConfig.mtl_url;
       const sourceFileName = objUrl.split('/').pop() || 'textured_mesh.obj';
@@ -369,7 +537,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
               objUrl,
               (obj) => setupLoadedObject(obj, 'OBJ', sourceFileName),
               undefined,
-              (_err) => {
+              () => {
                 setErrorMessage('Failed to load OBJ geometry. Ensure asset path is valid.');
                 onLoadingChange(false, 0);
               }
@@ -400,7 +568,9 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           }
         );
       }
-    } else if (repConfig.type === 'ply' && repConfig.ply_url) {
+    }
+    // C. Load PLY
+    else if (repConfig?.type === 'ply' && repConfig.ply_url) {
       const plyUrl = repConfig.ply_url;
       const sourceFileName = plyUrl.split('/').pop() || 'surface_mesh.ply';
       const plyLoader = new PLYLoader();
@@ -436,6 +606,9 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           onLoadingChange(false, 0);
         }
       );
+    } else {
+      setErrorMessage('No valid 3D representation found for this scene.');
+      onLoadingChange(false, 0);
     }
   }, [scene, representation, onLoadingChange, onBoundingBoxChange, onStatsChange, config.wireframe]);
 
@@ -455,6 +628,26 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
         </div>
       )}
 
+      {/* WALKTHROUGH MODE OVERLAY INSTRUCTIONS */}
+      {isWalkthroughMode && (
+        <div className="walkthrough-overlay-hud">
+          <div className="hud-badge">
+            <Footprints size={14} className="text-emerald" />
+            <span>First-Person Walkthrough Active</span>
+          </div>
+          <div className="hud-controls-hint">
+            <span><strong>W/S</strong>: Move Forward/Back &bull; <strong>A/D</strong>: Strafe &bull; <strong>U/P</strong>: Up/Down</span>
+            <span className="hud-subhint">
+              {isPointerLocked ? (
+                <span>&bull; Mouse Look Active (Press ESC to release cursor)</span>
+              ) : (
+                <span>&bull; Click viewport to engage mouse look</span>
+              )}
+            </span>
+          </div>
+        </div>
+      )}
+
       {errorMessage && (
         <div className="viewport-error-overlay">
           <AlertCircle size={20} />
@@ -464,4 +657,3 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     </div>
   );
 };
-

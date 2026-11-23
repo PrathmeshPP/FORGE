@@ -6,10 +6,11 @@ import {
   Cpu,
   ShieldCheck,
   Activity,
+  Compass,
 } from 'lucide-react';
 import type { HealthResponse } from '../types';
 
-export type ActiveTab = 'upload' | 'preflight' | 'status' | 'viewer' | 'library' | 'diagnostics';
+export type ActiveTab = 'gallery' | 'upload' | 'preflight' | 'status' | 'viewer' | 'library' | 'diagnostics';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -63,6 +64,15 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Processing</span>
           </button>
         )}
+
+        <button
+          className={`nav-btn ${activeTab === 'gallery' ? 'active' : ''}`}
+          onClick={() => onSelectTab('gallery')}
+          title="Recent 3D Models Gallery"
+        >
+          <Compass size={15} />
+          <span>Recent Models</span>
+        </button>
 
         <button
           className={`nav-btn ${activeTab === 'viewer' ? 'active' : ''}`}

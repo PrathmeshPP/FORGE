@@ -25,11 +25,12 @@ export type PipelineStage =
   | 'texturing'
   | 'qa_verification';
 
-export type RepresentationType = 'textured_obj' | 'photographic_ply' | 'untextured_ply';
+export type RepresentationType = 'glb' | 'textured_obj' | 'photographic_ply' | 'untextured_ply';
 
 export interface ModelRepresentation {
-  type: 'obj' | 'ply';
+  type: 'glb' | 'obj' | 'ply';
   label: string;
+  glb_url?: string;
   obj_url?: string;
   mtl_url?: string;
   texture_urls?: string[];
@@ -94,7 +95,7 @@ export interface SceneEntry {
   vertex_count: number;
   triangle_count: number;
   default_representation: RepresentationType;
-  representations: Record<RepresentationType, ModelRepresentation>;
+  representations: Partial<Record<RepresentationType, ModelRepresentation>>;
   initial_camera: {
     position: [number, number, number];
     target: [number, number, number];
@@ -171,5 +172,26 @@ export interface ViewportConfig {
   wireframe: boolean;
   autoRotate: boolean;
   background: BackgroundTheme;
+  brightness: number; // 0.5 to 2.0, default 1.0
+}
+
+export interface RecentModelItem {
+  id: string;
+  scene_name: string;
+  source_video_name: string;
+  completion_timestamp: string;
+  completion_mtime: number;
+  reconstruction_status: string;
+  is_partial: boolean;
+  walkthrough_validated: boolean;
+  file_size_bytes: number;
+  file_size_mb: number;
+  vertex_count: number;
+  triangle_count: number;
+  floor_continuity_pct: number;
+  obstacle_clearance_pct: number;
+  glb_url: string;
+  thumbnail_url: string;
+  has_local_thumbnail: boolean;
 }
 
