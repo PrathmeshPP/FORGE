@@ -67,6 +67,11 @@ export const App: React.FC = () => {
     setActiveStats(null);
     setIsComparisonMode(false);
     setRepresentation(scene.default_representation || 'textured_obj');
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('scene', scene.id);
+      window.history.replaceState(null, '', url.toString());
+    } catch (_) {}
   };
 
   // Toggle comparison mode
