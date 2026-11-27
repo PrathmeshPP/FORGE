@@ -124,5 +124,6 @@ viewer/public/data/
 .cache/
 *.npz
 *.npy
+user_workspace/
 
 

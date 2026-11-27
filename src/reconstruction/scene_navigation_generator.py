@@ -124,7 +124,11 @@ def derive_scene_navigation(
         if frame_manifest and i < len(frame_manifest):
             ts = frame_manifest[i].get("timestamp_sec", ts)
             filename = Path(frame_manifest[i].get("file_path", filename)).name
-            frame_url = f"/frames/{filename}"
+            if model_glb_url and "/" in model_glb_url and model_glb_url.startswith("/"):
+                base_url_dir = model_glb_url.rsplit("/", 1)[0]
+                frame_url = f"{base_url_dir}/frames/{filename}"
+            else:
+                frame_url = f"/frames/{filename}"
 
         trajectory.append({
             "index": i,
@@ -156,11 +160,12 @@ def derive_scene_navigation(
         floor_y = round(float(np.percentile(verts[:, 1], 5)), 3)
 
     ceiling_cand = float(np.percentile(verts[:, 1], 98))
-    ceiling_y = round(float(max(floor_y + 1.2, ceiling_cand)), 3)
+    ceiling_y = round(float(max(floor_y + 0.35, ceiling_cand)), 3)
 
-    room_height = max(0.5, ceiling_y - floor_y)
-    # Human eye level: comfortable standing observation height (~42% room height above floor in model scale)
-    eye_height = round(floor_y + room_height * 0.45, 3)
+    room_height = max(0.35, ceiling_y - floor_y)
+    # Scale-faithful camera eye level: median camera trajectory Y clamped cleanly inside [floor, ceiling]
+    med_cam_y = float(np.median(cam_centers_arr[:, 1])) if len(cam_centers_arr) > 0 else (floor_y + room_height * 0.45)
+    eye_height = round(float(np.clip(med_cam_y, floor_y + room_height * 0.25, floor_y + room_height * 0.65)), 3)
 
     # 4. Obstacle & Walkable Floor clustering
     # Identify non-floor structural geometry (e.g. furniture, beds, wardrobes)
@@ -227,9 +232,10 @@ def derive_scene_navigation(
 
     if len(cam_centers) > 0:
         # Check candidate points along first 25% of trajectory for clearance
+        best_idx = 0
         best_cand_pos = cam_centers[0]
         best_clearance = -1.0
-        for c_pos in cam_centers[:max(1, len(cam_centers) // 4)]:
+        for ci_idx, c_pos in enumerate(cam_centers[:max(1, len(cam_centers) // 4)]):
             min_dist_to_obs = 100.0
             for obs in obstacles:
                 b = obs["bounds"]
@@ -243,9 +249,13 @@ def derive_scene_navigation(
             if min_dist_to_obs > best_clearance:
                 best_clearance = min_dist_to_obs
                 best_cand_pos = c_pos
+                best_idx = ci_idx
 
         spawn_pos = [round(float(best_cand_pos[0]), 3), eye_height, round(float(best_cand_pos[2]), 3)]
-        if len(cam_centers) > 1:
+        fwd_vec = np.array(trajectory[best_idx]["forward"], dtype=np.float64)
+        if math.hypot(fwd_vec[0], fwd_vec[2]) > 0.1:
+            spawn_yaw = round(float(np.degrees(math.atan2(fwd_vec[0], fwd_vec[2]))), 1)
+        elif len(cam_centers) > 1:
             diff = cam_centers[1] - cam_centers[0]
             spawn_yaw = round(float(np.degrees(math.atan2(diff[0], diff[2]))), 1)
 

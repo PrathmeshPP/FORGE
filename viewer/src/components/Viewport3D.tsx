@@ -77,7 +77,12 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
   const navEngineRef = useRef<FirstPersonNavigationEngine | null>(null);
   const clockRef = useRef<THREE.Clock>(new THREE.Clock());
 
-  const getInitialSpawn = (scId: string): [number, number, number] => {
+  const getInitialSpawn = (sc: SceneEntry): [number, number, number] => {
+    const nav = (sc as any).navigation_metadata;
+    if (nav && Array.isArray(nav.spawn_position) && nav.spawn_position.length === 3) {
+      return [nav.spawn_position[0], nav.spawn_position[1], nav.spawn_position[2]];
+    }
+    const scId = sc.id;
     if (scId.includes('191043') || scId === 'indoor_nov1_191043_photographic_v3') {
       return [-0.12, 0.12, -0.20];
     }
@@ -87,7 +92,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     return [0.0, 1.42, -2.2];
   };
 
-  const [playerPos, setPlayerPos] = useState<[number, number, number]>(getInitialSpawn(scene.id));
+  const [playerPos, setPlayerPos] = useState<[number, number, number]>(getInitialSpawn(scene));
   const [playerYaw, setPlayerYaw] = useState<number>(Math.PI);
   const [collisionStatus, setCollisionStatus] = useState<'CLEAR' | 'SLIDING' | 'BOUNDARY'>('CLEAR');
   const [fps, setFps] = useState<number>(60);
@@ -101,8 +106,8 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
       navEngineRef.current.deactivate();
       navEngineRef.current = null;
     }
-    setPlayerPos(getInitialSpawn(scene.id));
-  }, [scene.id]);
+    setPlayerPos(getInitialSpawn(scene));
+  }, [scene]);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeStats, setActiveStats] = useState<ActiveGeometryStats | null>(null);
@@ -448,12 +453,18 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
     if (!cameraRef.current || !rendererRef.current || !controlsRef.current) return;
 
     controlsRef.current.enabled = false;
-    const isRoomV3 = scene.id.includes('191043') || scene.id === 'indoor_nov1_191043_photographic_v3';
-    cameraRef.current.near = isRoomV3 ? 0.02 : 0.05;
+    const navMeta = (scene as any).navigation_metadata;
+    const isRoomV3 = !navMeta && (scene.id.includes('191043') || scene.id === 'indoor_nov1_191043_photographic_v3');
+    cameraRef.current.near = (navMeta || isRoomV3) ? 0.02 : 0.05;
     cameraRef.current.far = 100;
     cameraRef.current.updateProjectionMatrix();
 
-    if (isRoomV3) {
+    if (navMeta && Array.isArray(navMeta.spawn_position)) {
+      const sp = navMeta.spawn_position;
+      const yawRad = ((navMeta.spawn_yaw_deg ?? 180) * Math.PI) / 180;
+      cameraRef.current.position.set(sp[0], sp[1], sp[2]);
+      cameraRef.current.rotation.set(0, yawRad, 0);
+    } else if (isRoomV3) {
       cameraRef.current.position.set(-0.12, 0.12, -0.20);
       cameraRef.current.rotation.set(0, Math.PI, 0);
     }
@@ -986,6 +997,7 @@ export const Viewport3D: React.FC<Viewport3DProps> = ({
           playerYaw={playerYaw}
           isOpen={isMiniMapOpen}
           onToggle={() => setIsMiniMapOpen(!isMiniMapOpen)}
+          navigationMetadata={(scene as any).navigation_metadata}
         />
       )}
 

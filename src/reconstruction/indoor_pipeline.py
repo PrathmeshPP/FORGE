@@ -46,6 +46,8 @@ from src.reconstruction.point_cloud import (
     filter_by_multiview_support
 )
 from src.vggt.inference import VGGTInferencePipeline, DEFAULT_CHECKPOINT_PATH, load_vggt_model
+from src.vggt.vggt_cache import VGGTInferenceCacheManager
+from src.reconstruction.window_alignment_lba import WindowAlignmentLBAManager, WindowJoinQuality
 import torch
 
 for _candidate_vggt_dir in [
@@ -80,8 +82,10 @@ class IndoorPipelineConfig:
     meshing_method: str = "poisson"  # "poisson" (default high-fidelity watertight mesher) | "tsdf" | "bpa"
     enable_per_camera_height_correction: bool = False  # Controlled experiment only; keep disabled by default to preserve rigidity
     tsdf_voxel_length: float = 0.012  # 1.2 cm crisp TSDF resolution
-    tsdf_trunc: float = 0.035
+    tsdf_trunc: float = 0.048         # 4x voxel truncation preserves grazing & slightly noisy thin surfaces
     bpa_radii: List[float] = field(default_factory=lambda: [0.008, 0.016, 0.032, 0.064])
+    enable_lba: bool = True  # Selective Local Bundle Adjustment on weak joins
+    use_vggt_cache: bool = True  # Persistent SHA-256 + frame indices cache for instant reloads
 
 
 @dataclass
@@ -322,6 +326,36 @@ class IndoorReconstructionEngine:
         if N == 0:
             raise ValueError("image_paths cannot be empty")
 
+        # ------------------------------------------------------------------
+        # Persistent VGGT Cache Lookup (hashes actual image bytes & checkpoint, not names)
+        # ------------------------------------------------------------------
+        cache_mgr = VGGTInferenceCacheManager()
+        cache_key = None
+        h_imgs = hashlib.sha256()
+        for p in image_paths:
+            pp = Path(p)
+            if pp.is_file():
+                h_imgs.update(pp.read_bytes())
+            else:
+                h_imgs.update(pp.name.encode("utf-8"))
+        if os.path.isfile(checkpoint_path):
+            h_imgs.update(str(os.path.getsize(checkpoint_path)).encode("utf-8"))
+        im_hash = h_imgs.hexdigest()
+
+        if getattr(self.config, "use_vggt_cache", True):
+            cache_key = cache_mgr.generate_cache_key(
+                video_sha256=im_hash,
+                frame_indices=list(range(N)),
+                image_resolution=self.config.image_resolution,
+                window_size=window_size,
+                overlap=overlap,
+                checkpoint_path=checkpoint_path
+            )
+            cached_res = cache_mgr.load_cache(cache_key)
+            if cached_res is not None and cached_res.get("raw_windows"):
+                _log(f"  [+] Persistent VGGT Inference Cache Hit ({cache_key[:16]})! Loaded {N} frames & {len(cached_res['raw_windows'])} raw windows in {cached_res['cache_load_time_sec']:.3f}s.")
+                return cached_res
+
         _log(f"[*] Initializing VGGT-Omega overlapping window engine (Total frames: {N}, Window: {window_size}, Overlap: {overlap})...")
         t_init_start = time.perf_counter()
         model = load_vggt_model(checkpoint_path, device)
@@ -342,6 +376,7 @@ class IndoorReconstructionEngine:
         _log(f"    Generated {len(windows)} overlapping windows across {N} frames.")
 
         global_frames = {}
+        raw_windows = []
         alignment_residuals = []
         total_vggt_infer_time = 0.0
 
@@ -371,6 +406,15 @@ class IndoorReconstructionEngine:
             intr_np = intr.squeeze(0).cpu().numpy()     # (W, 3, 3)
             depth_np = out["depth"].squeeze(0).cpu().numpy()  # (W, H, W, 1)
             conf_np = out["depth_conf"].squeeze(0).cpu().numpy()  # (W, H, W)
+
+            raw_windows.append({
+                "window_index": int(w_idx),
+                "frame_indices": [int(idx) for idx in win_indices],
+                "local_extrinsics": ext_np.astype(np.float32).copy(),
+                "local_intrinsics": intr_np.astype(np.float32).copy(),
+                "local_depth": depth_np.astype(np.float32).copy(),
+                "local_conf": conf_np.astype(np.float32).copy(),
+            })
 
             if w_idx == 0:
                 for local_pos, global_idx in enumerate(win_indices):
@@ -431,106 +475,90 @@ class IndoorReconstructionEngine:
                         X = np.vstack(pts_local_list)
                         Y = np.vstack(pts_global_list)
                         sim_res = verify_and_solve_umeyama_sim3(X, Y)
+
+                        # Gather camera centers and rotations for shared frames
+                        c_loc_shared = []
+                        c_glob_shared = []
+                        R_loc_shared = []
+                        R_glob_shared = []
+                        for l_idx, g_idx in zip(shared_local_indices, shared_global_indices):
+                            R_l = ext_np[l_idx, :3, :3]
+                            t_l = ext_np[l_idx, :3, 3]
+                            c_loc_shared.append(-R_l.T @ t_l)
+                            R_loc_shared.append(R_l)
+
+                            g_entry = global_frames[g_idx]
+                            c_glob_shared.append(g_entry["center"])
+                            R_glob_shared.append(g_entry["ext"][:3, :3])
+
+                        lba_mgr = WindowAlignmentLBAManager(enable_lba=getattr(self.config, "enable_lba", True))
+                        s_w, R_w, t_w, join_qual = lba_mgr.align_and_verify_window(
+                            w_idx=w_idx,
+                            win_indices=win_indices,
+                            shared_local_indices=shared_local_indices,
+                            shared_global_indices=shared_global_indices,
+                            X_local=X,
+                            Y_global=Y,
+                            local_cams=c_loc_shared,
+                            global_cams=c_glob_shared,
+                            local_rots=R_loc_shared,
+                            global_rots=R_glob_shared,
+                            s_umeyama=sim_res.scale,
+                            R_umeyama=sim_res.rotation,
+                            t_umeyama=sim_res.translation,
+                            log_callback=_log
+                        )
+                        med_err = join_qual.median_residual_m
+                        join_record.update(join_qual.to_dict())
                     else:
-                        sim_res = Sim3AlignmentResult(
-                            scale=1.0, rotation=np.eye(3), translation=np.zeros(3),
-                            median_residual_m=0.0, p90_residual_m=0.0, inlier_ratio=0.0,
-                            spatial_spread_m=0.0, num_correspondences=0, quality_status="FAILED",
+                        join_qual = WindowJoinQuality(
+                            window_index=w_idx,
+                            shared_frames=shared_global_indices,
+                            num_shared_frames=len(shared_global_indices),
+                            scale=1.0,
+                            rotation_error_deg=0.0,
+                            translation_drift_m=0.0,
+                            median_residual_m=0.0,
+                            p90_residual_m=0.0,
+                            inlier_ratio=0.0,
+                            spatial_spread_m=0.0,
+                            num_correspondences=0,
+                            join_category="FAILED",
+                            lba_applied=False,
+                            lba_residual_reduction_pct=0.0,
+                            action_taken="DISCONNECTED",
                             diagnostics_note="no_valid_point_correspondences"
                         )
-
-                    # Bounded Weak-Link Recovery: retry once if alignment is weak or failed
-                    if sim_res.quality_status in ("WEAK", "FAILED"):
-                        join_record["retried"] = True
-                        _log(f"    [!] Window [{w_idx}] initial join {sim_res.quality_status} ({sim_res.diagnostics_note}). Initiating bounded recovery retry...")
-                        
-                        # Relax depth confidence to 0.50 and increase spatial grid to 24x24
-                        sub_y_retry = np.linspace(int(H_d * 0.10), int(H_d * 0.90), 24, dtype=int)
-                        sub_x_retry = np.linspace(int(W_d * 0.10), int(W_d * 0.90), 24, dtype=int)
-                        pts_loc_retry, pts_glob_retry = [], []
-
-                        for l_idx, g_idx in zip(shared_local_indices, shared_global_indices):
-                            g_entry = global_frames[g_idx]
-                            p_glob = depth_to_points(g_entry["depth"], g_entry["ext"], g_entry["intr"])
-                            p_loc = depth_to_points(depth_np[l_idx], ext_np[l_idx], intr_np[l_idx])
-
-                            c_loc = conf_np[l_idx]
-                            c_glob = g_entry["conf"]
-                            c_loc_sub = c_loc[sub_y_retry][:, sub_x_retry]
-                            c_glob_sub = c_glob[sub_y_retry][:, sub_x_retry]
-                            valid_mask = (c_loc_sub >= 0.50) & (c_glob_sub >= 0.50)
-
-                            p_loc_sub = p_loc[sub_y_retry][:, sub_x_retry][valid_mask]
-                            p_glob_sub = p_glob[sub_y_retry][:, sub_x_retry][valid_mask]
-                            if len(p_loc_sub) > 10:
-                                pts_loc_retry.append(p_loc_sub)
-                                pts_glob_retry.append(p_glob_sub)
-
-                        if pts_loc_retry and pts_glob_retry:
-                            X_retry = np.vstack(pts_loc_retry)
-                            Y_retry = np.vstack(pts_glob_retry)
-                            sim_res_retry = verify_and_solve_umeyama_sim3(X_retry, Y_retry)
-                            if sim_res_retry.quality_status != "FAILED" and sim_res_retry.median_residual_m <= 0.070:
-                                sim_res = sim_res_retry
-                                sim_res.quality_status = "WEAK_RECOVERED"
-                                _log(f"    [+] Window [{w_idx}] recovery successful: status -> WEAK_RECOVERED (res: {sim_res.median_residual_m*100:.1f}cm)")
-                            else:
-                                _log(f"    [-] Window [{w_idx}] recovery retry still weak: {sim_res_retry.diagnostics_note}")
-
-                    # If join remains unverified or weak, recover using camera pose continuity
-                    # rather than letting diverged 3D point cloud Sim(3) parameters distort the scene.
-                    if sim_res.quality_status in ("FAILED", "WEAK") or sim_res.median_residual_m > 0.085 or sim_res.inlier_ratio < 0.15:
-                        last_g_idx = shared_global_indices[-1]
-                        last_l_idx = shared_local_indices[-1]
-                        g_last = global_frames[last_g_idx]
-                        R_g = g_last["ext"][:3, :3]
-                        c_g = g_last["center"]
-                        s_prev = g_last["scale"]
-
-                        R_l = ext_np[last_l_idx, :3, :3]
-                        t_l = ext_np[last_l_idx, :3, 3]
-                        c_l = -R_l.T @ t_l
-
-                        # Camera relative orientation: R_global = R_local @ R_w.T  => R_w = (R_l.T @ R_g).T
-                        R_w_cam = (R_l.T @ R_g).T
-                        s_w_cam = s_prev
-                        t_w_cam = c_g - s_w_cam * (R_w_cam @ c_l)
-
-                        s_w, R_w, t_w = s_w_cam, R_w_cam, t_w_cam
-                        med_err = min(med_err, 0.045)
-                        sim_res.quality_status = "WEAK_RECOVERED"
-                        _log(f"    [!] Window [{w_idx}] join unverified/weak -> recovered via smooth camera trajectory continuity (scale={s_w:.4f})")
-                    else:
-                        s_w = sim_res.scale
-                        R_w = sim_res.rotation
-                        t_w = sim_res.translation
-                        med_err = sim_res.median_residual_m
+                        s_w, R_w, t_w, med_err = 1.0, np.eye(3), np.zeros(3), 0.0
+                        join_record.update(join_qual.to_dict())
                 else:
-                    sim_res = Sim3AlignmentResult(
-                        scale=1.0, rotation=np.eye(3), translation=np.zeros(3),
-                        median_residual_m=0.0, p90_residual_m=0.0, inlier_ratio=0.0,
-                        spatial_spread_m=0.0, num_correspondences=0, quality_status="FAILED",
+                    join_qual = WindowJoinQuality(
+                        window_index=w_idx,
+                        shared_frames=shared_global_indices,
+                        num_shared_frames=len(shared_global_indices),
+                        scale=1.0,
+                        rotation_error_deg=0.0,
+                        translation_drift_m=0.0,
+                        median_residual_m=0.0,
+                        p90_residual_m=0.0,
+                        inlier_ratio=0.0,
+                        spatial_spread_m=0.0,
+                        num_correspondences=0,
+                        join_category="FAILED",
+                        lba_applied=False,
+                        lba_residual_reduction_pct=0.0,
+                        action_taken="DISCONNECTED",
                         diagnostics_note="insufficient_shared_frames"
                     )
                     s_w, R_w, t_w, med_err = 1.0, np.eye(3), np.zeros(3), 0.0
+                    join_record.update(join_qual.to_dict())
 
-                join_record.update({
-                    "scale": float(s_w),
-                    "median_residual_m": float(med_err),
-                    "p90_residual_m": float(sim_res.p90_residual_m),
-                    "inlier_ratio": float(sim_res.inlier_ratio),
-                    "spatial_spread_m": float(sim_res.spatial_spread_m),
-                    "num_correspondences": int(sim_res.num_correspondences),
-                    "quality_status": sim_res.quality_status,
-                    "action_taken": "MERGED" if sim_res.quality_status in ("STRONG", "ACCEPTABLE", "WEAK_RECOVERED") else "FAILED_DISCONNECTED",
-                    "diagnostics_note": sim_res.diagnostics_note
-                })
                 if not hasattr(self, "_window_joins"):
                     self._window_joins = []
                 self._window_joins.append(join_record)
 
                 alignment_residuals.append(med_err)
-                _log(f"    Window [{w_idx}/{len(windows)}] (frames {win_indices[0]}:{win_indices[-1]}): Status: {sim_res.quality_status} | Scale: {s_w:.4f}, Res: {med_err*100:.1f} cm (p90: {sim_res.p90_residual_m*100:.1f} cm)")
+                _log(f"    Window [{w_idx}/{len(windows)}] (frames {win_indices[0]}:{win_indices[-1]}): Status: {join_record.get('join_category', 'UNKNOWN')} | Scale: {s_w:.4f}, Res: {med_err*100:.1f} cm (Rot Err: {join_record.get('rotation_error_deg', 0):.1f} deg)")
 
                 for local_pos, global_idx in enumerate(win_indices):
                     if global_idx not in global_frames:
@@ -568,14 +596,18 @@ class IndoorReconstructionEngine:
                 all_conf[i] = global_frames[i]["conf"]
 
         peak_vram = torch.cuda.max_memory_allocated(0) / (1024**2) if "cuda" in device else 0.0
+        # 8 GB VRAM-aware scheduling: release VGGT weights before downstream GPU tasks
+        del model
+        if "cuda" in device:
+            torch.cuda.empty_cache()
         avg_fps = N / max(0.001, total_vggt_infer_time)
         mean_res = float(np.mean(alignment_residuals)) if alignment_residuals else 0.0
 
         joins = getattr(self, "_window_joins", [])
-        strong_joins = sum(1 for j in joins if j["quality_status"] == "STRONG")
-        acceptable_joins = sum(1 for j in joins if j["quality_status"] == "ACCEPTABLE")
-        recovered_joins = sum(1 for j in joins if j["quality_status"] == "WEAK_RECOVERED")
-        failed_joins = sum(1 for j in joins if j["quality_status"] == "FAILED")
+        strong_joins = sum(1 for j in joins if j.get("join_category") == "STRONG" or j.get("quality_status") == "STRONG")
+        acceptable_joins = sum(1 for j in joins if j.get("join_category") in ("ACCEPTABLE", "WEAK_RECOVERABLE") or j.get("quality_status") in ("ACCEPTABLE", "WEAK_RECOVERABLE"))
+        recovered_joins = sum(1 for j in joins if j.get("join_category") in ("WEAK_RECOVERED", "UNRELIABLE") or "RECOVERED" in j.get("action_taken", ""))
+        failed_joins = sum(1 for j in joins if j.get("join_category") == "FAILED" or j.get("quality_status") == "FAILED")
 
         section_summary = {
             "total_window_joins": len(joins),
@@ -587,26 +619,47 @@ class IndoorReconstructionEngine:
             "alignment_integrity_rate": round(float((strong_joins + acceptable_joins + recovered_joins) / max(1, len(joins))), 4)
         }
 
-        return {
+        perf_data = {
+            "num_frames": N,
+            "num_windows": len(windows),
+            "total_vggt_inference_sec": round(total_vggt_infer_time, 2),
+            "model_init_sec": round(init_time_sec, 2),
+            "average_time_per_window_sec": round(total_vggt_infer_time / len(windows), 3),
+            "sustained_inference_fps": round(avg_fps, 2),
+            "peak_vram_mb": round(peak_vram, 2),
+            "mean_sim3_alignment_error_m": round(mean_res, 4),
+            "window_alignment_residuals": [round(float(r), 4) for r in alignment_residuals],
+            "alignment_section_summary": section_summary
+        }
+
+        results_dict = {
             "extrinsics": all_ext,
             "intrinsics": all_intr,
             "depth": all_depth,
             "confidence": all_conf,
+            "raw_windows": raw_windows,
+            "windows": [w["frame_indices"] for w in raw_windows],
             "window_alignment_manifest": joins,
             "section_summary": section_summary,
-            "performance": {
-                "num_frames": N,
-                "num_windows": len(windows),
-                "total_vggt_inference_sec": round(total_vggt_infer_time, 2),
-                "model_init_sec": round(init_time_sec, 2),
-                "average_time_per_window_sec": round(total_vggt_infer_time / len(windows), 3),
-                "sustained_inference_fps": round(avg_fps, 2),
-                "peak_vram_mb": round(peak_vram, 2),
-                "mean_sim3_alignment_error_m": round(mean_res, 4),
-                "window_alignment_residuals": [round(float(r), 4) for r in alignment_residuals],
-                "alignment_section_summary": section_summary
-            }
+            "performance": perf_data
         }
+
+        if cache_key is not None and getattr(self.config, "use_vggt_cache", True):
+            cache_mgr.save_cache(
+                cache_key=cache_key,
+                results=results_dict,
+                video_path=image_paths[0],
+                video_sha256=im_hash,
+                frame_indices=list(range(N)),
+                image_resolution=self.config.image_resolution,
+                window_size=window_size,
+                overlap=overlap,
+                checkpoint_path=checkpoint_path,
+                device=device
+            )
+            _log(f"  [+] Saved VGGT inference results to persistent cache ({cache_key[:16]}).")
+
+        return results_dict
 
     @staticmethod
     def assess_indoor_trajectory(extrinsics: np.ndarray) -> Dict[str, Any]:
@@ -729,6 +782,7 @@ class IndoorReconstructionEngine:
         """Detects dominant floor and wall planes via RANSAC with trajectory gravity awareness."""
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(points.astype(np.float64))
+        o3d.utility.random.seed(42)
 
         # Robust scene upright vector from camera extrinsics
         mean_up = None
@@ -745,7 +799,8 @@ class IndoorReconstructionEngine:
 
         planes = []
         rest_pcd = pcd
-        for p_idx in range(5):  # Look for up to 5 major planes
+        all_pts_np = np.asarray(points, dtype=np.float64)
+        for p_idx in range(6):  # Look for up to 6 major planes
             if len(rest_pcd.points) < 500:
                 break
             plane_model, inliers = rest_pcd.segment_plane(
@@ -759,22 +814,29 @@ class IndoorReconstructionEngine:
 
             if mean_up is not None:
                 cos_up = float(np.dot(normal, mean_up))
-                is_horizontal = abs(cos_up) >= 0.70  # Within 45 deg of upright axis
-                # Orient normal along gravity vector if horizontal
+                is_horizontal = abs(cos_up) >= 0.88  # Within ~28 deg of camera upright axis
+                # Orient normal along gravity vector if horizontal (OpenCV Y-down -> floor normal ~ [0,+1,0])
                 if is_horizontal and cos_up > 0:
                     normal = -normal
                     d = -d
                     cos_up = -cos_up
                 if is_horizontal:
-                    # In camera coordinates where normal points down (along gravity toward floor):
-                    # cameras are above the floor if dot(cam, normal) + d < 0 or dist check
+                    inlier_pts = np.asarray(rest_pcd.points)[inliers]
+                    # Check whether significant structure sits underneath this horizontal slab (e.g., desk/bed vs true floor)
+                    signed_pts = (all_pts_np - np.median(inlier_pts, axis=0)) @ normal
+                    below_frac = float(np.mean(signed_pts > 0.14)) if len(signed_pts) > 0 else 0.0
                     if cams_np is not None:
                         dists = np.dot(cams_np, normal) + d
-                        is_floor = float(np.median(dists)) <= 0.0 or float(np.mean(dists < 0.2)) >= 0.6
+                        below_cams = float(np.median(dists)) <= -0.05 or float(np.mean(dists < 0.0)) >= 0.65
+                        if not below_cams:
+                            plane_type = "horizontal_ceiling"
+                        elif below_frac > 0.14:
+                            plane_type = "tabletop_or_bed"
+                        else:
+                            plane_type = "horizontal_floor"
                     else:
-                        inlier_pts = np.asarray(rest_pcd.points)[inliers]
                         is_floor = float(np.median(inlier_pts[:, 1])) >= float(np.mean(points[:, 1]))
-                    plane_type = "horizontal_floor" if is_floor else "horizontal_ceiling"
+                        plane_type = "horizontal_floor" if is_floor else "horizontal_ceiling"
                 elif abs(cos_up) <= 0.40:
                     plane_type = "vertical_wall"
                 else:

@@ -674,8 +674,9 @@ class OpenCV5FrameAnalyzer:
             f_end = max(f_start + 1, min(f_end, total_frames))
             active_range = f_end - f_start
 
+            eff_max_candidates = max(max_candidates, int(target_num_frames) * 5) if target_num_frames > 60 else max_candidates
             if candidate_stride is None or candidate_stride <= 0:
-                candidate_stride = max(1, active_range // max_candidates)
+                candidate_stride = max(1, active_range // eff_max_candidates)
 
             candidate_indices = list(range(f_start, f_end, candidate_stride))
             if candidate_indices and candidate_indices[-1] != (f_end - 1):
@@ -1047,12 +1048,16 @@ class OpenCV5FrameAnalyzer:
                 # Save native high-resolution frame
                 cv2.imwrite(str(target_fn), frame_bgr)
                 s_info.file_path = str(target_fn.resolve())
+                f_sha = hashlib.sha256(target_fn.read_bytes()).hexdigest()
 
                 extracted_records.append({
                     "rank": out_idx,
                     "frame_index": f_idx,
                     "timestamp_sec": s_info.timestamp_sec,
+                    "dimensions_wh": [int(frame_bgr.shape[1]), int(frame_bgr.shape[0])],
                     "file_path": str(target_fn.resolve()),
+                    "frame_sha256": f_sha,
+                    "selection_score": s_info.metrics.composite_quality_score,
                     "sharpness": s_info.metrics.laplacian_sharpness,
                     "luminance": s_info.metrics.mean_intensity,
                     "contrast": s_info.metrics.rms_contrast,
@@ -1072,5 +1077,28 @@ class OpenCV5FrameAnalyzer:
             meta_path = out_path / "adaptive_frame_selection_manifest.json"
             with open(meta_path, "w", encoding="utf-8") as f:
                 json.dump(report.to_dict(), f, indent=2)
+
+            # Explicit timestamp mapping for photographic texturing and keyframe tracking
+            mapping_dict = {
+                "video_path": str(vpath.resolve()),
+                "video_sha256": report.video_sha256,
+                "native_fps": report.native_fps,
+                "total_curated_frames": len(report.selected_frames),
+                "mapping": [
+                    {
+                        "selected_frame_idx": rec["rank"],
+                        "orig_video_frame_idx": rec["frame_index"],
+                        "timestamp_sec": round(rec["timestamp_sec"], 4),
+                        "file_path": rec["file_path"],
+                        "sharpness": rec["sharpness"],
+                        "is_bridge": rec["is_bridge"],
+                        "is_transition": rec["is_transition"]
+                    }
+                    for rec in extracted_records
+                ]
+            }
+            mapping_path = out_path / "frame_timestamp_mapping.json"
+            with open(mapping_path, "w", encoding="utf-8") as f:
+                json.dump(mapping_dict, f, indent=2)
 
         return extracted_records, report

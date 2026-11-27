@@ -6,6 +6,7 @@ interface MiniMapOverlayProps {
   playerYaw: number;
   isOpen: boolean;
   onToggle: () => void;
+  navigationMetadata?: any;
 }
 
 export const MiniMapOverlay: React.FC<MiniMapOverlayProps> = ({
@@ -13,13 +14,17 @@ export const MiniMapOverlay: React.FC<MiniMapOverlayProps> = ({
   playerYaw,
   isOpen,
   onToggle,
+  navigationMetadata,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Bounds from metadata: X in [-1.30, 1.20], Z in [-2.30, 1.50]
-  const { x_min, x_max, z_min, z_max } = walkthroughMetadata.spatial_bounds;
-  const roomW = x_max - x_min;
-  const roomL = z_max - z_min;
+  const bounds2d = navigationMetadata?.walkable_bounds_2d;
+  const x_min = bounds2d ? bounds2d[0] : walkthroughMetadata.spatial_bounds.x_min;
+  const z_min = bounds2d ? bounds2d[1] : walkthroughMetadata.spatial_bounds.z_min;
+  const x_max = bounds2d ? bounds2d[2] : walkthroughMetadata.spatial_bounds.x_max;
+  const z_max = bounds2d ? bounds2d[3] : walkthroughMetadata.spatial_bounds.z_max;
+  const roomW = Math.max(0.2, x_max - x_min);
+  const roomL = Math.max(0.2, z_max - z_min);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -57,7 +62,7 @@ export const MiniMapOverlay: React.FC<MiniMapOverlayProps> = ({
     }
 
     // Draw Architectural Regions
-    const regions = ((walkthroughMetadata as any).architectural_regions || []) as any[];
+    const regions = ((navigationMetadata?.collision_obstacles || (walkthroughMetadata as any).architectural_regions || [])) as any[];
     regions.forEach((reg: any) => {
       const [ox1, oz1, ox2, oz2] = reg.bounds;
       const [px1, py1] = worldToCanvas(ox1, oz1);
@@ -90,7 +95,7 @@ export const MiniMapOverlay: React.FC<MiniMapOverlayProps> = ({
     });
 
     // Draw Video Capture Trajectory Route
-    const trajectory = ((walkthroughMetadata as any).camera_trajectory || []) as any[];
+    const trajectory = ((navigationMetadata?.camera_trajectory || (walkthroughMetadata as any).camera_trajectory || [])) as any[];
     ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
     ctx.lineWidth = 2;
     ctx.setLineDash([3, 3]);
